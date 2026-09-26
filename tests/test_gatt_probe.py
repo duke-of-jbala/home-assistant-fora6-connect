@@ -1,6 +1,7 @@
 """Hardware-free checks for the temporary Stage 1B GATT probe."""
 
 import importlib.util
+import asyncio
 import json
 import sys
 import types
@@ -159,6 +160,8 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         )
         self.bluetooth.async_scanner_count = Mock(return_value=1)
         self.bluetooth.async_discovered_service_info = Mock(return_value=[])
+        self.bluetooth.async_last_service_info = Mock(return_value=None)
+        self.bluetooth.async_clear_advertisement_history = Mock()
         self.bluetooth.async_process_advertisements = AsyncMock(
             return_value=self.fresh_info
         )
@@ -218,6 +221,10 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(result["gatt_service_count"], 3)
         self.assertTrue(result["fresh_advertisement_observed"])
+        self.assertTrue(result["targeted_callback_received"])
+        self.assertFalse(result["latest_service_info_advanced"])
+        self.assertEqual(result["freshness_source"], "targeted_callback")
+        self.assertTrue(result["gatt_connection_attempted"])
         self.assertTrue(result["connected_via_ha_bluetooth"])
         self.assertTrue(result["disconnected_cleanly"])
         self.assertTrue(result["expected_gatt"]["fora_custom_service_present"])
@@ -233,6 +240,12 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("targeted active advertisement wait started", "\n".join(captured.output))
         self.assertIn("GATT enumeration reached", "\n".join(captured.output))
         self.assertIn("disconnect completed", "\n".join(captured.output))
+        self.bluetooth.async_last_service_info.assert_called_with(
+            self.hass, self.address, connectable=False
+        )
+        self.bluetooth.async_clear_advertisement_history.assert_called_once_with(
+            self.hass, self.address
+        )
         self.client.disconnect.assert_awaited_once()
         self.client.read_gatt_char.assert_not_awaited()
         self.client.write_gatt_char.assert_not_awaited()
@@ -248,6 +261,110 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["gatt_service_count"], 3)
         self.client.disconnect.assert_awaited_once()
 
+    async def test_identical_advertisement_callback_follows_history_clear(self) -> None:
+        self.bluetooth.async_last_service_info.return_value = self.info
+
+        async def deliver_after_clear(_hass, predicate, *_args):
+            self.bluetooth.async_clear_advertisement_history.assert_called_once_with(
+                self.hass, self.address
+            )
+            self.assertEqual(
+                self.info.advertisement.local_name,
+                self.fresh_info.advertisement.local_name,
+            )
+            self.assertTrue(predicate(self.fresh_info))
+            return self.fresh_info
+
+        self.bluetooth.async_process_advertisements.side_effect = deliver_after_clear
+        result = await self.probe.async_probe_gatt(self.hass, self.address)
+
+        self.assertEqual(result["freshness_source"], "targeted_callback")
+        self.assertTrue(result["targeted_callback_received"])
+        self.assertFalse(result["latest_service_info_advanced"])
+        self.assertTrue(result["connection_successful"])
+
+    async def test_latest_info_advance_succeeds_without_callback(self) -> None:
+        self.bluetooth.async_last_service_info.side_effect = [
+            self.info, self.info, self.fresh_info
+        ]
+        self.probe.ADVERTISEMENT_POLL_INTERVAL = 0.001
+
+        async def no_callback(*_args):
+            await asyncio.Event().wait()
+
+        self.bluetooth.async_process_advertisements.side_effect = no_callback
+        with self.assertLogs(self.probe.__name__, level="DEBUG") as captured:
+            result = await self.probe.async_probe_gatt(self.hass, self.address)
+
+        self.assertEqual(result["freshness_source"], "latest_service_info")
+        self.assertFalse(result["targeted_callback_received"])
+        self.assertTrue(result["latest_service_info_advanced"])
+        self.assertTrue(result["fresh_advertisement_observed"])
+        self.assertTrue(result["connection_successful"])
+        self.assertNotIn(self.address, json.dumps(result))
+        self.assertNotIn(self.address, "\n".join(captured.output))
+        self.bluetooth.async_ble_device_from_address.assert_called_once_with(
+            self.hass, self.address, connectable=True
+        )
+
+    async def test_stale_latest_info_is_not_fresh(self) -> None:
+        self.bluetooth.async_last_service_info.return_value = self.info
+        self.bluetooth.async_process_advertisements.side_effect = TimeoutError()
+
+        with self.assertRaisesRegex(self.probe.ProbeError, "No fresh"):
+            await self.probe.async_probe_gatt(self.hass, self.address)
+        self.bluetooth.async_ble_device_from_address.assert_not_called()
+        self.connector.establish_connection.assert_not_awaited()
+
+    async def test_history_clear_failure_is_sanitized(self) -> None:
+        self.bluetooth.async_clear_advertisement_history.side_effect = RuntimeError(
+            self.address
+        )
+        with self.assertLogs(self.probe.__name__, level="DEBUG") as captured:
+            with self.assertRaises(self.probe.ProbeError) as caught:
+                await self.probe.async_probe_gatt(self.hass, self.address)
+
+        self.assertNotIn(self.address, str(caught.exception))
+        self.assertNotIn(self.address, "\n".join(captured.output))
+        self.bluetooth.async_process_advertisements.assert_not_awaited()
+        self.bluetooth.async_ble_device_from_address.assert_not_called()
+
+    async def test_nul_padded_latest_info_is_normalized(self) -> None:
+        self.fresh_info.advertisement.local_name = "FORA 6 CONNECT\x00\x00\x00\x00\x00"
+        self.bluetooth.async_last_service_info.side_effect = [
+            self.info, self.fresh_info
+        ]
+        self.bluetooth.async_process_advertisements.side_effect = TimeoutError()
+
+        result = await self.probe.async_probe_gatt(self.hass, self.address)
+        self.assertEqual(result["freshness_source"], "latest_service_info")
+        self.assertEqual(result["local_name"], "FORA 6 CONNECT")
+        self.assertTrue(result["advertised_name_confirmed"])
+
+    async def test_wrong_latest_info_name_is_rejected(self) -> None:
+        self.fresh_info.advertisement.local_name = "OTHER"
+        self.bluetooth.async_last_service_info.side_effect = [
+            self.info, self.fresh_info
+        ]
+        self.bluetooth.async_process_advertisements.side_effect = TimeoutError()
+
+        with self.assertRaisesRegex(self.probe.ProbeError, "No fresh"):
+            await self.probe.async_probe_gatt(self.hass, self.address)
+        self.bluetooth.async_ble_device_from_address.assert_not_called()
+
+    async def test_latest_info_without_local_name_keeps_diagnostic_allowance(self) -> None:
+        self.fresh_info.advertisement.local_name = None
+        self.bluetooth.async_last_service_info.side_effect = [
+            self.info, self.fresh_info
+        ]
+        self.bluetooth.async_process_advertisements.side_effect = TimeoutError()
+
+        result = await self.probe.async_probe_gatt(self.hass, self.address)
+        self.assertEqual(result["freshness_source"], "latest_service_info")
+        self.assertIsNone(result["local_name"])
+        self.assertFalse(result["advertised_name_confirmed"])
+        self.assertTrue(result["connection_successful"])
+
     async def test_targeted_advertisement_timeout_is_sanitized(self) -> None:
         self.bluetooth.async_process_advertisements.side_effect = TimeoutError(
             self.address
@@ -257,6 +374,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
                 await self.probe.async_probe_gatt(self.hass, self.address)
         self.assertNotIn(self.address, str(caught.exception))
         self.assertNotIn(self.address, "\n".join(captured.output))
+        self.bluetooth.async_ble_device_from_address.assert_not_called()
         self.connector.establish_connection.assert_not_awaited()
 
     async def test_wrong_fresh_name_is_rejected(self) -> None:
@@ -267,7 +385,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
             address=self.address, time=2.0,
         )
         self.bluetooth.async_process_advertisements.return_value = wrong
-        with self.assertRaisesRegex(self.probe.ProbeError, "no fresh"):
+        with self.assertRaisesRegex(self.probe.ProbeError, "No fresh"):
             await self.probe.async_probe_gatt(self.hass, self.address)
         self.connector.establish_connection.assert_not_awaited()
 
@@ -294,7 +412,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_internal_nul_is_not_treated_as_padding(self) -> None:
         self.fresh_info.advertisement.local_name = "FORA\x00 6 CONNECT"
-        with self.assertRaisesRegex(self.probe.ProbeError, "no fresh"):
+        with self.assertRaisesRegex(self.probe.ProbeError, "No fresh"):
             await self.probe.async_probe_gatt(self.hass, self.address)
         self.connector.establish_connection.assert_not_awaited()
 
@@ -320,7 +438,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
             time=1.25,
         )
         self.bluetooth.async_process_advertisements.return_value = replay
-        with self.assertRaisesRegex(self.probe.ProbeError, "no fresh"):
+        with self.assertRaisesRegex(self.probe.ProbeError, "No fresh"):
             await self.probe.async_probe_gatt(self.hass, self.address)
         self.connector.establish_connection.assert_not_awaited()
 

@@ -20,6 +20,7 @@ TARGET_LOCAL_NAME = "FORA 6 CONNECT"
 CONNECTION_TIMEOUT = 20.0
 DISCONNECT_TIMEOUT = 10.0
 ADVERTISEMENT_TIMEOUT = 20
+ADVERTISEMENT_POLL_INTERVAL = 1.0
 SIG_BASE = "-0000-1000-8000-00805f9b34fb"
 _LOGGER = logging.getLogger(__name__)
 
@@ -114,51 +115,126 @@ async def async_probe_gatt(hass: HomeAssistant, address: str) -> dict[str, Any]:
             "No connectable Home Assistant Bluetooth scanner is available."
         )
 
-    wait_started = bluetooth.MONOTONIC_TIME()
+    try:
+        baseline = bluetooth.async_last_service_info(hass, address, connectable=False)
+        baseline_time = baseline.time if baseline is not None else float("-inf")
+        wait_started = bluetooth.MONOTONIC_TIME()
+        bluetooth.async_clear_advertisement_history(hass, address)
+    except Exception:
+        raise ProbeError(
+            "Home Assistant could not prepare the targeted advertisement wait."
+        ) from None
+
+    targeted_callback_received = False
+    latest_service_info_advanced = False
 
     def _is_fresh_fora(info: Any) -> bool:
         # async_process_advertisements may replay cached history on registration.
         # A live packet may omit the local name; the user selected its address
         # privately from the previously identified Advertisement Monitor row.
+        if info.address != address:
+            return False
         local_name = _advertised_local_name(info)
         return (
-            info.address == address
-            and (not local_name or local_name == TARGET_LOCAL_NAME)
-            and info.time > wait_started
+            (not local_name or local_name == TARGET_LOCAL_NAME)
+            and info.time > max(wait_started, baseline_time)
         )
 
+    def _matches_callback(info: Any) -> bool:
+        nonlocal targeted_callback_received
+        if info.address == address:
+            targeted_callback_received = True
+        return _is_fresh_fora(info)
+
+    fresh_info = None
+    freshness_source = None
+    wait_failed = False
     _LOGGER.debug("GATT probe: targeted active advertisement wait started")
-    try:
-        fresh_info = await bluetooth.async_process_advertisements(
+    wait_task = asyncio.create_task(
+        bluetooth.async_process_advertisements(
             hass,
-            _is_fresh_fora,
+            _matches_callback,
             # HA's callback matcher defaults to connectable-only when omitted.
             {"address": address, "connectable": False},
             bluetooth.BluetoothScanningMode.ACTIVE,
             ADVERTISEMENT_TIMEOUT,
         )
-    except TimeoutError:
-        _LOGGER.debug("GATT probe: no fresh advertisement received before timeout")
+    )
+    try:
+        while fresh_info is None:
+            done, _ = await asyncio.wait(
+                {wait_task}, timeout=ADVERTISEMENT_POLL_INTERVAL
+            )
+            if done:
+                try:
+                    callback_info = wait_task.result()
+                except TimeoutError:
+                    pass
+                except Exception:
+                    wait_failed = True
+                else:
+                    if callback_info.address == address:
+                        targeted_callback_received = True
+                    if _is_fresh_fora(callback_info):
+                        fresh_info = callback_info
+                        freshness_source = "targeted_callback"
+
+            latest_info = bluetooth.async_last_service_info(
+                hass, address, connectable=False
+            )
+            if (
+                latest_info is not None
+                and latest_info.address == address
+                and latest_info.time > max(wait_started, baseline_time)
+            ):
+                latest_service_info_advanced = True
+                if fresh_info is None and _is_fresh_fora(latest_info):
+                    fresh_info = latest_info
+                    freshness_source = "latest_service_info"
+
+            if done:
+                break
+    except Exception:
+        _LOGGER.debug("GATT probe: latest advertisement check failed")
+        raise ProbeError(
+            "Home Assistant could not check the latest advertisement."
+        ) from None
+    finally:
+        if not wait_task.done():
+            wait_task.cancel()
+            await asyncio.gather(wait_task, return_exceptions=True)
+
+    _LOGGER.debug(
+        "GATT probe: targeted callback received=%s; latest service info advanced=%s; "
+        "fresh observation established=%s",
+        targeted_callback_received,
+        latest_service_info_advanced,
+        fresh_info is not None,
+    )
+    if fresh_info is None:
+        _LOGGER.debug(
+            "GATT probe: fresh observation=false; connectable BLEDevice resolved=false; "
+            "GATT connection attempted=false; connection successful=false"
+        )
+        if wait_failed:
+            raise ProbeError(
+                "Home Assistant could not complete the targeted active wait."
+            )
         raise ProbeError(
             "No fresh FORA 6 CONNECT advertisement was observed during the "
             "targeted active wait."
-        ) from None
-    except Exception:
-        _LOGGER.debug("GATT probe: targeted active wait failed")
-        raise ProbeError(
-            "Home Assistant could not complete the targeted active wait."
-        ) from None
-    if not _is_fresh_fora(fresh_info):
-        _LOGGER.debug("GATT probe: targeted wait returned no valid fresh candidate")
-        raise ProbeError("Targeted wait returned no fresh FORA 6 CONNECT advertisement.")
+        )
 
     local_name = _advertised_local_name(fresh_info)
-    _LOGGER.debug("GATT probe: fresh targeted advertisement received")
+    _LOGGER.debug("GATT probe: fresh observation established via %s", freshness_source)
     ble_device = bluetooth.async_ble_device_from_address(
         hass, fresh_info.address, connectable=True
     )
     _LOGGER.debug("GATT probe: connectable BLEDevice resolved: %s", ble_device is not None)
     if ble_device is None:
+        _LOGGER.debug(
+            "GATT probe: GATT connection attempted=false; connection successful=false"
+        )
         raise ProbeError(
             "FORA 6 CONNECT was seen, but no connectable BLEDevice is available."
         )
@@ -175,10 +251,12 @@ async def async_probe_gatt(hass: HomeAssistant, address: str) -> dict[str, Any]:
             pair=False,
         )
     except BleakOutOfConnectionSlotsError:
+        _LOGGER.debug("GATT probe: connection successful=false (no slot)")
         raise ProbeError(
             "No Bluetooth proxy/adapter connection slot is available."
         ) from None
     except Exception:
+        _LOGGER.debug("GATT probe: connection successful=false")
         raise ProbeError(
             "Bluetooth connection failed or the device disappeared; "
             "check reachability privately."
@@ -189,6 +267,7 @@ async def async_probe_gatt(hass: HomeAssistant, address: str) -> dict[str, Any]:
     try:
         if not client.is_connected:
             raise ProbeError("The meter disconnected before GATT discovery.")
+        _LOGGER.debug("GATT probe: connection successful=true")
         services = client.services
         _LOGGER.debug("GATT probe: GATT enumeration reached")
         if services is None:
@@ -221,9 +300,13 @@ async def async_probe_gatt(hass: HomeAssistant, address: str) -> dict[str, Any]:
         "local_name": local_name,
         "advertised_name_confirmed": local_name == TARGET_LOCAL_NAME,
         "active_scan_requested": True,
+        "targeted_callback_received": targeted_callback_received,
+        "latest_service_info_advanced": latest_service_info_advanced,
+        "freshness_source": freshness_source,
         "fresh_advertisement_observed": True,
         "connectable_device_resolved": True,
         "connectable_scanner_count": scanner_count,
+        "gatt_connection_attempted": True,
         "connection_successful": True,
         "connected_via_ha_bluetooth": True,
         "gatt_service_count": len(result),
