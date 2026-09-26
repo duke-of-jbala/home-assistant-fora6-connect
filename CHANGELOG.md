@@ -1,0 +1,12 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog and this project follows Semantic Versioning.
+
+## [Unreleased]
+
+### Added
+- Initial Home Assistant FORA 6 integration project structure.
+- Initial architecture and development documentation.
+- Initial BLE protocol discovery framework and roadmap.

@@ -1,0 +1,27 @@
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Local environments and editor state
+.venv/
+venv/
+.env
+.env.*
+.idea/
+.vscode/
+
+# BLE captures and private health data: sanitize before creating public fixtures.
+*.pcap
+*.pcapng
+*.btsnoop
+*.hcidump
+*.har
+captures/
+private/
