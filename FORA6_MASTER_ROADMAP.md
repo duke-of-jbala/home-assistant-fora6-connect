@@ -18,32 +18,40 @@ This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates
 
 Intended proxy path: **FORA 6 Connect → BLE → ESPHome Bluetooth Proxy → Home Assistant Bluetooth → `fora6_connect` integration**. A local Home Assistant Bluetooth adapter is also an intended transport. ESPHome remains a **generic Bluetooth proxy**: all FORA-specific communication and decoding belong to the integration. The protocol parser remains independent of Home Assistant, ESPHome, Bluetooth adapters, and physical hardware so captured raw frames can be tested directly.
 
-At the naming-migration checkpoint, the active checkout still resides at the former local path pending a safe directory move. `CURRENT_STATUS.md` records the actual path and the required next step. The GitHub URL is a local remote target; no GitHub repository has been created by this project work.
+The active checkout is at the canonical local path. `CURRENT_STATUS.md` records the observed repository state and next gate. The GitHub URL is a local remote target; this project work has not created or contacted a remote repository.
 
-## Evidence register at the Stage 0 checkpoint
+## Evidence register
 
 ### Confirmed project and documentary facts
 
-- The target product is FORA 6 Connect, model/variant GD82. The Stage 0 brief reports that FORA documentation lists service UUID `00001523-1212-efde-1523-785feabcd123` and characteristic UUID `00001524-1212-efde-1523-785feabcd123`, with write and notify properties. The underlying document and the physical meter have not yet been independently checked in this repository.
+- The target product is FORA 6 Connect, model/variant GD82. The Stage 0 brief reports that FORA documentation lists service UUID `00001523-1212-efde-1523-785feabcd123` and characteristic UUID `00001524-1212-efde-1523-785feabcd123`, with write and notify properties. The underlying document has not been independently inspected in this repository.
 - The integration skeleton records these UUIDs but does not register Bluetooth discovery, connect to a meter, decode packets, or expose measurements.
 - The UUID pair alone is insufficient proof that an observed BLE device is a FORA 6 Connect; similar UUIDs may be reused.
+
+### User-supplied real-device observations, screenshots reviewed externally
+
+- A generic iPhone BLE scanner saw the real meter as `FORA 6 CONNECT` while its blue Bluetooth indicator flashed. It reported connectable, about −50 dBm at close range, and a successful connection marked `BONDED`. Whether the meter requires bonding is unknown; the scanner may have initiated it automatically.
+- The iPhone GATT view showed Device Information `0x180A` with readable standard fields, Glucose `0x1808` with `0x2A18` Notify, `0x2A34` Notify, `0x2A51` Read, and `0x2A52` Write/Indicate; and the documentary FORA custom `1523` service and `1524` characteristic with Write/Notify. This confirms their presence on the real device without establishing proprietary packet semantics.
+- Home Assistant showed Bedroom and Lounge ESPHome proxies in `Auto (passive)` mode, with 0/3 and 1/3 connection slots in use respectively. Lounge was temporarily switched to Active scanning. In the tested state, the iPhone still saw FORA and Home Assistant's Advertisement Monitor showed other BLE devices but not FORA. This is a Home Assistant visibility gap in that test, not evidence of meter radio failure.
+- Lounge uses the official M5Stack Atom Lite ESPHome Bluetooth proxy package and an explicit `esp32_ble_tracker` scan interval of `320ms` and window of `30ms`. The approximately 9.4% scan duty cycle is a plausible missed-advertisement hypothesis, not an established cause.
 
 ### Working hypotheses, not validated behavior
 
 - The meter may expose stored measurements through the documented characteristic.
 - Home Assistant may be able to connect through an eligible ESPHome Bluetooth Proxy. End-to-end operation has not been tested.
+- The Lounge scan timing may contribute to missed FORA advertisements; a controlled A/B test is needed before attributing cause.
 - The exact GD82 variant may support some or all of the expected analytes listed below.
 
 ### Unknown
 
-Advertisement name and fields, address behavior, manufacturer data, advertised UUIDs, connectability, actual GATT inventory/properties, and raw notification behavior; application commands/responses, framing, checksums, identity response, memory retrieval, record layout, analyte codes, timestamps, status and control-solution flags, units/scaling, error responses, and exact GD82 analyte support. `docs/PROTOCOL.md` is the detailed evidence register. Do not fill unknowns with guesses.
+Address behavior, manufacturer/service data, advertised UUIDs, Home Assistant scanner-source/RSSI relationship, Home Assistant-side connectability/GATT, raw notification behavior, and whether bonding is required; application commands/responses, framing, checksums, identity response, memory retrieval, record layout, analyte codes, timestamps, status and control-solution flags, units/scaling, error responses, and exact GD82 analyte support. `docs/PROTOCOL.md` is the detailed evidence register. Do not fill unknowns with guesses.
 
 ## Stage plan and gates
 
 | Stage | Scope | Status | Entry criterion | Exit criterion |
 | --- | --- | --- | --- | --- |
 | 0 — Repository/bootstrap | Skeleton, tests, documentation, architecture freeze, local checkpoint. | **Complete** | Fixed project decisions supplied. | Requested files, guardrails, validation baseline, and local Stage 0 commit exist. |
-| 1 — FORA 6 Connect BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **In progress: Stage 1A preparation complete; real advertisement observation pending** | Stage 1A explicitly authorized; controlled meter and capture path to be verified. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded; Stage 1B requires a separate candidate review. |
+| 1 — FORA 6 Connect BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **In progress: iPhone identity/GATT observed; Home Assistant proxy visibility unsuccessful in tested state** | Stage 1A explicitly authorized; controlled meter and capture path to be verified. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded; Home Assistant-side GATT needs discovery and separate authorization. |
 | 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **Not authorized** | Stage 1 evidence reviewed and Stage 2 explicitly authorized. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
 | 3 — Protocol parser and captured-frame fixtures | Build an HA-independent parser with sanitized, evidence-derived regression fixtures. | **Not started** | Protocol behavior supported by Stage 2 evidence. | Decoding tests cover supported frames, invalid data, and evidence-backed record semantics without HA or hardware. |
 | 4 — Home Assistant Bluetooth transport | Implement connection, notification, and retry-safe handling through supported HA Bluetooth APIs for local adapters and ESPHome proxies. | **Not started** | Validated protocol operations and explicit authorization. | Transport handles documented communication and recoverable connection failures without a hard-coded local interface. |
@@ -58,12 +66,12 @@ Advertisement name and fields, address behavior, manufacturer data, advertised U
 
 ### Stage 1 subdivisions
 
-- **Stage 1A — passive Bluetooth discovery and environment verification:** preparation is complete. `docs/CAPTURE_GUIDE.md` and the blank private-use `docs/STAGE1_OBSERVATION_TEMPLATE.md` describe Home Assistant's Adapters, Advertisement Monitor, and Connection Monitor observations for the M5Stack Atom Lite ESPHome proxy. No real-device advertisement has been supplied or assessed yet. The pending observation must record provenance, scanner state/capability, source and RSSI, candidate fields, and address behavior privately. A UUID or name match is not proof of identity.
-- **Stage 1B — observational GATT inspection:** planned in the capture guide, **not implemented or authorized**. After candidate advertisement review, use Home Assistant Bluetooth APIs to resolve a connectable path and enumerate GATT services/characteristics/properties. Notification subscription needs separate authorization. No FORA application writes during Stage 1.
+- **Stage 1A — passive Bluetooth discovery and environment verification:** preparation is complete. User-supplied, externally screenshot-reviewed iPhone observations established the real meter's local name and connectability. Home Assistant's Advertisement Monitor did not show FORA in the tested proxy state despite seeing other devices. The guide and private-use template remain available for the controlled repeat. Advertisement fields, address behavior, and scanner-source details remain unknown. A UUID or name match alone is not proof of identity.
+- **Stage 1B — observational GATT inspection:** the real-device GATT inventory was observed through the iPhone scanner, but the Home Assistant/ESPHome proxy connection and GATT path has **not** been validated or authorized for this repository task. After Home Assistant discovery and separate authorization, use Home Assistant Bluetooth APIs to resolve a connectable path and inspect GATT. Notification subscription needs separate authorization. No FORA application writes during Stage 1.
 
 ## Current next gate
 
-**Obtain and review the user's Home Assistant Advertisement Monitor observation** plus the Atom Lite proxy/environment fields in `docs/CAPTURE_GUIDE.md`. Stage 1A preparation is complete, but discovery evidence is pending. Do not begin Stage 1B before a real candidate advertisement is reviewed. Do not begin Stage 2 or invent/send FORA application commands.
+**Correct/test Lounge ESPHome BLE scan timing in a controlled A/B test, repeat Home Assistant Advertisement Monitor observation, and determine whether Home Assistant can see `FORA 6 CONNECT` through the proxy.** Only after Home Assistant discovery and separate authorization, validate Home Assistant-side connectability/GATT. Stage 1 remains in progress. Do not begin Stage 2 or invent/send FORA application commands.
 
 ## Deferred product work
 

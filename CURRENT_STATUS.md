@@ -1,72 +1,49 @@
 # Current Stage
 
-Stage 0 is complete. **Stage 1 — FORA 6 Connect BLE discovery is in progress.** Stage 1A capture preparation is complete, but no real-device advertisement has been supplied or observed in this naming task. Stage 1B has not begun. Stage 2 is not authorized.
+Stage 0 is complete. **Stage 1 — FORA 6 Connect BLE discovery is in progress.** Stage 1A preparation is complete; user-supplied, externally screenshot-reviewed iPhone observations established the real meter's local name, connectability, and GATT inventory. Home Assistant Advertisement Monitor did not show FORA in the tested ESPHome proxy state. Home Assistant-side discovery, connection, and GATT remain unvalidated. Stage 2 is not authorized.
 
 # Current Gate
 
-Complete the local checkout-directory move after this naming commit, then obtain and review the user's Home Assistant Advertisement Monitor observation. Do not infer device identity from a name or UUID match alone.
+Correct/test Lounge ESPHome BLE scan timing in a controlled A/B test, repeat Home Assistant Advertisement Monitor observation, and determine whether Home Assistant can see `FORA 6 CONNECT` through the proxy. Only after Home Assistant discovery and separate authorization, validate Home Assistant-side connectability/GATT. No FORA application writes.
 
-# Repository
+# Repository State at Pre-Commit Review
 
-- **Actual checkout path at this task's pre-commit review:** `<former local checkout>`
-- **Canonical target path:** `<local checkout>`
-- **Directory move:** pending manual action after commit to avoid invalidating the active Codex workspace.
-- **GitHub repository target:** `duke-of-jbala/home-assistant-fora6-connect`; no remote GitHub repository was created or contacted.
-- **Branch:** `main`
-- **Last completed checkpoint commit SHA:** `f3a47969f793b39ac04625054a4719e0481c55e6`
-- **Checkpoint commit message (historical, verbatim):** `docs: begin FORA 6 BLE discovery stage`
-- **Local origin URL:** `https://github.com/duke-of-jbala/home-assistant-fora6-connect`
-- **Changes after checkpoint:** yes — this naming migration. At pre-commit review the tree was dirty with only the project changes listed below. The migration commit's full SHA and final `git status --short` are reported after commit, outside tracked Markdown.
+- **Actual checkout path:** `<local checkout>`; the directory move is complete.
+- **Branch:** `main`.
+- **Last completed checkpoint:** `418c0fe0eec26c9d2ef08a877fddc823ea0d8d18` — `refactor: rename integration to FORA 6 Connect`.
+- **Changes after checkpoint:** yes — documentation-only Stage 1 evidence update in the files listed below. The task began with a clean tree (`git status --short --branch --untracked-files=all` showed `## main` only); the tree is dirty at this pre-commit review.
+- **GitHub repository target:** `duke-of-jbala/home-assistant-fora6-connect`. No remote operation occurred in this task.
 
-# Completed Work
+# Evidence and Provenance
 
-- Renamed the integration directory to `custom_components/fora6_connect/`, updated the manifest and constants to domain `fora6_connect` and display name **FORA 6 Connect**, and updated HACS metadata and tests.
-- Updated repository URLs, product naming, roadmap, README, architecture/protocol/decision documentation, Codex instructions, status, handover, and changelog. The master roadmap filename remains `FORA6_MASTER_ROADMAP.md` by design.
-- Changed only the local `origin` URL to the new target. No network operation, GitHub repository creation, BLE discovery, hardware connection, application write, or protocol implementation occurred.
+- **Documentary Stage 0 claim:** the project brief reports FORA documentation listing custom service `00001523-1212-efde-1523-785feabcd123` and characteristic `00001524-1212-efde-1523-785feabcd123` with Write/Notify. The underlying document has not been independently inspected in this repository.
+- **User-supplied observation, screenshots reviewed externally:** while the real meter's blue Bluetooth indicator flashed, a generic iPhone BLE scanner displayed local name `FORA 6 CONNECT`, connectable yes, and close-range RSSI around −50 dBm. It connected successfully and reported `BONDED`. Bonding requirement is unknown; the scanner may have initiated bonding automatically. No iPhone CoreBluetooth UUID or private device identifier is recorded.
+- **User-supplied iPhone GATT observation:** Device Information `0x180A` with readable standard fields; Glucose `0x1808` with `0x2A18` Notify, `0x2A34` Notify, `0x2A51` Read, and `0x2A52` Write/Indicate; FORA custom `1523` service and `1524` characteristic with Write/Notify. This confirms the documentary custom UUIDs on the real device, not proprietary packet semantics.
+- **User-supplied Home Assistant observation:** Bedroom and Lounge ESPHome proxies initially displayed `Auto (passive)`, with 0/3 and 1/3 slots in use respectively. Lounge was temporarily switched to Active scanning. With the meter indicator flashing and iPhone detection succeeding, Home Assistant Advertisement Monitor did not show FORA; it continued to show other BLE devices including the user's EcoFlow. This does not indicate a meter radio failure.
+- **User-supplied Lounge configuration:** official ESPHome M5Stack Atom Lite Bluetooth proxy package `github://esphome/bluetooth-proxies/m5stack/m5stack-atom-lite.yaml@main`, plus explicit `esp32_ble_tracker` scan interval `320ms` and window `30ms`.
+- **Hypothesis:** the approximately 9.4% scan duty cycle may cause missed advertisements. A controlled A/B test has not yet established causation.
 
-# Validated Facts
+# Unknowns and Limits
 
-- Canonical product/display name: **FORA 6 Connect**. Model/variant: **GD82**. Integration domain and directory: `fora6_connect` and `custom_components/fora6_connect/`.
-- The Stage 0 brief reports FORA documentation listing service UUID `00001523-1212-efde-1523-785feabcd123`, characteristic UUID `00001524-1212-efde-1523-785feabcd123`, and write/notify properties. These remain documentary claims; actual meter advertisement and GATT have not been observed.
-- The user's proxy is described as an M5Stack Atom Lite running ESPHome. Its actual scanner state and capabilities have not yet been observed here. The UUID pair alone cannot identify a FORA 6 Connect.
+Home Assistant/ESPHome proxy discovery and GATT path; whether bonding is required; address behavior; manufacturer/service advertisement data; advertised UUIDs; Home Assistant scanner-source/RSSI relationship; notification behavior; FORA application commands/responses, packet format, checksums, records, analyte codes, timestamps, flags, units, and exact GD82 analyte support. No protocol behavior is inferred.
 
-# Unvalidated / Unknown
+# Files Changed in This Task
 
-- Candidate advertisement, local name, address behavior, manufacturer/service data, RSSI/source relationship, connectability, and physical GATT inventory.
-- Atom Lite scanning mode, ESPHome version, active/GATT capability, and connection slots in the user's installation.
-- FORA application commands/responses, framing, record format, analyte codes, timestamps, control flags, and historical memory behavior. No protocol behavior was inferred in this task.
+`AGENTS.md`, `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, and `docs/PROTOCOL.md`. No integration code or tests changed.
 
-# Tests and Validation
+# Checks Actually Run
 
-- `python3 -m unittest discover -s tests -v` — **pass:** 5 total, 5 passed, 0 failed, 0 skipped.
-- `python3 -m compileall -q custom_components tests` — **pass**.
-- `python3 -m tabnanny custom_components tests` — **pass**.
-- JSON syntax and naming consistency audit — **pass:** manifest domain/name match directory, constants, HACS metadata, and intended repository URL.
-- Ruff was unavailable; no Ruff result is claimed.
-- Tracked-file and privacy audit — **pass:** no private Bluetooth MAC, personal measurement, secret/token, Home Assistant credential, raw capture, generated cache, virtual environment, or unrelated file is included in the commit.
+- `python3 -m unittest discover -s tests -v` — pass: 5 tests, 0 failures, 0 skipped.
+- `python3 -m compileall -q custom_components tests` — pass.
+- `python3 -m tabnanny custom_components tests` — pass.
+- `command -v ruff` — Ruff unavailable; no Ruff checks claimed.
+- `git diff --check` — pass.
+- Documentation and privacy audit — no private MAC address, CoreBluetooth UUID, serial number, health measurement, raw capture, or secret included. Only public standard/documentary GATT UUIDs and sanitized observations appear.
 
-# Files Changed in Latest Task
+# Authorization Boundary
 
-- **Renamed:** all 12 tracked files from `custom_components/fora6/` to `custom_components/fora6_connect/`; `__init__.py`, `const.py`, and `manifest.json` also changed internally.
-- **Modified:** `AGENTS.md`, `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/PROTOCOL.md`, `hacs.json`, `tests/test_bluetooth.py`, `tests/test_protocol.py`, and `tests/test_sensor.py`.
-- **Local Git metadata:** `origin` URL changed; this is not part of the commit.
-- **New BLE/protocol functionality:** none.
-
-# Outstanding Issues
-
-- The checkout directory itself remains at the old path until the user moves it safely after this session. Tracked documentation distinguishes that actual path from the canonical target.
-- The GitHub repository under the new name has not been created. Local `origin` points to the intended future URL only.
-- No real advertisement or proxy-environment observation has been supplied; Stage 1B entry criteria remain unmet.
-
-# Explicitly Not Yet Authorized
-
-- Do not start Stage 1B or Stage 2, transmit or invent FORA application commands, add a Bluetooth discovery matcher, or expose sensors.
-- Do not push, create the remote GitHub repository, merge, tag, publish, or release. Do not access unrelated repositories.
-
-# Exact Next Gate
-
-After the manual local directory move, **obtain the user's Home Assistant Advertisement Monitor observation** using `docs/CAPTURE_GUIDE.md` and review a sanitized summary. Stage 1 remains in progress; Stage 1B needs separate authorization after candidate review.
+Stage 1 remains in progress. Home Assistant-side GATT inspection requires discovery and separate authorization. Stage 2 is not authorized. No BLE writes, protocol implementation, push, tag, or release occurred in this task.
 
 # Last Updated
 
-2026-09-26 (Europe/London), at naming-migration pre-commit review. The final commit SHA and post-commit tree state are reported separately.
+2026-09-26 (Europe/London), at documentation-update pre-commit review. The task commit SHA and post-commit working-tree state are reported separately after commit.

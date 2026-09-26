@@ -12,6 +12,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Initial BLE protocol discovery framework and roadmap.
 - Durable master roadmap, repository status, and Codex handover workflow.
 - Stage 1A Home Assistant Bluetooth observation guide and blank private capture template.
+- Sanitized Stage 1 real-device discovery, GATT, and Home Assistant/ESPHome proxy observations with provenance and a controlled next gate.
 
 ### Changed
 - Standardized the project and integration name to FORA 6 Connect and the domain to `fora6_connect`.

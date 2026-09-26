@@ -1,6 +1,29 @@
 # Stage 1 capture guide
 
-Stage 1 is in progress. **Stage 1A preparation is complete; no FORA advertisement or real-device GATT observation has been supplied yet.** This guide prepares a controlled observation through Home Assistant and the user's existing M5Stack Atom Lite ESPHome Bluetooth Proxy. It does not authorize Stage 1B, application writes, or protocol implementation.
+Stage 1 is in progress. **Stage 1A preparation is complete.** A user-supplied, externally screenshot-reviewed iPhone scanner observation confirmed the real meter's name, connectability, and GATT inventory. Home Assistant's Advertisement Monitor did not show FORA in the tested ESPHome proxy state. This guide now supports a controlled repeat through Home Assistant. It does not authorize Home Assistant-side GATT work, application writes, or protocol implementation.
+
+## Current user-supplied observation (screenshots reviewed externally)
+
+- While the real meter's blue Bluetooth indicator flashed, a generic iPhone BLE scanner saw `FORA 6 CONNECT`, reported connectable at approximately −50 dBm close range, and connected successfully. It marked the connection `BONDED`; whether bonding is required remains unknown. Do not treat an iPhone CoreBluetooth UUID as a physical MAC address.
+- The iPhone scanner displayed Device Information `0x180A`, Glucose `0x1808` (`0x2A18` Notify, `0x2A34` Notify, `0x2A51` Read, `0x2A52` Write/Indicate), and FORA custom service `00001523-1212-efde-1523-785feabcd123` with characteristic `00001524-1212-efde-1523-785feabcd123` Write/Notify. See `PROTOCOL.md` for the evidence register.
+- Home Assistant's Bluetooth Adapter view showed Bedroom in `Auto (passive)` with 0/3 slots in use and Lounge in `Auto (passive)` with 1/3 slots in use. Lounge was temporarily changed to Active scanning. While iPhone discovery succeeded, Advertisement Monitor did not show FORA, although it continued to show other BLE devices such as the user's EcoFlow. This does not establish a meter radio failure.
+- The Lounge M5Stack Atom Lite configuration uses the official `esphome.bluetooth-proxy` package at `github://esphome/bluetooth-proxies/m5stack/m5stack-atom-lite.yaml@main` and this explicit scan timing override:
+
+  ```yaml
+  esp32_ble_tracker:
+    scan_parameters:
+      interval: 320ms
+      window: 30ms
+  ```
+
+  The scan window is about 9.4% of the interval. Missed advertisements from this timing are a hypothesis, not an established cause. The actual Home Assistant/ESPHome GATT path remains untested.
+
+## Next controlled gate
+
+1. Record the Lounge proxy's current scan settings and baseline Home Assistant Advertisement Monitor outcome while the meter indicator flashes.
+2. Correct/test the Lounge BLE scan timing as one controlled change; record the exact setting, scanner mode, proxy state, observation window, and meter state. Repeat Advertisement Monitor observation under comparable conditions.
+3. Determine whether Home Assistant sees `FORA 6 CONNECT` through the proxy. Record negative results as well as positive results; do not infer causation from one missed observation.
+4. Only after Home Assistant discovery and separate authorization, validate Home Assistant-side connectability and GATT. Do not perform FORA application writes.
 
 ## Source provenance (checked 2026-09-26)
 
@@ -46,9 +69,9 @@ These sources describe platform capabilities, **not** this meter or the user's a
 
 “Not shown” means the UI did not display a field; it does **not** mean the device omitted it. Do not copy a full raw log into this repository. The blank [Stage 1 observation template](STAGE1_OBSERVATION_TEMPLATE.md) is safe to keep in Git; completed copies are private.
 
-## Stage 1B — planned observational GATT method, not yet implemented
+## Stage 1B — planned Home Assistant-side observational GATT method, not yet implemented
 
-**Entry gate:** a real candidate advertisement and its private address/identifier have been reviewed, the candidate is sufficiently distinguished from unrelated BLE devices, a connectable scanner path is shown, and Stage 1B is explicitly authorized. This section is a design for a future probe, not code or permission to run it now.
+**Entry gate:** Home Assistant discovers the real candidate through an eligible scanner, the candidate is sufficiently distinguished from unrelated BLE devices, a connectable path is shown, and Home Assistant-side GATT inspection is explicitly authorized. The iPhone GATT inventory does not itself validate that path. This section is a design for a future probe, not code or permission to run it now.
 
 1. Use Home Assistant's Bluetooth stack to inspect recent candidate observations with `bluetooth.async_discovered_service_info(hass, connectable=False)` and `bluetooth.async_last_service_info(hass, address, connectable=True)` as appropriate. These are observations, not identity proof. If needed, inspect per-scanner observations through `bluetooth.async_scanner_devices_by_address` to understand which scanner heard the candidate.
 2. Resolve the current connectable `BLEDevice` through `bluetooth.async_ble_device_from_address(hass, address, connectable=True)`. If unavailable, use `bluetooth.async_address_reachability_diagnostics` with connection intent for a **private** reachability report; do not parse its human-readable text or publish an unredacted report. Do not hard-code the Atom Lite, another proxy, or a local BlueZ interface.
@@ -56,10 +79,10 @@ These sources describe platform capabilities, **not** this meter or the user's a
 4. Enumerate every service and characteristic and record UUIDs/properties with provenance. Verify whether `00001523-1212-efde-1523-785feabcd123` and `00001524-1212-efde-1523-785feabcd123` actually exist on this device and whether write/notify properties are present.
 5. Subscribe to notifications **only under separate explicit authorization**; record whether any arrive without FORA application writes. Do not send any FORA application write during Stage 1. Disconnect cleanly. Keep raw notifications private pending sanitization review.
 
-Stage 1B must not be implemented or run before its entry gate. Stage 2 protocol acquisition is not authorized. No command bytes, packet layouts, or response meanings are inferred from the documentary UUIDs.
+Home Assistant-side Stage 1B must not be implemented or run before its entry gate. Stage 2 protocol acquisition is not authorized. No command bytes, packet layouts, or response meanings are inferred from the observed UUIDs or properties.
 
 ## Evidence and public reporting
 
 Keep the original private capture with its source, date/time, Home Assistant and ESPHome versions, scanner configuration, meter state, and collection method. In public project documents, report only sanitized findings and distinguish **observed facts**, **interpretations**, and **unknowns**. Before adding any future fixture, remove identifying health values and addresses, document transformations, and verify the fixture still tests the intended behavior. If useful evidence cannot be safely sanitized, keep it private and publish only a non-sensitive conclusion.
 
-The next action is obtaining the user's **Home Assistant Advertisement Monitor observation**, with the proxy/environment fields above. Stage 1 is not complete; GATT inventory and passive notifications remain uncollected.
+The next action is the controlled Lounge scan-timing test and repeat Home Assistant Advertisement Monitor observation. Stage 1 is not complete: iPhone GATT inventory exists, but Home Assistant-side GATT and notification behavior remain uncollected.
