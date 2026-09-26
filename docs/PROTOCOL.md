@@ -1,6 +1,6 @@
 # Protocol evidence register
 
-This page records evidence before any FORA application protocol implementation. Documentary claims come from the FORA 6 Connect GD82 documentation described in the Stage 0 project brief; the underlying document has not been independently inspected in this repository. Real-device findings below are a sanitized user-supplied summary of screenshots reviewed externally, not a capture independently inspected or reproduced by this repository task. No private identifiers, health data, or raw captures are stored here.
+This page records evidence before any FORA application protocol implementation. Documentary claims come from the FORA 6 Connect GD82 documentation described in the Stage 0 project brief; the underlying document has not been independently inspected in this repository. The iPhone findings below are a sanitized user-supplied summary of screenshots reviewed externally. The later Home Assistant/ESPHome retest is user-supplied. Neither was independently reproduced by this repository task. No private identifiers, health data, or raw captures are stored here.
 
 ## Confirmed for this project brief
 
@@ -28,17 +28,25 @@ The iPhone scanner showed these GATT entries:
 
 This confirms the documentary custom service/characteristic and its properties on the physical meter. It does not establish proprietary commands, frames, records, or the behavior of the standard Glucose Service.
 
-In the tested state, Home Assistant's Advertisement Monitor did not display FORA while the iPhone scanner saw the meter and Home Assistant displayed other BLE devices. Home Assistant-side discovery, connection, and GATT have not been validated. See `CAPTURE_GUIDE.md` for the proxy environment and next controlled gate.
+In the initial tested state, Home Assistant's Advertisement Monitor did not display FORA while the iPhone scanner saw the meter and Home Assistant displayed other BLE devices. See the controlled retest below. Home Assistant-side connection and GATT have not been validated.
+
+## Home Assistant/ESPHome advertisement retest — user-supplied observation
+
+Before the change, Lounge had an explicit `esp32_ble_tracker` scan interval of `320ms` and window of `30ms`; Home Assistant Advertisement Monitor did not detect FORA even when Lounge was temporarily set to Active. The explicit override was then removed, and Lounge was rebuilt and reflashed with ESPHome `2026.9.0`. Bedroom remained unchanged as a control.
+
+After the change, with Lounge temporarily set to Active, Home Assistant Advertisement Monitor detected `FORA 6 CONNECT` through the Lounge ESPHome proxy. This confirms the ESPHome → Home Assistant advertisement path works in that tested state. Because the override removal and firmware reflash occurred together, the observation does not prove which change resolved the initial visibility gap.
+
+Lounge was then returned to Auto. The prior FORA row remained visible, but its Updated age did not refresh during the test. A fresh Auto-mode advertisement was **not** confirmed. This does not establish that Auto cannot support FORA. Home Assistant's [Bluetooth API documentation](https://developers.home-assistant.io/docs/core/bluetooth/api/) describes `bluetooth.async_request_active_scan(hass)` as an on-demand active sweep of Auto-mode scanners; the Stage 1B probe should use that supported API while Lounge stays in Auto.
 
 ## Working hypotheses
 
 - The meter may expose historical measurements over the documented write/notify characteristic. This is a product goal, not a verified protocol fact.
-- The meter may be reachable through a connectable ESPHome Bluetooth proxy via Home Assistant's stack. End-to-end behavior remains untested.
-- The Lounge proxy's short scan window may contribute to missed advertisements; causation requires a controlled A/B test.
+- The meter may be reachable for GATT through an eligible ESPHome Bluetooth proxy via Home Assistant's stack. Advertisement forwarding has been observed; GATT operation remains untested.
+- The previous Lounge scan timing may have contributed to missed advertisements, but the override removal and firmware reflash were combined, so causation remains unproven.
 
 ## Unknown
 
-- Whether bonding is required, address behavior, manufacturer/service advertisement data, advertised UUIDs, Home Assistant scanner-source/RSSI relationship, and Home Assistant-side connectability/GATT.
+- Whether bonding is required, address behavior, manufacturer/service advertisement data, advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and Home Assistant-side connectability/GATT.
 - Commands and responses.
 - Framing and checksums.
 - Device identification response.

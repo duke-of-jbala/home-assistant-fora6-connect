@@ -1,49 +1,59 @@
 # FORA 6 Connect Codex Handover
 
-## Task and Starting State
+## Task and Repository State at Pre-Commit Review
 
-Record the user-supplied, externally screenshot-reviewed Stage 1 real-device and Home Assistant/ESPHome observations without implementing protocol behavior.
+Document the user-supplied controlled Lounge ESPHome proxy retest and set the Stage 1B Home Assistant probe gate. This task changes documentation only.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `418c0fe0eec26c9d2ef08a877fddc823ea0d8d18` — `refactor: rename integration to FORA 6 Connect`.
-- **Actual checkout path:** `<local checkout>`. The directory move recorded as pending in the prior handover has occurred.
-- **Starting working tree:** clean; `git status --short --branch --untracked-files=all` showed `## main` only.
-- **Pre-commit state for this task:** dirty with only the documentation changes listed below. The post-commit state is to be verified and reported outside tracked Markdown.
+- **Last completed checkpoint:** `a94a7613d6d3fb4b872c6b9a5cbaff5c4a39c58c` — `docs: record FORA 6 Connect BLE observations`.
+- **Checkout path:** `<local checkout>`.
+- **Starting working tree:** clean; `git status --short --branch --untracked-files=all` showed `## main`.
+- **Changes after checkpoint:** yes — only the eight Markdown files listed below. The tree is dirty at this pre-commit review. Verify and report the post-commit state separately.
 
-## Changes After Checkpoint
+## Files Changed
 
-Updated the evidence register, capture guide, master roadmap, status, handover, README, roadmap pointer, architecture/development descriptions, repository instruction path, and changelog. No integration code, protocol parser, test, or BLE behavior changed.
+Modified: `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/CAPTURE_GUIDE.md`, `docs/PROTOCOL.md`.
 
-**Files modified:** `AGENTS.md`, `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`.
-
-**Files added/deleted/renamed:** none.
+Added, deleted, renamed: none. Integration code and tests did not change.
 
 ## Evidence and Provenance
 
-- **Documentary claim from Stage 0 brief:** FORA documentation lists custom service `00001523-1212-efde-1523-785feabcd123` and characteristic `00001524-1212-efde-1523-785feabcd123`, Write/Notify. The underlying document was not independently inspected here.
-- **User-supplied, screenshots reviewed externally:** a generic iPhone BLE scanner saw the real meter while its blue Bluetooth indicator flashed, displaying `FORA 6 CONNECT`, connectable yes, about −50 dBm at close range. It connected and reported `BONDED`. Whether bonding is required is unknown; the scanner could have initiated it. No private identifier or iPhone CoreBluetooth UUID is recorded.
-- **User-supplied iPhone GATT observation:** Device Information `0x180A` with readable standard fields; Glucose `0x1808` containing `0x2A18` Notify, `0x2A34` Notify, `0x2A51` Read, `0x2A52` Write/Indicate; custom FORA `1523` service and `1524` characteristic with Write/Notify. The actual device therefore exposes the documentary custom UUIDs. No proprietary packet semantics follow from this.
-- **User-supplied Home Assistant view:** Bedroom proxy `Auto (passive)`, 0/3 slots in use; Lounge proxy `Auto (passive)`, 1/3 slots in use. Lounge was temporarily changed to Active scanning. While the iPhone saw FORA, Advertisement Monitor did not; it still saw other BLE devices including EcoFlow. This is a Home Assistant visibility gap in the tested state, not evidence of meter radio failure.
-- **User-supplied Lounge configuration:** official M5Stack Atom Lite ESPHome Bluetooth proxy package plus `esp32_ble_tracker` scan interval `320ms`, window `30ms`. The roughly 9.4% scan duty cycle is a possible explanation for missed advertisements, not a proven cause.
-- **Not independently observed in this task:** the screenshots, private capture, Home Assistant system, meter, or proxy. No new BLE operation was run by Codex.
+The controlled retest below is **user-supplied**. Codex did not inspect the private UI address, access the Home Assistant or ESPHome systems, or perform a BLE operation.
 
-## Unknowns and Boundaries
+| Phase | Reported observation |
+| --- | --- |
+| Before | Lounge M5Stack Atom Lite used explicit `esp32_ble_tracker` interval `320ms` and window `30ms`. Home Assistant Advertisement Monitor did not detect FORA, even when Lounge was temporarily set to Active. |
+| Change | The explicit override was removed. Lounge was rebuilt and reflashed with ESPHome `2026.9.0`; Bedroom remained unchanged as control. |
+| After | With Lounge temporarily in Active mode, Home Assistant Advertisement Monitor detected `FORA 6 CONNECT` through Lounge. The ESPHome → Home Assistant advertisement path worked in this tested state. |
+| Auto retest | Lounge was returned to Auto. The existing FORA row stayed visible, but its Updated age did not refresh. No fresh Auto-mode advertisement was confirmed. |
 
-Home Assistant discovery/connection/GATT through the proxy, bonding requirement, address behavior, advertisement manufacturer/service data and UUIDs, scanner-source relationship, notification behavior, and FORA application protocol remain unknown. Stage 1 remains in progress; Stage 2 is not authorized. No BLE write, protocol implementation, push, tag, or release was performed.
+The override removal and reflash occurred together. Their individual effects were not isolated, so scan timing is still only a possible explanation for the initial miss. The stale Auto row does not establish that Auto cannot support FORA.
+
+Home Assistant's [Bluetooth API guidance](https://developers.home-assistant.io/docs/core/bluetooth/api/) documents `bluetooth.async_request_active_scan(hass)` as an on-demand active sweep across Auto-mode scanners. This supports the next probe design; the user's Auto-mode behavior remains to be tested.
+
+The prior iPhone local-name, connectability, bonding, and GATT observations remain in `docs/PROTOCOL.md`. The private Bluetooth address shown in the Home Assistant UI is not included.
+
+## Stage and Unknowns
+
+**Stage 1 remains in progress.** Home Assistant Active-mode advertisement forwarding through Lounge is observed. A fresh Auto-mode advertisement, Home Assistant-side connection and GATT enumeration, bonding requirement, detailed advertisement fields, and FORA application protocol remain unverified. **Stage 2 is not authorized.**
 
 ## Checks Actually Run
 
-- `python3 -m unittest discover -s tests -v` — pass, 5 tests, 0 failures, 0 skipped.
+- `python3 -m unittest discover -s tests -v` — pass: 5 tests, 0 failures, 0 skipped.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
 - `command -v ruff` — Ruff unavailable; no Ruff check claimed.
 - `git diff --check` — pass.
-- Documentation and privacy audit — no private MAC address, CoreBluetooth UUID, serial number, health measurement, raw capture, or secret included. The listed public GATT UUIDs are service/characteristic identifiers, not private device identifiers.
+- Documentation/privacy audit — no private Bluetooth address, CoreBluetooth identifier, serial number, health measurement, raw capture, or secret included.
 
 ## Exact Next Gate
 
-Correct/test Lounge ESPHome BLE scan timing in a controlled A/B test, repeat Home Assistant Advertisement Monitor observation, and determine whether Home Assistant can discover `FORA 6 CONNECT` through the proxy. Only after Home Assistant discovery and separate authorization, validate Home Assistant-side connectability/GATT. No application-level FORA writes yet.
+**Stage 1B — minimal development-only Home Assistant probe:** leave Lounge in Auto, call `bluetooth.async_request_active_scan(hass)`, resolve a fresh `FORA 6 CONNECT` observation through Home Assistant Bluetooth, obtain a connectable `BLEDevice` through supported APIs, connect through an available proxy, and enumerate GATT services/characteristics. Perform no application-level writes. The probe was not implemented in this documentation task.
+
+## Authorization Boundary
+
+No BLE writes, protocol code, push, tag, or release occurred. Stop after the documentation commit; Stage 2 remains unauthorized.
 
 ## Last Updated
 
-2026-09-26 (Europe/London), at this documentation task's pre-commit review. Verify and report the new commit SHA and final working-tree state after committing.
+2026-09-26 (Europe/London), at documentation pre-commit review. Report the new commit SHA and final working-tree state after commit.
