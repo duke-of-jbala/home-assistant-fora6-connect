@@ -1,6 +1,6 @@
 # Stage 1 capture guide
 
-Stage 1 is in progress. **Stage 1A preparation is complete.** User-supplied iPhone observations confirmed the real meter's name, connectability, and GATT inventory. A later controlled Lounge proxy retest confirmed Home Assistant Advertisement Monitor visibility in Active mode. A fresh Auto-mode advertisement and Home Assistant-side GATT remain unconfirmed. The first real Stage 1B probe attempts failed at fresh-advertisement discovery, before any Home Assistant GATT connection. The revised development probe needs a real retest. No application-level writes or protocol implementation are authorized.
+Stage 1 is in progress. **Stage 1A preparation is complete.** User-supplied iPhone observations confirmed the real meter's name, connectability, and GATT inventory. A controlled Lounge proxy retest confirmed Home Assistant Advertisement Monitor visibility in Active mode. A fresh Auto-mode advertisement and Home Assistant-side GATT remain unconfirmed. The first real Stage 1B build failed at fresh-advertisement discovery; the installed targeted-wait build then failed at cached-candidate lookup. Neither reached a GATT connection. The general-discovery revision needs a real retest. No application-level writes or protocol implementation are authorized.
 
 ## User-supplied Stage 1 observations
 
@@ -20,11 +20,12 @@ Stage 1 is in progress. **Stage 1A preparation is complete.** User-supplied iPho
 - **Controlled retest:** Lounge was rebuilt and reflashed with ESPHome `2026.9.0` after removing the override; Bedroom remained unchanged as a control. With Lounge temporarily set to Active, Advertisement Monitor detected `FORA 6 CONNECT` through Lounge. This confirms advertisement forwarding in the tested Active state. The override removal and reflash occurred together, so the cause of the prior missed detections is not isolated.
 - **Auto retest:** Lounge was returned to Auto. The previous FORA row remained, but its Updated age did not refresh during the test. A fresh Auto-mode advertisement was not confirmed; the result does not prove Auto cannot support FORA.
 - **First real Stage 1B probe attempts, user-supplied:** repeated calls returned `No fresh FORA 6 CONNECT advertisement was observed during the active scan.` No Home Assistant GATT connection was attempted, and no FORA operation was transmitted. This is a discovery-gate result, not evidence of a meter or proxy GATT failure. EcoFlow activity and unrelated ESPHome API warnings do not establish a FORA failure.
+- **Second real Stage 1B probe, user-supplied:** after the targeted-wait build was installed, the action returned `No known FORA 6 CONNECT candidate is available for targeted active scanning; first observe it in Home Assistant Bluetooth.` This occurred despite an earlier Advertisement Monitor observation. The code stopped before the targeted wait, GATT connection, or any FORA operation. A previously observed UI row does not prove current presence in either HA cache; the restrictive connectable-only lookup is being removed as the first gate.
 
 ## Next Stage 1B gate — run the development probe
 
-1. Replace the installed development integration and restart Home Assistant Core as described in [the development guide](DEVELOPMENT.md). Leave Lounge in Auto and invoke `fora6_connect.probe_gatt`; the revised action uses a targeted active advertisement wait through [Home Assistant's Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/).
-2. Return the privacy-safe service response or sanitized error. The probe needs a previously cached FORA candidate solely to obtain a runtime address; it accepts only an advertisement newer than both the cached candidate and the wait start. If no candidate is cached, record that diagnostic separately from a targeted-wait timeout. A stale Advertisement Monitor row is not fresh evidence. It resolves a connectable `BLEDevice` and enumerates GATT metadata only after the live wait succeeds.
+1. Replace the installed development integration and restart Home Assistant Core as described in [the development guide](DEVELOPMENT.md). Leave Lounge in Auto and invoke `fora6_connect.probe_gatt`; the revision finds a candidate in general discovery and uses a targeted active advertisement wait through [Home Assistant's Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/).
+2. Return the privacy-safe service response or sanitized error. The probe needs a currently cached general FORA candidate solely to obtain a runtime address; it accepts only an advertisement newer than both the cached candidate and wait start. If none exists, record the safe discovery counts and distinguish that error from a targeted-wait timeout. A stale Advertisement Monitor row is not fresh evidence. It resolves a connectable `BLEDevice` and enumerates GATT metadata only after the live wait succeeds.
 3. Privately confirm the selected connection path in Home Assistant's Connection Monitor if necessary. Record actual Home Assistant and ESPHome versions, meter state, scan/source observations, connection outcome, GATT inventory, and disconnect outcome with provenance. Keep addresses and raw logs private.
 4. Perform no FORA application-level writes. Stage 2 remains unauthorized.
 
@@ -72,7 +73,7 @@ These sources describe platform capabilities, **not** this meter or the user's a
 
 “Not shown” means the UI did not display a field; it does **not** mean the device omitted it. Do not copy a full raw log into this repository. The blank [Stage 1 observation template](STAGE1_OBSERVATION_TEMPLATE.md) is safe to keep in Git; completed copies are private.
 
-## Stage 1B — Home Assistant-side observational GATT method, revised probe pending retest
+## Stage 1B — Home Assistant-side observational GATT method, general-discovery revision pending retest
 
 **Entry gate:** Home Assistant has detected the real candidate through Lounge in Active mode. The development-only probe in `custom_components/fora6_connect/gatt_probe.py` must establish a fresh observation with Lounge left in Auto, obtain a connectable path, and inspect GATT. The iPhone GATT inventory does not itself validate Home Assistant's connection path. The implementation and mock tests do not constitute a real-device result.
 
@@ -82,7 +83,7 @@ These sources describe platform capabilities, **not** this meter or the user's a
 4. Enumerate every service and characteristic and record UUIDs/properties with provenance. Verify whether `00001523-1212-efde-1523-785feabcd123` and `00001524-1212-efde-1523-785feabcd123` actually exist on this device and whether write/notify properties are present.
 5. Subscribe to notifications **only under separate explicit authorization**; record whether any arrive without FORA application writes. Do not send any FORA application write during Stage 1. Disconnect cleanly. Keep raw notifications private pending sanitization review.
 
-The earlier Stage 1B probe ran on the real system but stopped at discovery; the targeted-wait revision has not been run there. Stage 2 protocol acquisition is not authorized. No command bytes, packet layouts, or response meanings are inferred from the observed UUIDs or properties.
+The first two Stage 1B builds ran on the real system but stopped at different discovery gates; the general-discovery revision has not been run there. Stage 2 protocol acquisition is not authorized. No command bytes, packet layouts, or response meanings are inferred from the observed UUIDs or properties.
 
 ## Evidence and public reporting
 

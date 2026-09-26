@@ -19,3 +19,4 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ### Changed
 - Standardized the project and integration name to FORA 6 Connect and the domain to `fora6_connect`.
 - Revised the Stage 1B development probe to wait for a newer address-targeted advertisement through Home Assistant after real attempts stopped at the previous fresh-advertisement gate; no Home Assistant GATT connection or FORA operation occurred in those attempts.
+- Separated the Stage 1B probe's general advertisement lookup from connectable-device resolution after the installed targeted-wait build stopped at its connectable-only candidate gate; no targeted wait or Home Assistant GATT connection occurred in that retest.

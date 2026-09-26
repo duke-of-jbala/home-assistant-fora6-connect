@@ -106,17 +106,21 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.info = types.SimpleNamespace(
             name="FORA 6 CONNECT",
             device=types.SimpleNamespace(name="FORA 6 CONNECT"),
+            advertisement=types.SimpleNamespace(local_name="FORA 6 CONNECT"),
             address=self.address,
             time=1.0,
         )
         self.fresh_info = types.SimpleNamespace(
             name="FORA 6 CONNECT",
             device=types.SimpleNamespace(name="FORA 6 CONNECT"),
+            advertisement=types.SimpleNamespace(local_name="FORA 6 CONNECT"),
             address=self.address,
             time=2.0,
         )
         self.bluetooth.async_scanner_count = Mock(return_value=1)
-        self.bluetooth.async_discovered_service_info = Mock(return_value=[self.info])
+        self.bluetooth.async_discovered_service_info = Mock(
+            side_effect=lambda _hass, connectable: [] if connectable else [self.info]
+        )
         self.bluetooth.async_process_advertisements = AsyncMock(
             return_value=self.fresh_info
         )
@@ -150,9 +154,12 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertLogs(self.probe.__name__, level="DEBUG") as captured:
             result = await self.probe.async_probe_gatt(self.hass)
 
+        self.bluetooth.async_discovered_service_info.assert_called_once_with(
+            self.hass, connectable=False
+        )
         wait_args = self.bluetooth.async_process_advertisements.call_args.args
         self.assertEqual(wait_args[0], self.hass)
-        self.assertEqual(wait_args[2], {"address": self.address, "connectable": True})
+        self.assertEqual(wait_args[2], {"address": self.address, "connectable": False})
         self.assertEqual(wait_args[3], "active")
         self.assertEqual(wait_args[4], 20)
         self.assertFalse(wait_args[1](self.info))
@@ -186,6 +193,8 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertNotIn(self.address, json.dumps(result))
         self.assertNotIn(self.address, "\n".join(captured.output))
+        self.assertIn("general discoveries=1", "\n".join(captured.output))
+        self.assertIn("FORA name matches=1", "\n".join(captured.output))
         self.assertIn("targeted active advertisement wait started", "\n".join(captured.output))
         self.assertIn("GATT enumeration reached", "\n".join(captured.output))
         self.assertIn("disconnect completed", "\n".join(captured.output))
@@ -195,6 +204,22 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.client.write_gatt_descriptor.assert_not_awaited()
         self.client.start_notify.assert_not_awaited()
         self.client.pair.assert_not_awaited()
+
+    async def test_general_candidate_absent_from_connectable_cache_still_connects(self) -> None:
+        self.assertEqual(
+            self.bluetooth.async_discovered_service_info(self.hass, connectable=True),
+            [],
+        )
+        self.assertEqual(
+            self.bluetooth.async_discovered_service_info(self.hass, connectable=False),
+            [self.info],
+        )
+
+        result = await self.probe.async_probe_gatt(self.hass)
+
+        self.assertTrue(result["connection_successful"])
+        self.assertEqual(result["gatt_service_count"], 3)
+        self.client.disconnect.assert_awaited_once()
 
     async def test_targeted_advertisement_timeout_is_sanitized(self) -> None:
         self.bluetooth.async_process_advertisements.side_effect = TimeoutError(
@@ -206,21 +231,36 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.connector.establish_connection.assert_not_awaited()
 
     async def test_no_cached_candidate_stops_before_targeted_wait(self) -> None:
+        self.bluetooth.async_discovered_service_info.side_effect = None
         self.bluetooth.async_discovered_service_info.return_value = []
-        with self.assertRaisesRegex(self.probe.ProbeError, "No known FORA"):
+        with self.assertRaisesRegex(self.probe.ProbeError, "No known FORA") as caught:
             await self.probe.async_probe_gatt(self.hass)
+        self.assertIn("general discoveries: 0", str(caught.exception))
+        self.assertNotIn(self.address, str(caught.exception))
         self.bluetooth.async_process_advertisements.assert_not_awaited()
         self.connector.establish_connection.assert_not_awaited()
 
     async def test_wrong_fresh_name_is_rejected(self) -> None:
         wrong = types.SimpleNamespace(
-            name="OTHER", device=types.SimpleNamespace(name="OTHER"),
+            name="FORA 6 CONNECT",
+            device=types.SimpleNamespace(name="FORA 6 CONNECT"),
+            advertisement=types.SimpleNamespace(local_name="OTHER"),
             address=self.address, time=2.0,
         )
         self.bluetooth.async_process_advertisements.return_value = wrong
         with self.assertRaisesRegex(self.probe.ProbeError, "no fresh"):
             await self.probe.async_probe_gatt(self.hass)
         self.connector.establish_connection.assert_not_awaited()
+
+    async def test_advertised_name_wins_over_different_bleak_name(self) -> None:
+        self.info.name = "OTHER"
+        self.info.device.name = "OTHER"
+        self.fresh_info.name = None
+        self.fresh_info.device.name = None
+        result = await self.probe.async_probe_gatt(self.hass)
+        self.assertTrue(result["fresh_advertisement_observed"])
+        self.assertEqual(result["gatt_service_count"], 3)
+        self.client.disconnect.assert_awaited_once()
 
     async def test_cached_replay_is_rejected(self) -> None:
         replay = types.SimpleNamespace(
@@ -256,6 +296,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
             address="private-device-2",
             time=1.0,
         )
+        self.bluetooth.async_discovered_service_info.side_effect = None
         self.bluetooth.async_discovered_service_info.return_value = [self.info, other]
         with self.assertRaisesRegex(self.probe.ProbeError, "Multiple matching"):
             await self.probe.async_probe_gatt(self.hass)

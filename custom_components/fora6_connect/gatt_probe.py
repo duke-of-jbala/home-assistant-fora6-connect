@@ -35,8 +35,9 @@ def _uuid128(value: str) -> str:
 
 
 def _local_name(info: Any) -> str | None:
-    """Read the advertised name without persisting its device address."""
-    return info.name or info.device.name
+    """Prefer the packet local name, then HA's resolved service-info name."""
+    advertised = getattr(getattr(info, "advertisement", None), "local_name", None)
+    return advertised or getattr(info, "name", None)
 
 
 def _enumerate_services(services: Any) -> list[dict[str, Any]]:
@@ -100,22 +101,34 @@ def _expected_gatt(observed: list[dict[str, Any]]) -> dict[str, Any]:
 async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
     """Find a fresh advertisement, connect through HA, and list GATT metadata."""
     scanner_count = bluetooth.async_scanner_count(hass, connectable=True)
+    discoveries = tuple(
+        bluetooth.async_discovered_service_info(hass, connectable=False)
+    )
+    candidates = {
+        info.address: info
+        for info in discoveries
+        if _local_name(info) == TARGET_LOCAL_NAME
+    }
+    _LOGGER.debug(
+        "GATT probe: general discoveries=%d; FORA name matches=%d; "
+        "connectable scanners=%d; cached candidate found=%s",
+        len(discoveries),
+        len(candidates),
+        scanner_count,
+        bool(candidates),
+    )
     if not scanner_count:
         _LOGGER.debug("GATT probe: no connectable Home Assistant scanner")
         raise ProbeError(
             "No connectable Home Assistant Bluetooth scanner is available."
         )
 
-    candidates = {
-        info.address: info
-        for info in bluetooth.async_discovered_service_info(hass, connectable=True)
-        if _local_name(info) == TARGET_LOCAL_NAME
-    }
-    _LOGGER.debug("GATT probe: cached FORA candidate found: %s", bool(candidates))
     if not candidates:
         raise ProbeError(
             "No known FORA 6 CONNECT candidate is available for targeted active "
-            "scanning; first observe it in Home Assistant Bluetooth."
+            "scanning; first observe it in Home Assistant Bluetooth "
+            f"(general discoveries: {len(discoveries)}; name matches: 0; "
+            f"connectable scanners: {scanner_count})."
         )
     if len(candidates) > 1:
         raise ProbeError("Multiple matching devices are known; probe stopped.")
@@ -140,7 +153,8 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
         fresh_info = await bluetooth.async_process_advertisements(
             hass,
             _is_fresh_fora,
-            {"address": address, "connectable": True},
+            # HA's callback matcher defaults to connectable-only when omitted.
+            {"address": address, "connectable": False},
             bluetooth.BluetoothScanningMode.ACTIVE,
             ADVERTISEMENT_TIMEOUT,
         )
