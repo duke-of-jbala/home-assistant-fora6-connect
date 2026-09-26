@@ -1,6 +1,6 @@
 # Protocol evidence register
 
-This page records evidence before any FORA application protocol implementation. Documentary claims come from the FORA 6 Connect GD82 documentation described in the Stage 0 project brief; the underlying document has not been independently inspected in this repository. The iPhone findings below are a sanitized user-supplied summary of screenshots reviewed externally. The later Home Assistant/ESPHome observations are user-supplied and were not independently reproduced by this repository task. No private identifiers, health data, or raw captures are stored here.
+This page records evidence before any FORA application protocol implementation. The [ForaCare FAQ Rev 5.5](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) and [GD82 manual](https://switzerland.foracare.ch/wp-content/uploads/2021/10/FORA-6-Connect-GD82-4183D_meter-manual_311-4183400-070.pdf) were independently reviewed for Stage 2A; the [source register](STAGE2_PROTOCOL_ACQUISITION.md) separates their claims from the user-supplied real-device observations below. No private identifiers, health data, or raw captures are stored here.
 
 ## Confirmed for this project brief
 
@@ -9,7 +9,7 @@ This page records evidence before any FORA application protocol implementation. 
 - Documented BLE characteristic UUID: `00001524-1212-efde-1523-785feabcd123`.
 - The documentation describes the characteristic as supporting write and notify.
 
-The UUID pair alone cannot establish that an observed BLE device is a FORA 6 Connect.
+The manufacturer FAQ Q36 independently documents this UUID pair and Write/Notify metadata for ForaCare Bluetooth V4; Q37 identifies GD82 with iFORA HM. The UUID pair alone cannot establish that an observed BLE device is a FORA 6 Connect. Nordic demonstration apps reuse this UUID namespace with unrelated meanings, which are **not** FORA protocol evidence.
 
 ## Observed on the real meter — user-supplied, screenshots reviewed externally
 
@@ -100,7 +100,7 @@ The probe returned these **actual service and characteristic UUIDs/properties**.
 
 The development-only `fora6_connect.observe_notifications` action is limited to the three **observed Notify characteristics**: Glucose Measurement `00002a18-0000-1000-8000-00805f9b34fb`, Glucose Measurement Context `00002a34-0000-1000-8000-00805f9b34fb`, and FORA custom `00001524-1212-efde-1523-785feabcd123`. It resolves a privately supplied known device through Home Assistant, connects without pairing, confirms the characteristics, attempts each subscription independently, observes for 30 seconds if any succeed, stops only successful subscriptions, and disconnects. It does **not** subscribe to RACP `0x2A52` or read/write an application characteristic. Notification subscription can cause Bleak/Home Assistant to configure CCCDs; only those stack-managed descriptor operations needed by `start_notify`/`stop_notify` are authorized for Stage 1C. They do not authorize a FORA application command.
 
-The action returns only per-characteristic notification counts, observed payload lengths/length counts, and a distinct-payload count calculated from in-memory SHA-256 digests. It returns no digest or payload bytes, and neither bytes nor digests are persisted. A zero-notification result is valid. No raw notification has yet been observed on the real meter through this action; do not infer that any notification requires an application request merely from zero traffic. No packet layout, measurement, or proprietary meaning is decoded. Stage 2 is not authorized. [Home Assistant's Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/) supports retry-safe fresh clients; [Bleak's client API](https://bleak.readthedocs.io/en/latest/api/client.html) documents notification callback and stop-notify behavior.
+The action returns only per-characteristic notification counts, observed payload lengths/length counts, and a distinct-payload count calculated from in-memory SHA-256 digests. It returns no digest or payload bytes, and neither bytes nor digests are persisted. A zero-notification result is valid. No raw notification has yet been observed on the real meter through this action; do not infer that any notification requires an application request merely from zero traffic. No packet layout, measurement, or proprietary meaning is decoded. Stage 2A authorizes documentary research only; it does not authorize new live BLE operations. [Home Assistant's Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/) supports retry-safe fresh clients; [Bleak's client API](https://bleak.readthedocs.io/en/latest/api/client.html) documents notification callback and stop-notify behavior.
 
 ### First real Stage 1C subscription result (user-supplied)
 
@@ -129,7 +129,7 @@ No notification payload was received or decoded.
 
 The meter was new and had only one real measurement so far, for **uric acid**. Its memory appeared to contain only that result. While the custom subscription was already active, the user pressed the meter's arrow/navigation keys. The display remained on the existing uric-acid result, and no new measurement was performed. **Observed conclusion:** passive custom `1524` subscription plus navigation/display of that existing record produced no custom notification during this window. This does not establish that an application command is required, that other analytes behave alike, or that bonding caused the standard Glucose subscription failures. Glucose, ketone, cholesterol, haemoglobin, and haematocrit have not been tested on this physical meter. An explicit application-level request before `1524` emits stored data is only a hypothesis for future, separately authorized Stage 2 acquisition.
 
-**Stage 1C passive observation and the full Stage 1 evidence review are complete.** The remaining discovery questions have explicit Stage 6/9 deferrals below; pairing and Stage 2 are not yet authorized. No private address, raw payload, measurement value, or personal timestamp is recorded here.
+**Stage 1C passive observation and the full Stage 1 evidence review are complete.** The remaining discovery questions have explicit Stage 6/9 deferrals below. Stage 2A public research is authorized; pairing and live protocol operations are not. No private address, raw payload, measurement value, or personal timestamp is recorded here.
 
 ## Working hypotheses
 
@@ -153,4 +153,26 @@ The meter was new and had only one real measurement so far, for **uric acid**. I
 - Units, scaling, and error responses.
 - Which expected analytes are supported by the exact GD82 variant.
 
-Stage 0 and Stage 1 (1A, 1B, 1C) are **complete**. The Stage 1 review explicitly deferred the named discovery questions; no claim that they are resolved is made. **Exact next gate: explicit authorization of Stage 2 — protocol acquisition / reverse engineering.** Do not add protocol behavior until that authorization and evidence, provenance, sanitized frames, and regression tests are available. See `CAPTURE_GUIDE.md`.
+## Stage 2A evidence classes — reviewed 2026-09-26
+
+### OBSERVED
+
+The Stage 1 real-meter results above remain the only physical GD82 evidence: custom `1524` is Write/Notify and accepted subscription, but passive navigation of the only stored **uric-acid** result yielded zero notifications over 30 seconds; unpaired `2A18`/`2A34` subscriptions failed. No FORA application command has been transmitted. No other analyte has been measured on this physical meter.
+
+### DOCUMENTED
+
+The [ForaCare FAQ Rev 5.5, Q36–Q37](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) documents the BLE UUID base `1212-efde-1523-785feabcd123`, service `1523`, characteristic `1524` with Write/Notify, and identifies FORA 6 Connect GD82 with iFORA HM. The [GD82 manual](https://switzerland.foracare.ch/wp-content/uploads/2021/10/FORA-6-Connect-GD82-4183D_meter-manual_311-4183400-070.pdf) describes Bluetooth data transmission after meter shutoff and iFORA HM data download. These sources do not publish a request or frame format in the sections reviewed. The [Bluetooth SIG Glucose Profile](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) specifies bonding/security for its standard Glucose path; that does not establish the GD82 custom `1524` protocol.
+
+### INFERRED
+
+The official iFORA HM client is the strongest identified target for a later, separately authorized static analysis because the manufacturer associates it with GD82 data transfer. This is a source-selection inference, **not** an inferred command. The public Nordic Blinky examples reuse the UUID base with unrelated application semantics; their bytes and operations cannot be imported into FORA.
+
+### HYPOTHESES
+
+An explicit request may precede stored-data notifications on `1524`; the zero-notification Stage 1C observation does not prove this. Missing bonding/encryption may explain standard Glucose subscription failures, with proxy/descriptor failure still possible. Neither hypothesis authorizes a write or pairing.
+
+### UNKNOWN
+
+The first GD82 application request bytes, opcode, framing, checksum, response, record layout, and analyte mapping remain unknown. The FAQ-linked Box share was inaccessible in the Stage 2A environment, so its contents are unknown. See [the source register](STAGE2_PROTOCOL_ACQUISITION.md) for access outcome and Stage 2B plan.
+
+Stage 0 and Stage 1 (1A, 1B, 1C) are **complete**. Stage 2 is **in progress — evidence acquisition**. The Stage 1 review explicitly deferred the named discovery questions; none is silently resolved. **Exact next gate: explicit authorization of Stage 2B static acquisition and inspection of a provenance-verified iFORA HM package.** Do not add protocol behavior or send an application command until exact evidence, provenance, and a separate scoped authorization exist. See `CAPTURE_GUIDE.md`.

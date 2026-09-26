@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Stage 2A public source register and proposed iFORA HM static-analysis plan. Manufacturer FAQ and GD82 manual confirm GATT metadata and official app association; no application command bytes were verified or transmitted.
 - Initial Home Assistant FORA 6 Connect integration project structure.
 - Initial architecture and development documentation.
 - Initial BLE protocol discovery framework and roadmap.

@@ -1,6 +1,6 @@
 # Home Assistant — FORA 6 Connect: master roadmap
 
-This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 and Stage 1 are complete; Stage 2 is not yet authorized.**
+This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 and Stage 1 are complete; Stage 2 is in progress for public protocol evidence acquisition.** Stage 2A authorizes research, not live protocol traffic.
 
 ## Project identity and goal
 
@@ -24,7 +24,7 @@ The active checkout is at the canonical local path. `CURRENT_STATUS.md` records 
 
 ### Confirmed project and documentary facts
 
-- The target product is FORA 6 Connect, model/variant GD82. The Stage 0 brief reports that FORA documentation lists service UUID `00001523-1212-efde-1523-785feabcd123` and characteristic UUID `00001524-1212-efde-1523-785feabcd123`, with write and notify properties. The underlying document has not been independently inspected in this repository.
+- The target product is FORA 6 Connect, model/variant GD82. The [ForaCare FAQ Rev 5.5, Q36–Q37](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) has now been independently reviewed: it documents service `00001523-1212-efde-1523-785feabcd123`, characteristic `00001524-1212-efde-1523-785feabcd123` with Write/Notify, and associates GD82 with iFORA HM. It does not provide command bytes. See `docs/STAGE2_PROTOCOL_ACQUISITION.md`.
 - The integration records these UUIDs and offers manually invoked Stage 1B GATT inventory and Stage 1C notification-metadata actions. It has no production Bluetooth discovery matcher, FORA packet decoder, record retrieval, or measurement entities. Earlier builds stopped at discovery, including a general-cache retest with no FORA name match and targeted-wait timeouts after both the trailing-NUL normalization and deduplication/timestamp builds. The later direct-connect Stage 1B probe succeeded on the real meter through Home Assistant; no application operation was performed.
 - The UUID pair alone is insufficient proof that an observed BLE device is a FORA 6 Connect; similar UUIDs may be reused.
 
@@ -62,7 +62,7 @@ Address stability/randomization/identity behavior (Stage 6), manufacturer-data m
 | --- | --- | --- | --- | --- |
 | 0 — Repository/bootstrap | Skeleton, tests, documentation, architecture freeze, local checkpoint. | **Complete** | Fixed project decisions supplied. | Requested files, guardrails, validation baseline, and local Stage 0 commit exist. |
 | 1 — FORA 6 Connect BLE discovery | Establish real advertisement/name, connectability, Home Assistant GATT structure, and bounded passive notification behavior; record unresolved production-discovery questions. | **Complete: Stage 1A, 1B, and 1C complete; named unknowns deferred** | Stage 1A preparation completed; Stage 1B and 1C observations explicitly authorized. | Real evidence reviewed; Stage 6/9 deferrals recorded explicitly. |
-| 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **Not yet authorized** | Stage 1 evidence reviewed and explicit Stage 2 authorization. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
+| 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **In progress — Stage 2A public evidence review** | Stage 1 evidence reviewed and explicit Stage 2 authorization; both met. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
 | 3 — Protocol parser and captured-frame fixtures | Build an HA-independent parser with sanitized, evidence-derived regression fixtures. | **Not started** | Protocol behavior supported by Stage 2 evidence. | Decoding tests cover supported frames, invalid data, and evidence-backed record semantics without HA or hardware. |
 | 4 — Home Assistant Bluetooth transport | Implement connection, notification, and retry-safe handling through supported HA Bluetooth APIs for local adapters and ESPHome proxies. | **Not started** | Validated protocol operations and explicit authorization. | Transport handles documented communication and recoverable connection failures without a hard-coded local interface. |
 | 5 — Measurement/entity model | Represent validated analytes, units, status, and one-device association in HA. | **Not started** | Validated record semantics. | Supported entities expose correct measurements; control-solution results stay distinct when the protocol supplies status. |
@@ -93,7 +93,7 @@ The Stage 1 evidence review is complete. These unresolved questions **do not blo
 | Exact Home Assistant scanner/ESPHome proxy selected for successful GATT connections | Stage 9 end-to-end ESPHome Bluetooth Proxy validation. The earlier action reported two connectable scanners but did not identify the selected path. |
 | Manufacturer-data meaning | Unknown; revisit in Stage 6 if useful for identification, or earlier only if later protocol evidence establishes relevance. No payload meaning is inferred. |
 
-**Exact next gate: explicit authorization of Stage 2 — protocol acquisition / reverse engineering.** Stage 1 completion does not authorize Stage 2, pairing, RACP, characteristic I/O, record retrieval, or FORA application commands.
+Stage 2A independently reviewed the manufacturer FAQ and GD82 manual, identified the official iFORA HM package, and recorded public code and UUID-collision limitations in `docs/STAGE2_PROTOCOL_ACQUISITION.md`. The FAQ-linked Box share was inaccessible from this environment; no exact GD82 command bytes were verified. **Exact next gate: explicit authorization of Stage 2B — acquire and statically inspect a provenance-verified iFORA HM package.** This research authorization does not permit pairing, RACP, characteristic I/O, record retrieval, or FORA application commands.
 
 ## Deferred product work
 
