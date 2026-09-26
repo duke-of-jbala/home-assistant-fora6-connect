@@ -7,6 +7,6 @@
   "codeowners": ["@duke-of-jbala"],
   "integration_type": "device",
   "iot_class": "local_polling",
-  "dependencies": ["bluetooth"],
+  "dependencies": ["bluetooth_adapters", "bluetooth"],
   "requirements": []
 }

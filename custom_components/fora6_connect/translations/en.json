@@ -1,1 +1,8 @@
-{}
+{
+  "services": {
+    "probe_gatt": {
+      "name": "Probe GATT (development only)",
+      "description": "Request a fresh Bluetooth advertisement, connect, and list GATT metadata without reading measurements or writing characteristics."
+    }
+  }
+}

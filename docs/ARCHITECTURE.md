@@ -27,7 +27,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. The
 - `config_flow.py`: future setup and discovery after device identity can be established beyond the documented UUID pair.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
-As of the current Stage 1 checkpoint, no connection, parser, config flow, or entities are active in the Home Assistant integration. The real meter has been connected and its GATT inventory viewed with an iPhone scanner; the Home Assistant connection path remains unvalidated. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
+At the current Stage 1B checkpoint, a manually invoked development-only Home Assistant GATT probe is available in `gatt_probe.py`; it is separate from the future production `bluetooth.py` transport. The real meter has been connected and its GATT inventory viewed with an iPhone scanner, but the Home Assistant connection path remains unvalidated until the probe runs on the user's system. No parser, production config flow, or entities are active. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
 
 ## Documentation and packaging
 

@@ -1,0 +1,5 @@
+probe_gatt:
+  name: Probe GATT (development only)
+  description: >-
+    Request a one-shot active scan, connect to a freshly observed FORA 6
+    CONNECT through Home Assistant Bluetooth, and list GATT metadata only.

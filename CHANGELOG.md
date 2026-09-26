@@ -14,6 +14,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Stage 1A Home Assistant Bluetooth observation guide and blank private capture template.
 - Sanitized Stage 1 real-device discovery, GATT, and Home Assistant/ESPHome proxy observations with provenance and a controlled next gate.
 - Stage 1 controlled proxy retest: Home Assistant detected FORA through Lounge in Active mode after the scan override was removed and firmware reflashed; Auto-mode freshness remains unconfirmed.
+- Development-only Stage 1B Home Assistant action for fresh on-demand discovery, read-only GATT inventory, and privacy-safe response; hardware validation pending.
 
 ### Changed
 - Standardized the project and integration name to FORA 6 Connect and the domain to `fora6_connect`.
