@@ -1,35 +1,35 @@
 # Current Status — FORA 6 Connect
 
-Stage 0 is complete. **Stage 1 remains in progress; Stage 2 and pairing are not authorized.** Stage 1B real Home Assistant transport/GATT validation succeeded: connectable resolution, connection, five services with the expected Glucose and custom GATT structure, and clean disconnect. The selected scanner/adapter is unknown; Auto-mode and production discovery remain separate work.
+Stage 0 is complete. **Stage 1 remains in progress. Stage 1B Home Assistant transport/GATT validation succeeded; Stage 1C passive notification observation is complete. Stage 2 and pairing are not authorized.** Production automatic discovery remains Stage 6 work. Fresh Auto-mode advertisement and address behavior remain unresolved; whether either blocks Stage 1 closure awaits explicit review.
 
-## Stage 1C real evidence and interpretation
+## Stage 1C real evidence (user-supplied, privacy-safe)
 
-**User-supplied real result:** the installed Stage 1C observer connected and reached notification subscription, then failed on the first target, Glucose Measurement `0x2A18`. The previous implementation aborted on that failure. It therefore collected **no subscription evidence** for Glucose Measurement Context `0x2A34` or FORA custom `0x1524`; no notification payload was observed. This was a subscription/CCCD-layer failure, not a service-discovery failure. Its cause is unknown.
+The first installed Stage 1C observer connected, failed to subscribe to Glucose Measurement `2A18`, and aborted before `2A34` or custom `1524` could be tested. The revised observer was then run on the real meter and reported `device_found`, connectable resolution, connection, and Home Assistant Bluetooth connection as true. In its 30-second window, it attempted three subscriptions: `2A18` and `2A34` each failed with sanitized `BleakError`; custom `1524` subscribed successfully. **Zero notifications** were received. The successful subscription stopped cleanly and disconnect completed cleanly.
 
-The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) requires Sensor/Collector bonding and LE Security Mode 1, Security Level 2 or 3 for supported Glucose Service characteristics. An earlier iPhone connection was observed as bonded. Missing bonding/encryption is a **strong hypothesis**, not a confirmed cause; ESPHome/proxy or descriptor-notify failure remains possible. **Pairing is not authorized.**
+During the revised run, the user pressed the meter's arrow/navigation keys while custom `1524` was already subscribed. The display remained on the existing uric-acid result. This new meter has had only one real measurement so far, uric acid; its memory appears to contain only that record. No new measurement was performed. **Observed conclusion:** passive custom subscription plus navigation/display of that existing record produced no custom notification during the 30-second window. This does not show that `1524` requires an application command or establish behavior for glucose, ketone, cholesterol, haemoglobin, or haematocrit, none of which has been tested on this physical meter.
 
-The revised development-only action attempts `start_notify` on all three characteristics independently. Each failure returns only a safe exception class and, if available, a structured D-Bus error code; unstructured upstream text is withheld to protect private data. If any subscription succeeds, the action observes for 30 seconds and stops only successful subscriptions. If none succeeds, it returns a normal privacy-safe result and disconnects without waiting. Cleanup outcomes are reported separately as `subscriptions_stopped_cleanly` and `disconnected_cleanly`. Stack-managed CCCD activity from `start_notify`/`stop_notify` remains the sole authorized subscription activity. No characteristic read/write, direct descriptor write, pairing, RACP, record retrieval, decoding, or FORA command was added. Raw payload bytes remain in memory only during the action and are not returned or persisted.
+The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) requires bonding and LE Security Mode 1, Security Level 2 or 3 for supported Glucose Service characteristics. An earlier iPhone connection was observed as bonded. Missing bonding/encryption remains a strong **hypothesis** for the standard subscription failures; proxy/descriptor failure remains possible. Neither cause is confirmed. An explicit application-level request before `1524` emits stored data is also unproven and belongs to future, separately authorized Stage 2 acquisition. No pairing, characteristic read/write, RACP, record retrieval, decoding, or FORA application command occurred in this documentation task or is authorized now. Only stack-managed CCCD activity from the prior real observer's notification subscriptions was within Stage 1C scope.
 
 ## Exact next gate
 
-Install the complete revised `custom_components/fora6_connect/` directory in Home Assistant, check configuration, and restart Core. Lounge may temporarily be Active. With the meter in its normal Bluetooth transfer state, privately obtain the known FORA address from Advertisement Monitor and run **Developer Tools → Actions → `fora6_connect.observe_notifications`**. Review only the privacy-safe result: the three subscription outcomes, safe error classes/codes, counts/lengths if any notifications arrive, and disconnect outcome. Zero successful subscriptions and zero notifications are valid findings. Do not make a health measurement solely to generate traffic or share the address, raw payloads, or unredacted logs. Review this real retest before any further Stage 1 decision. Stage 2 and pairing remain unauthorized.
+**Explicitly review the remaining Stage 1 discovery questions and decide whether unresolved fresh Auto-mode advertisement and address behavior block Stage 1 closure or can be deferred to later production discovery.** No additional passive notification run is required for Stage 1C. Keep Stage 1 in progress until that review; do not begin Stage 2 or pairing.
 
 ## Repository state at pre-commit review
 
 - **Date/branch/checkout:** 2026-09-26 (Europe/London), `main`, `<local checkout>`.
-- **Last completed checkpoint:** `368172a3e8f5e26a0dd54550d09bf0eacc4b7b16` — `feat: add Stage 1C notification observer`.
-- **Starting tree:** clean (`git status --short` was empty).
-- **Changes after checkpoint:** yes; dirty pre-commit state. Post-commit SHA and status will be verified and reported separately.
-- **Files changed:** `custom_components/fora6_connect/notification_observer.py`, `tests/test_notification_observer.py`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`.
-- **Remote/BLE actions:** no push, tag, release, or BLE operation from this repository task.
+- **Last completed checkpoint:** `bc25c44a5d3673486791ff6ad9bd972f15590eee` — `fix: continue Stage 1C after subscription failure`.
+- **Starting tree:** clean; `git status --short` was empty.
+- **Changes after checkpoint:** yes; documentation-only dirty pre-commit state. Verify and report post-commit SHA/status separately.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`.
+- **Remote/BLE actions:** none; no push, tag, release, or BLE operation from this repository task.
 
 ## Checks actually run
 
 - `python3 -m unittest discover -s tests -v` — pass, 44 tests, 0 failures.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
-- `git diff --check` — pass; final rerun follows.
+- `git diff --check` — pass after correction of one Markdown EOF blank line; final rerun follows.
 - Ruff — not installed (`command -v ruff` returned no path); not run.
-- Privacy and operation audit — synthetic test address/payloads only; no real address, scanner identifier, raw notification or advertisement, health value, serial, or secret added. Source has no characteristic read/write, direct descriptor write, pairing, or RACP operation. Tests assert response/log privacy and forbidden-operation boundaries.
+- Privacy audit — documentation diff inspected; no real Bluetooth/scanner address, raw packet/payload, measurement value, serial number, or secret added. The only long hexadecimal string added is the prior Git checkpoint SHA.
 
 Updated 2026-09-26 (Europe/London), pre-commit.

@@ -96,11 +96,40 @@ The probe returned these **actual service and characteristic UUIDs/properties**.
 
 **Comparison with prior iPhone GATT observation:** Device Information `0x180A`, Glucose `0x1808`, custom `1523`, and all expected Glucose/custom characteristic properties were present. This independently confirms the earlier inventory. The read/write/notify/indicate labels are GATT properties; they do **not** establish command formats, record semantics, or which service carries non-glucose analytes. The complete standard Bluetooth Glucose Service and the custom FORA service coexist. Future, separately authorized protocol acquisition should examine two possible paths: Bluetooth SIG Glucose Service/RACP for standard glucose functionality and 1523/1524 for FORA-specific functionality. Whether non-glucose analytes use 1523/1524 remains a hypothesis. Earlier callback timeouts were discovery-layer results and did not demonstrate a meter or GATT failure. Auto-mode discovery and raw notification behavior remain unverified.
 
-## Stage 1C notification observation gate — first subscription result
+## Stage 1C passive notification observation — complete
 
 The development-only `fora6_connect.observe_notifications` action is limited to the three **observed Notify characteristics**: Glucose Measurement `00002a18-0000-1000-8000-00805f9b34fb`, Glucose Measurement Context `00002a34-0000-1000-8000-00805f9b34fb`, and FORA custom `00001524-1212-efde-1523-785feabcd123`. It resolves a privately supplied known device through Home Assistant, connects without pairing, confirms the characteristics, attempts each subscription independently, observes for 30 seconds if any succeed, stops only successful subscriptions, and disconnects. It does **not** subscribe to RACP `0x2A52` or read/write an application characteristic. Notification subscription can cause Bleak/Home Assistant to configure CCCDs; only those stack-managed descriptor operations needed by `start_notify`/`stop_notify` are authorized for Stage 1C. They do not authorize a FORA application command.
 
 The action returns only per-characteristic notification counts, observed payload lengths/length counts, and a distinct-payload count calculated from in-memory SHA-256 digests. It returns no digest or payload bytes, and neither bytes nor digests are persisted. A zero-notification result is valid. No raw notification has yet been observed on the real meter through this action; do not infer that any notification requires an application request merely from zero traffic. No packet layout, measurement, or proprietary meaning is decoded. Stage 2 is not authorized. [Home Assistant's Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/) supports retry-safe fresh clients; [Bleak's client API](https://bleak.readthedocs.io/en/latest/api/client.html) documents notification callback and stop-notify behavior.
+
+### First real Stage 1C subscription result (user-supplied)
+
+The installed observer reached notification subscription, but `start_notify` failed for Glucose Measurement `0x2A18`. The previous implementation aborted immediately. It therefore collected **no evidence** about subscription to `0x2A34` or custom `0x1524`, and no notification payload. This is a subscription/CCCD-layer result after connection and GATT discovery; its cause is unknown. The revised development action attempts all three independently and returns sanitized error class/structured code per failed target, with no upstream exception text that could expose private data. Zero successful subscriptions is a normal observation result.
+
+The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) requires bonding between Glucose Sensor and Collector and LE Security Mode 1, Security Level 2 or 3 for supported Glucose Service characteristics. A previous iPhone connection was observed as bonded. Missing bonding/encryption is a **strong hypothesis** for this `2A18` subscription failure, not confirmed causation. A proxy or descriptor-notify failure remains an alternative. **Pairing is not authorized** for this gate; neither this result nor GATT properties establish FORA protocol behavior.
+
+### Second real Stage 1C passive observation (user-supplied privacy-safe result)
+
+The revised development observer resolved and connected to the real meter through Home Assistant. Over a 30-second observation, it attempted all three subscriptions. `0x2A18` Glucose Measurement and `0x2A34` Glucose Measurement Context each returned `subscription_successful: false` with sanitized `BleakError`. Custom `0x1524` returned `subscription_successful: true`; it delivered **zero notifications**. Overall: three subscriptions attempted, one successful, zero notifications. The successful subscription stopped cleanly and the BLE connection disconnected cleanly. The sanitized action fields were:
+
+| Field | Observed value |
+| --- | --- |
+| `device_found` | `true` |
+| `connectable_device_resolved` | `true` |
+| `connection_successful` / `connected_via_ha_bluetooth` | `true` / `true` |
+| `observation_duration_seconds` | `30` |
+| `subscriptions_attempted` / `subscriptions_successful` | `3` / `1` |
+| `notifications_observed` | `0` |
+| `2A18`: subscription / error / count | `false` / `BleakError` / `0` |
+| `2A34`: subscription / error / count | `false` / `BleakError` / `0` |
+| `1524`: subscription / error / count | `true` / `null` / `0` |
+| `subscriptions_stopped_cleanly` / `disconnected_cleanly` | `true` / `true` |
+
+No notification payload was received or decoded.
+
+The meter was new and had only one real measurement so far, for **uric acid**. Its memory appeared to contain only that result. While the custom subscription was already active, the user pressed the meter's arrow/navigation keys. The display remained on the existing uric-acid result, and no new measurement was performed. **Observed conclusion:** passive custom `1524` subscription plus navigation/display of that existing record produced no custom notification during this window. This does not establish that an application command is required, that other analytes behave alike, or that bonding caused the standard Glucose subscription failures. Glucose, ketone, cholesterol, haemoglobin, and haematocrit have not been tested on this physical meter. An explicit application-level request before `1524` emits stored data is only a hypothesis for future, separately authorized Stage 2 acquisition.
+
+**Stage 1C passive observation is complete.** Stage 1 remains in progress pending review of unresolved discovery questions, including Auto-mode and address behavior. Pairing and Stage 2 are not authorized. No private address, raw payload, measurement value, or personal timestamp is recorded here.
 
 ## Working hypotheses
 
@@ -121,9 +150,3 @@ The action returns only per-characteristic notification counts, observed payload
 - Which expected analytes are supported by the exact GD82 variant.
 
 Do not add protocol behavior until evidence, provenance, sanitized frames, and regression tests are available. See `CAPTURE_GUIDE.md`.
-
-### First real Stage 1C subscription result (user-supplied)
-
-The installed observer reached notification subscription, but `start_notify` failed for Glucose Measurement `0x2A18`. The previous implementation aborted immediately. It therefore collected **no evidence** about subscription to `0x2A34` or custom `0x1524`, and no notification payload. This is a subscription/CCCD-layer result after connection and GATT discovery; its cause is unknown. The revised development action attempts all three independently and returns sanitized error class/structured code per failed target, with no upstream exception text that could expose private data. Zero successful subscriptions is a normal observation result.
-
-The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) requires bonding between Glucose Sensor and Collector and LE Security Mode 1, Security Level 2 or 3 for supported Glucose Service characteristics. A previous iPhone connection was observed as bonded. Missing bonding/encryption is a **strong hypothesis** for this `2A18` subscription failure, not confirmed causation. A proxy or descriptor-notify failure remains an alternative. **Pairing is not authorized** for this gate; neither this result nor GATT properties establish FORA protocol behavior.
