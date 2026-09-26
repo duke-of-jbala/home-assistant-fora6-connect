@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from bleak_retry_connector import (
@@ -18,7 +19,9 @@ from .const import CHARACTERISTIC_UUID, NAME, SERVICE_UUID
 TARGET_LOCAL_NAME = "FORA 6 CONNECT"
 CONNECTION_TIMEOUT = 20.0
 DISCONNECT_TIMEOUT = 10.0
+ADVERTISEMENT_TIMEOUT = 20
 SIG_BASE = "-0000-1000-8000-00805f9b34fb"
+_LOGGER = logging.getLogger(__name__)
 
 
 class ProbeError(Exception):
@@ -98,58 +101,75 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
     """Find a fresh advertisement, connect through HA, and list GATT metadata."""
     scanner_count = bluetooth.async_scanner_count(hass, connectable=True)
     if not scanner_count:
+        _LOGGER.debug("GATT probe: no connectable Home Assistant scanner")
         raise ProbeError(
             "No connectable Home Assistant Bluetooth scanner is available."
         )
 
-    # HA may deduplicate identical advertisements. Clear only a previously
-    # cached candidate's advertisement history so a new radio packet can
-    # reach our callback; never treat that cached candidate as fresh evidence.
-    for info in bluetooth.async_discovered_service_info(hass, connectable=True):
-        if _local_name(info) == TARGET_LOCAL_NAME:
-            bluetooth.async_clear_advertisement_history(hass, info.address)
-
-    fresh_addresses: set[str] = set()
-
-    def _on_advertisement(info: Any, change: Any) -> None:
-        if _local_name(info) == TARGET_LOCAL_NAME:
-            fresh_addresses.add(info.address)
-
-    cancel = bluetooth.async_register_callback(
-        hass,
-        _on_advertisement,
-        {"local_name": TARGET_LOCAL_NAME, "connectable": True},
-        bluetooth.BluetoothScanningMode.ACTIVE,
-        replay=bluetooth.BluetoothCallbackReplay.DISABLED,
-    )
-    try:
-        await bluetooth.async_request_active_scan(hass)
-    except Exception:
-        raise ProbeError("Home Assistant could not complete the active scan.") from None
-    finally:
-        cancel()
-
     candidates = {
         info.address: info
         for info in bluetooth.async_discovered_service_info(hass, connectable=True)
-        if info.address in fresh_addresses and _local_name(info) == TARGET_LOCAL_NAME
+        if _local_name(info) == TARGET_LOCAL_NAME
     }
+    _LOGGER.debug("GATT probe: cached FORA candidate found: %s", bool(candidates))
     if not candidates:
         raise ProbeError(
-            "No fresh FORA 6 CONNECT advertisement was observed during the active scan."
+            "No known FORA 6 CONNECT candidate is available for targeted active "
+            "scanning; first observe it in Home Assistant Bluetooth."
         )
     if len(candidates) > 1:
-        raise ProbeError("Multiple matching devices were observed; probe stopped.")
+        raise ProbeError("Multiple matching devices are known; probe stopped.")
 
-    address = next(iter(candidates))  # Runtime only; never returned or logged.
+    cached_info = next(iter(candidates.values()))
+    address = cached_info.address  # Runtime only; never returned or logged.
+    cached_time = cached_info.time
+    wait_started = bluetooth.MONOTONIC_TIME()
+
+    def _is_fresh_fora(info: Any) -> bool:
+        # async_process_advertisements may replay cached history on registration.
+        # A replay can be newer than this candidate if another scanner heard
+        # the device later, so it must also postdate the start of this wait.
+        return (
+            info.address == address
+            and _local_name(info) == TARGET_LOCAL_NAME
+            and info.time > max(cached_time, wait_started)
+        )
+
+    _LOGGER.debug("GATT probe: targeted active advertisement wait started")
+    try:
+        fresh_info = await bluetooth.async_process_advertisements(
+            hass,
+            _is_fresh_fora,
+            {"address": address, "connectable": True},
+            bluetooth.BluetoothScanningMode.ACTIVE,
+            ADVERTISEMENT_TIMEOUT,
+        )
+    except TimeoutError:
+        _LOGGER.debug("GATT probe: no fresh advertisement received before timeout")
+        raise ProbeError(
+            "No fresh FORA 6 CONNECT advertisement was observed during the "
+            "targeted active wait."
+        ) from None
+    except Exception:
+        _LOGGER.debug("GATT probe: targeted active wait failed")
+        raise ProbeError(
+            "Home Assistant could not complete the targeted active wait."
+        ) from None
+    if not _is_fresh_fora(fresh_info):
+        _LOGGER.debug("GATT probe: targeted wait returned no valid fresh candidate")
+        raise ProbeError("Targeted wait returned no fresh FORA 6 CONNECT advertisement.")
+
+    _LOGGER.debug("GATT probe: fresh FORA advertisement received")
     ble_device = bluetooth.async_ble_device_from_address(
-        hass, address, connectable=True
+        hass, fresh_info.address, connectable=True
     )
+    _LOGGER.debug("GATT probe: connectable BLEDevice resolved: %s", ble_device is not None)
     if ble_device is None:
         raise ProbeError(
             "FORA 6 CONNECT was seen, but no connectable BLEDevice is available."
         )
 
+    _LOGGER.debug("GATT probe: connection attempted")
     try:
         client = await establish_connection(
             BleakClientWithServiceCache,
@@ -176,6 +196,7 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
         if not client.is_connected:
             raise ProbeError("The meter disconnected before GATT discovery.")
         services = client.services
+        _LOGGER.debug("GATT probe: GATT enumeration reached")
         if services is None:
             raise ProbeError("GATT services were unavailable after connection.")
         result = _enumerate_services(services)
@@ -188,12 +209,15 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
     except Exception:
         failure = ProbeError("GATT service discovery failed or the peer disconnected.")
     finally:
+        _LOGGER.debug("GATT probe: disconnect attempted")
         try:
             await asyncio.wait_for(client.disconnect(), timeout=DISCONNECT_TIMEOUT)
         except Exception:
+            _LOGGER.debug("GATT probe: disconnect did not complete cleanly")
             raise ProbeError(
                 "GATT probe could not confirm a clean disconnect."
             ) from None
+        _LOGGER.debug("GATT probe: disconnect completed")
 
     if failure is not None:
         raise failure

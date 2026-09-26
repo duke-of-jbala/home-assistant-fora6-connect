@@ -1,6 +1,6 @@
 # Protocol evidence register
 
-This page records evidence before any FORA application protocol implementation. Documentary claims come from the FORA 6 Connect GD82 documentation described in the Stage 0 project brief; the underlying document has not been independently inspected in this repository. The iPhone findings below are a sanitized user-supplied summary of screenshots reviewed externally. The later Home Assistant/ESPHome retest is user-supplied. Neither was independently reproduced by this repository task. No private identifiers, health data, or raw captures are stored here.
+This page records evidence before any FORA application protocol implementation. Documentary claims come from the FORA 6 Connect GD82 documentation described in the Stage 0 project brief; the underlying document has not been independently inspected in this repository. The iPhone findings below are a sanitized user-supplied summary of screenshots reviewed externally. The later Home Assistant/ESPHome observations are user-supplied and were not independently reproduced by this repository task. No private identifiers, health data, or raw captures are stored here.
 
 ## Confirmed for this project brief
 
@@ -36,7 +36,11 @@ Before the change, Lounge had an explicit `esp32_ble_tracker` scan interval of `
 
 After the change, with Lounge temporarily set to Active, Home Assistant Advertisement Monitor detected `FORA 6 CONNECT` through the Lounge ESPHome proxy. This confirms the ESPHome → Home Assistant advertisement path works in that tested state. Because the override removal and firmware reflash occurred together, the observation does not prove which change resolved the initial visibility gap.
 
-Lounge was then returned to Auto. The prior FORA row remained visible, but its Updated age did not refresh during the test. A fresh Auto-mode advertisement was **not** confirmed. This does not establish that Auto cannot support FORA. Home Assistant's [Bluetooth API documentation](https://developers.home-assistant.io/docs/core/bluetooth/api/) describes `bluetooth.async_request_active_scan(hass)` as an on-demand active sweep of Auto-mode scanners; the Stage 1B probe should use that supported API while Lounge stays in Auto.
+Lounge was then returned to Auto. The prior FORA row remained visible, but its Updated age did not refresh during the test. A fresh Auto-mode advertisement was **not** confirmed. This does not establish that Auto cannot support FORA.
+
+## Stage 1B discovery gate — user-supplied real probe observation
+
+Multiple calls to the first development Home Assistant probe failed with `No fresh FORA 6 CONNECT advertisement was observed during the active scan.` No Home Assistant GATT connection was attempted and no FORA operation was transmitted. This does not establish a meter or proxy GATT failure. EcoFlow activity and unrelated ESPHome API warnings are not FORA evidence. The revised development probe uses an address-targeted `bluetooth.async_process_advertisements` wait with `BluetoothScanningMode.ACTIVE` while Lounge remains in Auto; it has not yet been tested on the real system. Home Assistant's [Bluetooth API documentation](https://developers.home-assistant.io/docs/core/bluetooth/api/) describes the targeted active-scan scheduling. A prior cached candidate supplies only a runtime address, and an observation newer than the wait start is required before connection.
 
 ## Working hypotheses
 
