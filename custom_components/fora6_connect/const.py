@@ -1,7 +1,7 @@
 """Established integration identifiers and documented GATT UUIDs."""
 
-DOMAIN = "fora6"
-NAME = "FORA 6"
+DOMAIN = "fora6_connect"
+NAME = "FORA 6 Connect"
 
 # From FORA 6 Connect GD82 documentation. These UUIDs do not identify a
 # particular device on their own; similar UUIDs can be used by other devices.

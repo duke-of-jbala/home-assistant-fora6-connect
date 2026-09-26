@@ -1,4 +1,4 @@
-# Home Assistant — FORA 6: master roadmap
+# Home Assistant — FORA 6 Connect: master roadmap
 
 This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 is complete; Stage 1 is in progress; Stage 2 is not authorized.**
 
@@ -6,24 +6,27 @@ This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates
 
 | Item | Value |
 | --- | --- |
-| Repository | `duke-of-jbala/home-assistant-fora6` |
-| Local path | `<former local checkout>` |
-| Home Assistant integration domain | `fora6` |
-| Display name | FORA 6 |
-| Target device | FORA 6 Connect GD82 |
+| Repository | `duke-of-jbala/home-assistant-fora6-connect` |
+| Canonical local path | `<local checkout>` |
+| Home Assistant integration domain | `fora6_connect` |
+| Display name | FORA 6 Connect |
+| Target device | FORA 6 Connect |
+| Model/variant | GD82 |
 | Target distribution | HACS-compatible Home Assistant custom integration |
 | License | MIT |
 | Versioning | Semantic Versioning |
 
-Intended proxy path: **FORA 6 → BLE → ESPHome Bluetooth Proxy → Home Assistant Bluetooth → `fora6` integration**. A local Home Assistant Bluetooth adapter is also an intended transport. ESPHome remains a **generic Bluetooth proxy**: all FORA-specific communication and decoding belong to the integration. The protocol parser remains independent of Home Assistant, ESPHome, Bluetooth adapters, and physical hardware so captured raw frames can be tested directly.
+Intended proxy path: **FORA 6 Connect → BLE → ESPHome Bluetooth Proxy → Home Assistant Bluetooth → `fora6_connect` integration**. A local Home Assistant Bluetooth adapter is also an intended transport. ESPHome remains a **generic Bluetooth proxy**: all FORA-specific communication and decoding belong to the integration. The protocol parser remains independent of Home Assistant, ESPHome, Bluetooth adapters, and physical hardware so captured raw frames can be tested directly.
+
+At the naming-migration checkpoint, the active checkout still resides at the former local path pending a safe directory move. `CURRENT_STATUS.md` records the actual path and the required next step. The GitHub URL is a local remote target; no GitHub repository has been created by this project work.
 
 ## Evidence register at the Stage 0 checkpoint
 
 ### Confirmed project and documentary facts
 
-- The target is the FORA 6 Connect GD82. The Stage 0 brief reports that FORA documentation lists service UUID `00001523-1212-efde-1523-785feabcd123` and characteristic UUID `00001524-1212-efde-1523-785feabcd123`, with write and notify properties. The underlying document and the physical meter have not yet been independently checked in this repository.
+- The target product is FORA 6 Connect, model/variant GD82. The Stage 0 brief reports that FORA documentation lists service UUID `00001523-1212-efde-1523-785feabcd123` and characteristic UUID `00001524-1212-efde-1523-785feabcd123`, with write and notify properties. The underlying document and the physical meter have not yet been independently checked in this repository.
 - The integration skeleton records these UUIDs but does not register Bluetooth discovery, connect to a meter, decode packets, or expose measurements.
-- The UUID pair alone is insufficient proof that an observed BLE device is a FORA 6; similar UUIDs may be reused.
+- The UUID pair alone is insufficient proof that an observed BLE device is a FORA 6 Connect; similar UUIDs may be reused.
 
 ### Working hypotheses, not validated behavior
 
@@ -40,7 +43,7 @@ Advertisement name and fields, address behavior, manufacturer data, advertised U
 | Stage | Scope | Status | Entry criterion | Exit criterion |
 | --- | --- | --- | --- | --- |
 | 0 — Repository/bootstrap | Skeleton, tests, documentation, architecture freeze, local checkpoint. | **Complete** | Fixed project decisions supplied. | Requested files, guardrails, validation baseline, and local Stage 0 commit exist. |
-| 1 — FORA 6 BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **In progress: Stage 1A preparation complete; real advertisement observation pending** | Stage 1A explicitly authorized; controlled meter and capture path to be verified. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded; Stage 1B requires a separate candidate review. |
+| 1 — FORA 6 Connect BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **In progress: Stage 1A preparation complete; real advertisement observation pending** | Stage 1A explicitly authorized; controlled meter and capture path to be verified. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded; Stage 1B requires a separate candidate review. |
 | 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **Not authorized** | Stage 1 evidence reviewed and Stage 2 explicitly authorized. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
 | 3 — Protocol parser and captured-frame fixtures | Build an HA-independent parser with sanitized, evidence-derived regression fixtures. | **Not started** | Protocol behavior supported by Stage 2 evidence. | Decoding tests cover supported frames, invalid data, and evidence-backed record semantics without HA or hardware. |
 | 4 — Home Assistant Bluetooth transport | Implement connection, notification, and retry-safe handling through supported HA Bluetooth APIs for local adapters and ESPHome proxies. | **Not started** | Validated protocol operations and explicit authorization. | Transport handles documented communication and recoverable connection failures without a hard-coded local interface. |
@@ -87,7 +90,7 @@ Do not commit identifiable health measurements, secrets, meter identifiers, MAC 
 ## Release and HACS strategy
 
 - `0.0.0` in the custom integration manifest is a development placeholder required by Home Assistant; it is not a release. Use Semantic Versioning for actual releases, with v1.0.0 only after Stage 11 validation and explicit authorization. Keep unreleased changes in `CHANGELOG.md`; do not invent tags or releases.
-- The current repository has the single `custom_components/fora6/` integration layout, `manifest.json`, root `hacs.json`, and README. Stage 10 must recheck current HACS rules, including a public GitHub repository with description/topics/README, required manifest metadata, integration brand assets, and installation/update behavior. This Stage 0 skeleton is not yet HACS-ready.
+- The current repository has the single `custom_components/fora6_connect/` integration layout, `manifest.json`, root `hacs.json`, and README. Stage 10 must recheck current HACS rules, including a public GitHub repository with description/topics/README, required manifest metadata, integration brand assets, and installation/update behavior. This Stage 0 skeleton is not yet HACS-ready.
 - `translations/en.json` is the custom integration runtime translation source; the requested `strings.json` is an inert scaffold file. Discovery/config flow and entity setup remain disabled until their evidence gates.
 
 The last completed checkpoint, task changes, test results, and next gate are in `CURRENT_STATUS.md` and `CODEX_HANDOVER.md`. The exact SHA and working-tree state after a task's own commit belong in the post-commit report, avoiding a self-referential SHA in tracked files.

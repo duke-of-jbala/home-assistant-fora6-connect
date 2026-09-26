@@ -3,12 +3,12 @@
 ## Intended data path
 
 ```text
-FORA 6 Connect GD82 --BLE--> Home Assistant Bluetooth stack
+FORA 6 Connect (GD82) --BLE--> Home Assistant Bluetooth stack
                                  ^
                                  | optional generic transport
                          ESPHome Bluetooth Proxy
 
-Home Assistant Bluetooth stack --> custom_components/fora6
+Home Assistant Bluetooth stack --> custom_components/fora6_connect
                                    |-- Bluetooth transport
                                    |-- HA-independent FORA protocol parser
                                    |-- measurement synchronization

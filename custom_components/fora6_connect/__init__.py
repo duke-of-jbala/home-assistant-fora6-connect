@@ -1,4 +1,4 @@
-"""FORA 6 integration bootstrap.
+"""FORA 6 Connect integration bootstrap.
 
 No meter setup is available until discovery and the protocol are validated.
 """

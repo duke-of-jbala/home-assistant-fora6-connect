@@ -1,62 +1,75 @@
-# FORA 6 Codex Handover
+# FORA 6 Connect Codex Handover
 
 ## Task
 
-Stage 1A — prepare passive FORA 6 Bluetooth discovery through Home Assistant and the existing M5Stack Atom Lite ESPHome proxy. Stage 1 is in progress; this task prepares capture and records platform guidance without observing the user's meter.
+Canonical naming migration from FORA 6 / `fora6` to **FORA 6 Connect** / `fora6_connect`, model **GD82**, without new BLE or protocol work.
 
 ## Starting State
 
 - **Branch:** `main`.
-- **Starting checkpoint:** `cfd3704c3e82c1ff091b0388780614b4fb8571ef` — `docs: add durable Codex handover workflow`.
+- **Starting checkpoint:** `f3a47969f793b39ac04625054a4719e0481c55e6` — `docs: begin FORA 6 BLE discovery stage` (historical Git message, quoted verbatim).
 - **Working tree:** clean at task start (`git status --short --branch --untracked-files=all` showed `## main` only).
+- **Starting checkout path:** `<former local checkout>`.
 
 ## Work Performed
 
-- Reviewed the existing capture guide and current official Home Assistant and ESPHome documentation.
-- Prepared Home Assistant Adapters, Advertisement Monitor, and Connection Monitor observation instructions with fields for the Atom Lite proxy and two candidate advertisements.
-- Added a blank template for private use; completed copies and raw logs must stay outside Git.
-- Documented the gated Stage 1B method using Home Assistant Bluetooth APIs for observational GATT inspection; no probe was implemented.
-- Set Stage 1 to in progress and Stage 1A preparation to complete in the master roadmap and current status; aligned the README, architecture, and development wording. Stage 2 remains unauthorized.
+- Renamed the component directory and changed the manifest, constants, HACS name, and tests to `fora6_connect` / FORA 6 Connect.
+- Standardized project identity and repository links throughout tracked documentation while preserving GD82 as the model/variant. Preserved the `FORA6_MASTER_ROADMAP.md` filename to avoid unnecessary churn.
+- Changed the local `origin` URL to `https://github.com/duke-of-jbala/home-assistant-fora6-connect` without contacting or creating a remote repository.
+- Deferred the parent-directory move because this active workspace is rooted in the old path. The canonical target is `<local checkout>`; the actual checkout remains at the old path until the user runs the move command after this session.
 
 ## Files Added
 
-- `docs/STAGE1_OBSERVATION_TEMPLATE.md`
+None apart from the renamed component paths below.
 
 ## Files Modified
 
-- `docs/CAPTURE_GUIDE.md`
-- `FORA6_MASTER_ROADMAP.md`
-- `ROADMAP.md`
-- `CURRENT_STATUS.md`
-- `CODEX_HANDOVER.md`
+- `AGENTS.md`
 - `CHANGELOG.md`
+- `CODEX_HANDOVER.md`
+- `CURRENT_STATUS.md`
+- `FORA6_MASTER_ROADMAP.md`
 - `README.md`
+- `ROADMAP.md`
 - `docs/ARCHITECTURE.md`
-- `docs/DEVELOPMENT.md`
+- `docs/DECISIONS.md`
+- `docs/PROTOCOL.md`
+- `hacs.json`
+- `tests/test_bluetooth.py`
+- `tests/test_protocol.py`
+- `tests/test_sensor.py`
+- `custom_components/fora6_connect/__init__.py`
+- `custom_components/fora6_connect/const.py`
+- `custom_components/fora6_connect/manifest.json`
+
+## Files Renamed
+
+All 12 tracked files under `custom_components/fora6/` moved to `custom_components/fora6_connect/`: `__init__.py`, `bluetooth.py`, `config_flow.py`, `const.py`, `coordinator.py`, `diagnostics.py`, `manifest.json`, `models.py`, `protocol.py`, `sensor.py`, `strings.json`, and `translations/en.json`.
 
 ## Files Deleted
 
-None.
+None; the former component path was replaced by the renamed directory.
 
 ## Technical Decisions
 
-- Stage 1A starts with Home Assistant's built-in Bluetooth views; a field not displayed by the UI is recorded as “not shown”, not assumed absent from the advertisement.
-- The Atom Lite's advertisement and active/GATT capabilities must be observed in the user's installation, not inferred from the hardware model or ESPHome defaults. Actual scanning mode is recorded separately from active GATT capability.
-- Stage 1B remains a documented, separately authorized method. No direct local BlueZ interface, hard-coded proxy, discovery matcher, sensor, or application-protocol code was added.
+- `FORA6_MASTER_ROADMAP.md` retains its established filename; its title and contents now use the canonical product name.
+- The current checkout path and canonical target path are recorded separately. The parent-directory move is left for a safe manual action after Codex stops; the active session is not moved out from under itself.
+- Historical Git commit messages remain verbatim even where they contain the old product wording. They are labeled as historical checkpoint evidence, not current naming.
 
 ## Evidence / Findings
 
-- **Official platform documentation checked 2026-09-26:** Home Assistant describes Settings → Connectivity → Bluetooth with Adapters, Advertisement Monitor, and Connection Monitor; its Bluetooth APIs support discovered/last service information, connectable device resolution, and reachability diagnostics. ESPHome describes Bluetooth proxy advertisement forwarding, active GATT connections, and connection slots. Exact source URLs are in `docs/CAPTURE_GUIDE.md`.
-- **Documentary FORA facts from the Stage 0 brief:** service UUID `00001523-1212-efde-1523-785feabcd123`, characteristic UUID `00001524-1212-efde-1523-785feabcd123`, documented write/notify properties. These have not been verified on the real meter.
-- **Real-device observation:** none supplied or performed. The actual proxy configuration, advertisement, address behavior, GATT inventory, and notifications remain unknown. No application command was transmitted and no protocol behavior was inferred.
+- **Observed locally:** the starting checkpoint was clean on `main`; the integration directory, manifest domain/name, constants, and local origin URL have been changed as described. The GitHub repository at the new URL has not been created or contacted.
+- **Documentary FORA facts unchanged:** the 1523 service UUID, 1524 characteristic UUID, and documented write/notify claim. These do not prove identity and have not been checked on the physical GD82.
+- **Real-device observation:** none supplied or performed. No BLE connection, application command, protocol decoding, or Stage 1B work occurred.
 
 ## Commands / Checks Run
 
-- `git status --short --branch --untracked-files=all`, `git rev-parse HEAD`, `git log -1 --format='%s'`, `git remote -v` — confirmed the clean starting checkpoint.
-- `python3 -m unittest discover -s tests -v` — pass, five tests.
+- `git status --short --branch --untracked-files=all`, `git rev-parse HEAD`, `git ls-files`, `git remote -v` — inspected the clean 33-file starting checkpoint.
+- `rg -n --hidden -g '!.git/**' 'fora6|FORA 6|home-assistant-fora6|duke-of-jbala/home-assistant-fora6' .` — inventoried old naming references before changes.
+- `python3 -m unittest discover -s tests -v` — pass, 5 tests.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
-- File/privacy and staged-diff review — only the ten intended documentation files are included; no generated cache or private capture is committed.
+- JSON, naming, tracked-file, and privacy audits — pass. No old live domain or repository identity remains outside labeled migration/historical references.
 
 ## Tests
 
@@ -64,30 +77,32 @@ None.
 - **Passed:** 5
 - **Failed:** 0
 - **Skipped:** 0
-- **Unavailable tooling:** Ruff is not installed; not run.
+- **Unavailable tooling:** Ruff is not installed; no Ruff result claimed.
 
 ## Git State
 
 - **Branch:** `main`
-- **Last completed checkpoint SHA:** `cfd3704c3e82c1ff091b0388780614b4fb8571ef`
-- **Checkpoint message:** `docs: add durable Codex handover workflow`
-- **Changes after checkpoint:** yes — the ten documentation files listed above. At pre-commit review, those were the only task changes. This task's exact commit SHA and final `git status --short` are reported after commit, outside tracked Markdown.
+- **Last completed checkpoint SHA:** `f3a47969f793b39ac04625054a4719e0481c55e6`
+- **Checkpoint message (historical):** `docs: begin FORA 6 BLE discovery stage`
+- **Changes after checkpoint:** yes — the naming migration listed above. The migration commit's full SHA and final `git status --short` are reported after commit, outside tracked Markdown.
+- **Current checkout path at pre-commit review:** `<former local checkout>`; canonical target path pending manual move.
+- **Local origin URL:** `https://github.com/duke-of-jbala/home-assistant-fora6-connect`.
 - **Pushed:** no.
 - **Tagged:** no.
 - **Released:** no.
 
 ## Blockers / Unknowns
 
-No real-device advertisement has been supplied. The Atom Lite scanner state/capabilities and the FORA candidate identity cannot yet be evaluated. Stage 1B entry criteria are unmet; Stage 2 is not authorized.
+The active session remains rooted in the old local directory, so the parent-directory move is pending. The remote GitHub repository has not been created. The candidate advertisement and actual Atom Lite scanner capabilities remain unknown.
 
 ## Privacy Check
 
-No actual MAC address, private measurement, Home Assistant credential, secret/token, or raw BLE capture was added or committed. The observation template contains placeholders only; completed copies must remain private and outside Git.
+No private measurements, actual MAC addresses, Home Assistant credentials, secrets/tokens, or raw BLE captures were added or committed. The migration contains identifiers for the project and documentary UUIDs only.
 
 ## Exact Next Gate
 
-Obtain the user's **Home Assistant Advertisement Monitor observation** and Atom Lite proxy/environment fields described in `docs/CAPTURE_GUIDE.md`; compare at least two observations and review a sanitized summary. Do not start Stage 1B before candidate review and explicit authorization.
+After the user safely moves the checkout directory, obtain the user's **Home Assistant Advertisement Monitor observation** and Atom Lite proxy details described in `docs/CAPTURE_GUIDE.md`. Review a sanitized summary before any Stage 1B work.
 
 ## Authorization Boundary
 
-No FORA application writes or protocol inference during Stage 1. Do not implement/run a Stage 1B probe, subscribe to notifications, add a discovery matcher or sensors, begin Stage 2, push, tag, or release without the relevant explicit authorization.
+Do not create the remote GitHub repository, push, merge, tag, or release. Do not begin Stage 1B or Stage 2, add a Bluetooth matcher or sensors, or invent/transmit FORA application commands during this naming task.

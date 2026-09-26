@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL = ROOT / "custom_components" / "fora6" / "protocol.py"
+PROTOCOL = ROOT / "custom_components" / "fora6_connect" / "protocol.py"
 
 
 class ProtocolBoundaryTests(unittest.TestCase):

@@ -1,10 +1,10 @@
-# FORA 6 for Home Assistant
+# FORA 6 Connect for Home Assistant
 
-An early-stage custom integration project for the **FORA 6 Connect GD82** blood-testing meter. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
+An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
 **Status:** Stage 0 is complete and Stage 1 BLE discovery is in progress. Stage 1A capture preparation is complete; no real meter advertisement has been reviewed yet. The FORA application protocol has not been established or implemented. There is no working meter setup, synchronization, or measurement entity. This project is under active development and is not ready for production health monitoring.
 
-The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6.
+The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect.
 
 ## Project plan
 

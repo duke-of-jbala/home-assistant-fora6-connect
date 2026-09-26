@@ -4,12 +4,12 @@ This page records what is established before any FORA application protocol imple
 
 ## Confirmed for this project brief
 
-- Device family: FORA 6 Connect GD82.
+- Product: FORA 6 Connect; model/variant: GD82.
 - Documented BLE service UUID: `00001523-1212-efde-1523-785feabcd123`.
 - Documented BLE characteristic UUID: `00001524-1212-efde-1523-785feabcd123`.
 - The documentation describes the characteristic as supporting write and notify.
 
-The UUID pair alone cannot establish that an observed BLE device is a FORA 6. Stage 1 must verify the actual device's advertisement and GATT behavior.
+The UUID pair alone cannot establish that an observed BLE device is a FORA 6 Connect. Stage 1 must verify the actual device's advertisement and GATT behavior.
 
 ## Working hypotheses
 

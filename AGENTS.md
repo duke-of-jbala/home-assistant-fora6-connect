@@ -1,9 +1,9 @@
-# FORA 6 repository instructions
+# FORA 6 Connect repository instructions
 
-- Work only in `<former local checkout>`. Do not access, inspect, modify, or depend on unrelated repositories, including `<unrelated local checkout>`.
+- Work only in this repository's active checkout. Its canonical local path is `<local checkout>`; at the naming-migration commit the checkout still resides at `<former local checkout>` pending a safe manual directory move. Do not access, inspect, modify, or depend on unrelated repositories, including `<unrelated local checkout>`.
 - Develop in the stages in `FORA6_MASTER_ROADMAP.md`; `ROADMAP.md` is only a pointer. Stop at each stage gate until the user authorizes the next stage.
 - Never invent FORA BLE commands, packet formats, checksums, record layouts, analyte codes, timestamps, flags, or responses. Record the documentary or captured evidence and its provenance before implementing protocol behavior.
-- Keep `custom_components/fora6/protocol.py` independent of Home Assistant, ESPHome, and Bluetooth hardware. Require sanitized, evidence-derived regression fixtures and decoding tests for protocol changes.
+- Keep `custom_components/fora6_connect/protocol.py` independent of Home Assistant, ESPHome, and Bluetooth hardware. Require sanitized, evidence-derived regression fixtures and decoding tests for protocol changes.
 - Keep ESPHome as a generic Bluetooth proxy. FORA-specific communication and decoding belong in the Home Assistant integration and its protocol layer.
 - Treat service/characteristic UUIDs alone as insufficient device identification. Use supported Home Assistant Bluetooth APIs for future local and proxy transport.
 - Preserve original meter measurement time separately from sync/ingestion time. Keep control-solution results distinct where the device provides that status.

@@ -20,7 +20,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 
 ## ADR-005 — One meter, one HA device
 
-**Status:** Accepted. One Home Assistant device represents each physical FORA 6 meter; later entities belong to it.
+**Status:** Accepted. One Home Assistant device represents each physical FORA 6 Connect meter; later entities belong to it.
 
 ## ADR-006 — Preserve meter time
 

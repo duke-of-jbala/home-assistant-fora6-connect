@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INTEGRATION = ROOT / "custom_components" / "fora6"
+INTEGRATION = ROOT / "custom_components" / "fora6_connect"
 
 
 class SensorBootstrapTests(unittest.TestCase):
