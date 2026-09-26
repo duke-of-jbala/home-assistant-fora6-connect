@@ -80,6 +80,11 @@ def _load_setup(probe_module):
     gatt = types.ModuleType("_fora6_setup_test.gatt_probe")
     gatt.ProbeError = probe_module.ProbeError
     gatt.async_probe_gatt = AsyncMock(return_value={"device_found": True})
+    observer = types.ModuleType("_fora6_setup_test.notification_observer")
+    observer.ObservationError = type("ObservationError", (Exception,), {})
+    observer.async_observe_notifications = AsyncMock(
+        return_value={"notifications_observed": 0}
+    )
     spec = importlib.util.spec_from_file_location(
         "_fora6_setup_test",
         INTEGRATION / "__init__.py",
@@ -95,10 +100,18 @@ def _load_setup(probe_module):
             "_fora6_setup_test": module,
             "_fora6_setup_test.const": const,
             "_fora6_setup_test.gatt_probe": gatt,
+            "_fora6_setup_test.notification_observer": observer,
         },
     ):
         spec.loader.exec_module(module)
-    return module, gatt, exceptions
+    return module, gatt, observer, exceptions
+
+
+def _registered_action(services, name):
+    return next(
+        call for call in services.async_register.call_args_list
+        if call.args[1] == name
+    )
 
 
 class LocalNameNormalizationTests(unittest.TestCase):
@@ -376,7 +389,7 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
 class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_manual_action_registers_and_returns_probe_data(self) -> None:
         probe, _, _ = _load_probe()
-        integration, gatt, _ = _load_setup(probe)
+        integration, gatt, observer, _ = _load_setup(probe)
         services = types.SimpleNamespace(async_register=Mock())
         hass = types.SimpleNamespace(
             services=services, data={}, config_entries=Mock()
@@ -384,7 +397,7 @@ class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
         address = "synthetic-device"
 
         self.assertTrue(await integration.async_setup(hass, {}))
-        args = services.async_register.call_args
+        args = _registered_action(services, "probe_gatt")
         self.assertEqual(args.args[:2], ("fora6_connect", "probe_gatt"))
         self.assertEqual(args.kwargs["supports_response"], "response_only")
         result = await args.args[2](types.SimpleNamespace(data={"address": address}))
@@ -393,16 +406,17 @@ class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
         gatt.async_probe_gatt.assert_awaited_once_with(hass, address)
         self.assertEqual(hass.data, {})
         hass.config_entries.assert_not_called()
+        observer.async_observe_notifications.assert_not_awaited()
 
     async def test_manual_action_converts_probe_error_to_safe_service_error(
         self,
     ) -> None:
         probe, _, _ = _load_probe()
-        integration, gatt, exceptions = _load_setup(probe)
+        integration, gatt, _, exceptions = _load_setup(probe)
         services = types.SimpleNamespace(async_register=Mock())
         hass = types.SimpleNamespace(services=services)
         await integration.async_setup(hass, {})
-        handler = services.async_register.call_args.args[2]
+        handler = _registered_action(services, "probe_gatt").args[2]
         gatt.async_probe_gatt.side_effect = probe.ProbeError(
             "No connectable BLEDevice is available."
         )
@@ -414,11 +428,11 @@ class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_manual_action_requires_address_without_echoing_input(self) -> None:
         probe, _, _ = _load_probe()
-        integration, gatt, exceptions = _load_setup(probe)
+        integration, gatt, _, exceptions = _load_setup(probe)
         services = types.SimpleNamespace(async_register=Mock())
         hass = types.SimpleNamespace(services=services)
         await integration.async_setup(hass, {})
-        handler = services.async_register.call_args.args[2]
+        handler = _registered_action(services, "probe_gatt").args[2]
 
         for data in ({}, {"address": "   "}, {"address": ["synthetic-device"]}):
             with self.assertRaises(exceptions.ServiceValidationError) as caught:
@@ -428,14 +442,63 @@ class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_unexpected_service_error_does_not_echo_address(self) -> None:
         probe, _, _ = _load_probe()
-        integration, gatt, exceptions = _load_setup(probe)
+        integration, gatt, _, exceptions = _load_setup(probe)
         services = types.SimpleNamespace(async_register=Mock())
         hass = types.SimpleNamespace(services=services)
         await integration.async_setup(hass, {})
-        handler = services.async_register.call_args.args[2]
+        handler = _registered_action(services, "probe_gatt").args[2]
         address = "synthetic-device"
         gatt.async_probe_gatt.side_effect = RuntimeError(address)
 
         with self.assertRaises(exceptions.ServiceValidationError) as caught:
             await handler(types.SimpleNamespace(data={"address": address}))
         self.assertNotIn(address, str(caught.exception))
+
+    async def test_notification_action_registration_and_no_persistence(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, _, observer, _ = _load_setup(probe)
+        services = types.SimpleNamespace(async_register=Mock())
+        hass = types.SimpleNamespace(
+            services=services, data={}, config_entries=Mock()
+        )
+        address = "synthetic-private-device"
+        await integration.async_setup(hass, {})
+        action = _registered_action(services, "observe_notifications")
+        self.assertEqual(action.kwargs["supports_response"], "response_only")
+        result = await action.args[2](
+            types.SimpleNamespace(data={"address": address})
+        )
+        self.assertEqual(result, {"notifications_observed": 0})
+        self.assertNotIn(address, json.dumps(result))
+        observer.async_observe_notifications.assert_awaited_once_with(hass, address)
+        self.assertEqual(hass.data, {})
+        hass.config_entries.assert_not_called()
+
+    async def test_notification_action_errors_are_private(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, _, observer, exceptions = _load_setup(probe)
+        services = types.SimpleNamespace(async_register=Mock())
+        hass = types.SimpleNamespace(services=services)
+        await integration.async_setup(hass, {})
+        handler = _registered_action(services, "observe_notifications").args[2]
+        address = "synthetic-private-device"
+        observer.async_observe_notifications.side_effect = observer.ObservationError(
+            "Notification subscription failed."
+        )
+        with self.assertRaisesRegex(
+            exceptions.ServiceValidationError, "subscription failed"
+        ) as caught:
+            await handler(types.SimpleNamespace(data={"address": address}))
+        self.assertNotIn(address, str(caught.exception))
+
+    async def test_notification_action_requires_address(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, _, observer, exceptions = _load_setup(probe)
+        services = types.SimpleNamespace(async_register=Mock())
+        hass = types.SimpleNamespace(services=services)
+        await integration.async_setup(hass, {})
+        handler = _registered_action(services, "observe_notifications").args[2]
+        for data in ({}, {"address": " "}, {"address": ["synthetic"]}):
+            with self.assertRaises(exceptions.ServiceValidationError):
+                await handler(types.SimpleNamespace(data=data))
+        observer.async_observe_notifications.assert_not_awaited()

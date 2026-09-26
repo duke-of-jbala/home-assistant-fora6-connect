@@ -30,7 +30,7 @@ Stage 1 is in progress. **Stage 1A preparation is complete.** User-supplied iPho
 The user-supplied privacy-safe direct-connect action result reports a connectable FORA BLEDevice, successful connection, five GATT services with all expected Glucose and custom characteristic properties, and clean disconnect. It reports two connectable scanners but does not identify the selected one. The full sanitized inventory and comparison are in [the protocol evidence register](PROTOCOL.md). This result validates Home Assistant-side GATT transport; the earlier callback timeouts were discovery-layer results, not a meter/GATT failure. No characteristic was read or written and no notification was started by the probe.
 
 1. Preserve the reported result without a Bluetooth address, scanner/source identifier, raw advertisement, manufacturer payload, serial number, or health measurement.
-2. Keep Stage 1 open for review of remaining discovery questions and a separately authorized, controlled observation of raw notification behavior. A notification subscription or any further BLE operation is **not** authorized by this documentation task.
+2. Keep Stage 1 open for review of remaining discovery questions. The separately authorized Stage 1C observer below now permits bounded subscription to the three known Notify characteristics; it does not permit other BLE operations.
 3. Keep fresh Auto-mode discovery and production automatic discovery separate from the successful direct GATT result. Do not infer which adapter/proxy handled the connection unless Connection Monitor evidence is supplied.
 4. Do not begin Stage 2 or infer FORA packet semantics from GATT properties.
 
@@ -90,8 +90,19 @@ These sources describe platform capabilities, **not** this meter or the user's a
 
 Earlier Stage 1B builds stopped at discovery, including the installed deduplication/timestamp revision. The later direct-connect revision succeeded on the real meter through Home Assistant and returned five services and a clean disconnect. The exact connection path remains unknown. Production automatic discovery belongs to Stage 6. Stage 2 is not authorized. No command bytes, packet layouts, or response meanings are inferred from UUIDs or properties.
 
+## Stage 1C — controlled notification-metadata observation, real result pending
+
+Stage 1B Home Assistant connection, five-service GATT inventory, and clean disconnect are confirmed from the user-supplied real action result. The Stage 1C development observer has **not** yet run on the real meter. For its first controlled test:
+
+1. Install the complete development integration and restart Home Assistant Core as described in [DEVELOPMENT.md](DEVELOPMENT.md). Lounge may remain temporarily **Active**, the mode previously proven to expose FORA advertisements; this does not identify the adapter selected for the connection.
+2. In Advertisement Monitor, identify `FORA 6 CONNECT` and privately copy its known address. Observe the meter in its normal Bluetooth transfer state; do not make a new health measurement solely to produce traffic.
+3. Run **Developer Tools → Actions → `fora6_connect.observe_notifications`** with the private address field. The action resolves a connectable BLEDevice, confirms `2A18`, `2A34`, and custom `1524` as Notify characteristics, subscribes for 30 seconds, stops every successful subscription, and disconnects. It never targets RACP `2A52`.
+4. Share only the privacy-safe result or safe error: subscription status, per-characteristic notification count, payload lengths/length counts, distinct-payload count, overall count, and cleanup outcome. Zero notifications is a valid observation; do not send commands to make traffic appear. Keep addresses, raw bytes, manufacturer payload, serial values, measurements, and unredacted logs private.
+
+The BLE stack may configure Client Characteristic Configuration Descriptors (CCCDs) to perform `start_notify`/`stop_notify`; that narrow descriptor activity is expressly authorized for Stage 1C. No application characteristic read/write, pairing, RACP operation, record retrieval, protocol decoding, or FORA command is authorized. Stage 1 remains in progress pending the real result and review; Stage 2 remains unauthorized.
+
 ## Evidence and public reporting
 
 Keep the original private capture with its source, date/time, Home Assistant and ESPHome versions, scanner configuration, meter state, and collection method. In public project documents, report only sanitized findings and distinguish **observed facts**, **interpretations**, and **unknowns**. Before adding any future fixture, remove identifying health values and addresses, document transformations, and verify the fixture still tests the intended behavior. If useful evidence cannot be safely sanitized, keep it private and publish only a non-sensitive conclusion.
 
-The exact next gate is Stage 1 review of remaining discovery evidence and separate authorization for any raw notification observation. Stage 1B Home Assistant GATT transport is confirmed; Stage 1 overall remains in progress. Fresh Auto-mode and production discovery remain unresolved and do not invalidate the direct GATT result.
+The exact next gate is installing and running the Stage 1C notification observer above and reviewing its privacy-safe real result. Stage 1B Home Assistant GATT transport is confirmed; Stage 1 overall remains in progress. Fresh Auto-mode and production discovery remain unresolved and do not invalidate the direct GATT result.

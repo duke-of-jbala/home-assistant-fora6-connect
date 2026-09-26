@@ -9,6 +9,16 @@
           "description": "Development-only. Copy the Bluetooth address for FORA 6 CONNECT from Settings → Connectivity → Bluetooth → Advertisement Monitor. It is used only in memory for this probe and is not returned or persisted. Do not share it publicly."
         }
       }
+    },
+    "observe_notifications": {
+      "name": "Observe notifications (development only)",
+      "description": "Stage 1C only. Subscribe to three known Notify characteristics for 30 seconds and return counts and lengths without raw payloads. Bleak may configure CCCDs; no application characteristic read or write is sent.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Copy the known FORA 6 CONNECT address privately from Advertisement Monitor. Used only in memory; never returned, logged, or persisted. Do not share it publicly."
+        }
+      }
     }
   }
 }

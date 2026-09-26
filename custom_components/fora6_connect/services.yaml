@@ -14,3 +14,20 @@ probe_gatt:
       required: true
       selector:
         text: {}
+observe_notifications:
+  name: Observe notifications (development only)
+  description: >-
+    Development-only Stage 1C. Subscribe to the three known FORA 6 Connect
+    Notify characteristics for 30 seconds. Bleak may configure CCCDs for
+    subscription; no application characteristic write or read is sent.
+    Returns counts and payload lengths only, never raw notification bytes.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the known FORA 6 CONNECT address privately from Advertisement
+        Monitor. Used only in memory for this observation; not returned,
+        logged, or persisted. Do not share it publicly.
+      required: true
+      selector:
+        text: {}

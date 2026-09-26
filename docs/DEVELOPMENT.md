@@ -2,7 +2,7 @@
 
 ## Stage discipline
 
-Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. Stage 1B now has a manually invoked development-only GATT probe. Protocol decoding, production discovery/config flow, synchronization, and entities remain inactive.
+Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. Stage 1B has a development-only GATT probe, and Stage 1C has a separately invoked notification-metadata observer. Protocol decoding, production discovery/config flow, synchronization, and entities remain inactive.
 
 Document every future protocol conclusion with its source, date, capture conditions, confidence, and sanitized fixture when possible. Add parser tests before using decoded data in Home Assistant. Never substitute the time of synchronization for the original meter timestamp.
 
@@ -50,6 +50,21 @@ To install and invoke this build in the user's private Home Assistant instance:
 6. If needed, privately check **Settings → Connectivity → Bluetooth → Connection Monitor** for the actual path. Home Assistant chooses it; the response does not assert Lounge was used. Share only the sanitized action response or error. Keep raw Home Assistant logs, addresses, proxy identifiers, serial values, and health measurements private. Return Lounge to its usual mode after the controlled test.
 
 The address stays in memory and is not persisted, returned, or logged by this integration. The action registers no production discovery matcher, clears no advertisement history, starts no advertisement wait, and performs no characteristic I/O. Privacy-safe phase messages are available at DEBUG for `custom_components.fora6_connect.gatt_probe`; do not share unredacted platform logs.
+
+## Temporary Stage 1C Home Assistant notification observer
+
+The real Stage 1B direct-connect action already confirmed Home Assistant-side connection, expected GATT inventory, and clean disconnect. The new `fora6_connect.observe_notifications` action is **development-only** and has not yet been run against the real meter. It uses the privately supplied known address to resolve a connectable BLEDevice through Home Assistant, creates a fresh retry-safe client with `pair=False` and a 20-second connection timeout, and confirms the three observed Notify characteristics `2A18`, `2A34`, and custom `1524`. It starts notifications for each, observes for an initial **30 seconds**, stops every successful subscription, and disconnects in cleanup. No `2A52`/RACP subscription or command occurs.
+
+`start_notify`/`stop_notify` may cause Bleak/Home Assistant to configure the Client Characteristic Configuration Descriptor (CCCD). That stack-managed descriptor activity is explicitly authorized for this Stage 1C gate. The integration does not call `read_gatt_char`, `write_gatt_char`, `write_gatt_descriptor`, pairing, or any FORA application operation. Raw callback bytes are hashed only in memory for distinct-payload counting; the action returns no bytes or digests and persists nothing. The privacy-safe result contains `device_found`, `connectable_device_resolved`, `connection_successful`, `connected_via_ha_bluetooth`, actual `observation_duration_seconds`, `subscriptions_started`, `notifications_observed`, each characteristic's UUID/subscription status/count/observed payload lengths/length counts/distinct-payload count, and `disconnected_cleanly`. Zero notifications is a successful observation and does not justify sending a command. See [Bleak's current notification API](https://bleak.readthedocs.io/en/latest/api/client.html) and [Home Assistant Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/).
+
+To run the first controlled Stage 1C test privately:
+
+1. Replace `<Home Assistant config>/custom_components/fora6_connect/` with this checkout's **entire** `custom_components/fora6_connect/` directory, including the new `notification_observer.py`, `__init__.py`, `services.yaml`, `translations/en.json`, and all other integration files. Keep the top-level `fora6_connect:` in `configuration.yaml` (add it if absent). Check configuration and restart Home Assistant Core.
+2. Lounge may be temporarily **Active** because that mode previously exposed FORA in Advertisement Monitor. Make the meter available in its normal Bluetooth transfer state. Do not make a new health measurement solely to create notifications.
+3. In **Settings → Connectivity → Bluetooth → Advertisement Monitor**, privately identify the `FORA 6 CONNECT` row and copy the known address. In **Developer Tools → Actions**, select `fora6_connect.observe_notifications`, enter that address in **Bluetooth address (private)**, leave target empty, and perform the action. Wait for its approximately 30-second observation window plus connection/cleanup time.
+4. Share only the privacy-safe action result or safe error. Do not share the private address, raw notification bytes, screenshots/logs containing identifiers or measurements, or manufacturer payload. If no notifications arrive, report the zero counts. Return Lounge to its usual mode after the controlled test.
+
+The action does not confirm which scanner/adapter Home Assistant selected. Fresh Auto-mode and production discovery remain separate work. Stage 1 remains in progress until the real notification result is reviewed; Stage 2 is not authorized.
 
 ## Integration scaffold
 

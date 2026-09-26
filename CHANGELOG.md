@@ -16,6 +16,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Stage 1 controlled proxy retest: Home Assistant detected FORA through Lounge in Active mode after the scan override was removed and firmware reflashed; Auto-mode freshness remains unconfirmed.
 - Development-only Stage 1B Home Assistant action for read-only GATT inventory and privacy-safe response; hardware validation was pending when introduced.
 - Sanitized real Stage 1B direct-connect result: Home Assistant resolved and connected to the meter, enumerated five services including the full expected Glucose and FORA custom GATT metadata, and disconnected cleanly. The selected scanner/adapter and Auto-mode discovery remain unconfirmed; no application operation was performed.
+- Development-only Stage 1C Home Assistant notification observer for `2A18`, `2A34`, and custom `1524`, with a bounded 30-second window, in-memory payload deduplication, privacy-safe metadata, and cleanup. Real-device notification evidence is pending; stack-managed CCCD configuration is allowed only for subscription.
 
 ### Changed
 - Standardized the project and integration name to FORA 6 Connect and the domain to `fora6_connect`.

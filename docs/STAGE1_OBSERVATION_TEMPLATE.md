@@ -77,9 +77,9 @@
 
 The real Stage 1B Home Assistant inventory is recorded in [PROTOCOL.md](PROTOCOL.md). Use this blank section only for an additional, separately authorized private observation; do not fill it from documentation alone.
 
-## I. Passive notifications — not yet collected
+## I. Notification observations — not yet collected
 
-Subscription requires separate explicit authorization. No FORA application writes during Stage 1. Keep any future raw notification bytes private.
+Stage 1C authorizes subscription to three known Notify characteristics for a bounded observation. Record only privacy-safe metadata in any shareable summary; keep raw notification bytes private. Bleak/Home Assistant may configure CCCDs for subscription, but no FORA application characteristic write is authorized.
 
 ## J. Privacy/sanitization review
 
