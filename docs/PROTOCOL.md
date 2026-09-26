@@ -13,7 +13,7 @@ The UUID pair alone cannot establish that an observed BLE device is a FORA 6 Con
 
 ## Observed on the real meter — user-supplied, screenshots reviewed externally
 
-The real meter's blue Bluetooth indicator was flashing when a generic iPhone BLE scanner displayed local name `FORA 6 CONNECT`. The scanner showed it as connectable, with close-range RSSI approximately −50 dBm. The iPhone connected successfully and marked the connection `BONDED`. This shows bonding occurred in that session; it does **not** establish that the meter requires bonding. The scanner may have initiated bonding automatically. An iPhone CoreBluetooth identifier is not a physical MAC address and is not recorded here.
+The real meter's blue Bluetooth indicator was flashing when a generic iPhone BLE scanner displayed local name `FORA 6 CONNECT`. The scanner showed it as connectable, with close-range RSSI approximately −50 dBm. The iPhone connected successfully and marked the connection `BONDED`. This shows bonding occurred in that session; the scanner may have initiated it automatically. The Bluetooth SIG Glucose Profile specifies bonding/security for the standard Glucose path, but the iPhone observation does **not** show whether missing bonding/encryption caused the later Home Assistant `2A18`/`2A34` subscription failures. An iPhone CoreBluetooth identifier is not a physical MAC address and is not recorded here.
 
 The iPhone scanner showed these GATT entries:
 
@@ -129,7 +129,7 @@ No notification payload was received or decoded.
 
 The meter was new and had only one real measurement so far, for **uric acid**. Its memory appeared to contain only that result. While the custom subscription was already active, the user pressed the meter's arrow/navigation keys. The display remained on the existing uric-acid result, and no new measurement was performed. **Observed conclusion:** passive custom `1524` subscription plus navigation/display of that existing record produced no custom notification during this window. This does not establish that an application command is required, that other analytes behave alike, or that bonding caused the standard Glucose subscription failures. Glucose, ketone, cholesterol, haemoglobin, and haematocrit have not been tested on this physical meter. An explicit application-level request before `1524` emits stored data is only a hypothesis for future, separately authorized Stage 2 acquisition.
 
-**Stage 1C passive observation is complete.** Stage 1 remains in progress pending review of unresolved discovery questions, including Auto-mode and address behavior. Pairing and Stage 2 are not authorized. No private address, raw payload, measurement value, or personal timestamp is recorded here.
+**Stage 1C passive observation and the full Stage 1 evidence review are complete.** The remaining discovery questions have explicit Stage 6/9 deferrals below; pairing and Stage 2 are not yet authorized. No private address, raw payload, measurement value, or personal timestamp is recorded here.
 
 ## Working hypotheses
 
@@ -138,7 +138,11 @@ The meter was new and had only one real measurement so far, for **uric acid**. I
 
 ## Unknown
 
-- Whether bonding is required, address behavior, manufacturer payload meaning, any additional advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and the exact selected Home Assistant GATT scanner/adapter.
+- The Bluetooth SIG Glucose Profile specifies bonding and LE Security Mode 1, Security Level 2 or 3 for its standard Glucose path. What remains unknown is whether missing bonding/encryption caused the observed GD82 `2A18`/`2A34` failures, whether the GD82 enforces that security in the tested Home Assistant/ESPHome path, whether later RACP operations require pairing, and whether FORA custom `1524` application operations require pairing. The bonded iPhone observation supports investigation but does not establish causation; pairing is not authorized.
+- Fresh Auto-mode advertisement behavior and Bluetooth address stability/randomization/identity behavior: Stage 6 production discovery and duplicate-device handling.
+- Exact Home Assistant scanner/ESPHome proxy selected for the successful GATT connection: Stage 9 end-to-end proxy validation.
+- Manufacturer-data meaning: unknown; revisit in Stage 6 if useful for identification, or earlier only if later protocol evidence establishes relevance.
+- Any additional advertised UUIDs and detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source remain unknown; no unsupported identity claim is made.
 - Commands and responses.
 - Framing and checksums.
 - Device identification response.
@@ -149,4 +153,4 @@ The meter was new and had only one real measurement so far, for **uric acid**. I
 - Units, scaling, and error responses.
 - Which expected analytes are supported by the exact GD82 variant.
 
-Do not add protocol behavior until evidence, provenance, sanitized frames, and regression tests are available. See `CAPTURE_GUIDE.md`.
+Stage 0 and Stage 1 (1A, 1B, 1C) are **complete**. The Stage 1 review explicitly deferred the named discovery questions; no claim that they are resolved is made. **Exact next gate: explicit authorization of Stage 2 — protocol acquisition / reverse engineering.** Do not add protocol behavior until that authorization and evidence, provenance, sanitized frames, and regression tests are available. See `CAPTURE_GUIDE.md`.

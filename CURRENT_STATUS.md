@@ -1,26 +1,37 @@
 # Current Status — FORA 6 Connect
 
-Stage 0 is complete. **Stage 1 remains in progress. Stage 1B Home Assistant transport/GATT validation succeeded; Stage 1C passive notification observation is complete. Stage 2 and pairing are not authorized.** Production automatic discovery remains Stage 6 work. Fresh Auto-mode advertisement and address behavior remain unresolved; whether either blocks Stage 1 closure awaits explicit review.
+**Stage 0: complete. Stage 1: complete (1A, 1B, 1C). Stage 2: not yet authorized.** The Stage 1 evidence review is complete. Stage 1 closure does not authorize pairing, application characteristic operations, RACP, record retrieval, decoding, or FORA commands.
 
-## Stage 1C real evidence (user-supplied, privacy-safe)
+## Completed Stage 1 evidence
 
-The first installed Stage 1C observer connected, failed to subscribe to Glucose Measurement `2A18`, and aborted before `2A34` or custom `1524` could be tested. The revised observer was then run on the real meter and reported `device_found`, connectable resolution, connection, and Home Assistant Bluetooth connection as true. In its 30-second window, it attempted three subscriptions: `2A18` and `2A34` each failed with sanitized `BleakError`; custom `1524` subscribed successfully. **Zero notifications** were received. The successful subscription stopped cleanly and disconnect completed cleanly.
+- **Stage 1A:** the real meter's `FORA 6 CONNECT` local name and connectability were observed. Home Assistant Advertisement Monitor saw it through Lounge in a controlled Active-mode test. Sanitized advertisement details include a local name with five trailing NUL bytes, advertised Glucose `0x1808` and Device Information `0x180A`, and manufacturer-data presence. Fresh Auto-mode visibility was not established.
+- **Stage 1B:** Home Assistant resolved a connectable BLEDevice, connected through its Bluetooth abstraction, enumerated five GATT services, confirmed Device Information, the full expected standard Glucose structure, and FORA custom `1523`/`1524`, then disconnected cleanly. The selected scanner/proxy is unknown. No application operation occurred.
+- **Stage 1C:** the first real observer failed at `2A18` subscription and aborted. The revised run attempted all three: `2A18` and `2A34` failed with sanitized `BleakError`; custom `1524` subscribed successfully and delivered zero notifications in 30 seconds. The user pressed navigation keys while `1524` was subscribed, and the display remained on the only existing uric-acid result. No new measurement was taken. Subscription cleanup and disconnect were clean. Passive navigation/display of this result did not trigger a custom notification in that window. **Only uric acid has been measured on this physical meter**; no behavior is inferred for other analytes.
 
-During the revised run, the user pressed the meter's arrow/navigation keys while custom `1524` was already subscribed. The display remained on the existing uric-acid result. This new meter has had only one real measurement so far, uric acid; its memory appears to contain only that record. No new measurement was performed. **Observed conclusion:** passive custom subscription plus navigation/display of that existing record produced no custom notification during the 30-second window. This does not show that `1524` requires an application command or establish behavior for glucose, ketone, cholesterol, haemoglobin, or haematocrit, none of which has been tested on this physical meter.
+The Bluetooth SIG Glucose Profile specifies bonding/security for the standard Glucose path. The earlier iPhone connection was observed as bonded, but whether missing bonding/encryption caused the GD82's standard subscription failures is unknown; proxy/descriptor failure is also possible. It is unknown whether the GD82 enforces that security in the tested Home Assistant/ESPHome path, whether later RACP operations require pairing, or whether custom `1524` operations require pairing. An application request to emit stored data is a hypothesis, not an observed requirement. Pairing remains unauthorized.
 
-The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/GLP_v1.0.1/out/en/index-en.html) requires bonding and LE Security Mode 1, Security Level 2 or 3 for supported Glucose Service characteristics. An earlier iPhone connection was observed as bonded. Missing bonding/encryption remains a strong **hypothesis** for the standard subscription failures; proxy/descriptor failure remains possible. Neither cause is confirmed. An explicit application-level request before `1524` emits stored data is also unproven and belongs to future, separately authorized Stage 2 acquisition. No pairing, characteristic read/write, RACP, record retrieval, decoding, or FORA application command occurred in this documentation task or is authorized now. Only stack-managed CCCD activity from the prior real observer's notification subscriptions was within Stage 1C scope.
+## Explicitly deferred Stage 1 unknowns
+
+| Unresolved question | Assigned gate |
+| --- | --- |
+| Fresh Auto-mode advertisement behavior | Stage 6 production Config Flow / Bluetooth discovery validation. Auto is not known to be broken. |
+| Bluetooth address stability, randomization, and identity behavior | Stage 6 production discovery and duplicate-device handling. No stability claim is established. |
+| Exact Home Assistant scanner/ESPHome proxy selected for successful GATT connections | Stage 9 end-to-end ESPHome Bluetooth Proxy validation. |
+| Manufacturer-data meaning | Remains unknown; revisit in Stage 6 if useful for identification, or earlier only if later protocol evidence establishes relevance. |
+
+These open questions **do not block Stage 1 closure** and are not treated as resolved.
 
 ## Exact next gate
 
-**Explicitly review the remaining Stage 1 discovery questions and decide whether unresolved fresh Auto-mode advertisement and address behavior block Stage 1 closure or can be deferred to later production discovery.** No additional passive notification run is required for Stage 1C. Keep Stage 1 in progress until that review; do not begin Stage 2 or pairing.
+**Explicit authorization of Stage 2 — protocol acquisition / reverse engineering.** Stage 1 evidence has been reviewed, satisfying the first Stage 2 entry condition; explicit Stage 2 authorization has not been given. Do not begin Stage 2, pairing, or any BLE operation under this documentation task.
 
 ## Repository state at pre-commit review
 
 - **Date/branch/checkout:** 2026-09-26 (Europe/London), `main`, `<local checkout>`.
-- **Last completed checkpoint:** `bc25c44a5d3673486791ff6ad9bd972f15590eee` — `fix: continue Stage 1C after subscription failure`.
-- **Starting tree:** clean; `git status --short` was empty.
-- **Changes after checkpoint:** yes; documentation-only dirty pre-commit state. Verify and report post-commit SHA/status separately.
-- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`.
+- **Last completed checkpoint:** `592b4195a3d527cdee03730288761f483b3be78d` — `docs: record completed Stage 1C observation`.
+- **Starting tree:** clean (`git status --short` was empty).
+- **Changes after checkpoint:** yes; documentation-only dirty pre-commit state. Verify/report post-commit SHA and status separately.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `docs/STAGE1_OBSERVATION_TEMPLATE.md`.
 - **Remote/BLE actions:** none; no push, tag, release, or BLE operation from this repository task.
 
 ## Checks actually run
@@ -28,8 +39,7 @@ The [Bluetooth SIG Glucose Profile 1.0.1, sections 6.1–6.2](https://www.blueto
 - `python3 -m unittest discover -s tests -v` — pass, 44 tests, 0 failures.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
-- `git diff --check` — pass after correction of one Markdown EOF blank line; final rerun follows.
-- Ruff — not installed (`command -v ruff` returned no path); not run.
-- Privacy audit — documentation diff inspected; no real Bluetooth/scanner address, raw packet/payload, measurement value, serial number, or secret added. The only long hexadecimal string added is the prior Git checkpoint SHA.
+- `git diff --check` — pass; final rerun follows.
+- Ruff unavailable (`command -v ruff` returned no path); not run. Tracked-Markdown audit found no current Stage 1 in-progress or pending Stage 1C wording; historical failed-probe sections remain identified as earlier observations. Privacy diff audit found no private address, raw payload, serial number, health value, or secret.
 
 Updated 2026-09-26 (Europe/London), pre-commit.

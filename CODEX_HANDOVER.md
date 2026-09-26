@@ -2,29 +2,31 @@
 
 ## Task, checkpoint, and stage
 
-This documentation-only task records the user-supplied second real Stage 1C passive observation. This handover describes the dirty pre-commit repository state on 2026-09-26 (Europe/London).
+This documentation-only task records the completed Stage 1 evidence review and closes Stage 1. This handover describes the dirty pre-commit repository state on 2026-09-26 (Europe/London).
 
 - **Branch/checkout:** `main`, `<local checkout>`.
-- **Last completed checkpoint:** `bc25c44a5d3673486791ff6ad9bd972f15590eee` — `fix: continue Stage 1C after subscription failure`.
+- **Last completed checkpoint:** `592b4195a3d527cdee03730288761f483b3be78d` — `docs: record completed Stage 1C observation`.
 - **Starting tree:** clean (`git status --short` empty).
-- **Changes after checkpoint:** yes; documentation only. Files changed: `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`. Post-commit SHA/status must be checked and reported separately.
-- **Stage:** Stage 0 complete; Stage 1B Home Assistant transport/GATT validated; Stage 1C passive observation complete; Stage 1 overall in progress. Stage 2 and pairing unauthorized.
+- **Changes after checkpoint:** yes; documentation only. Files changed: `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md`, `docs/STAGE1_OBSERVATION_TEMPLATE.md`. Post-commit SHA/status must be checked and reported separately.
+- **Stage state:** Stage 0 complete; Stage 1 complete (1A, 1B, 1C); Stage 2 not yet authorized. No pairing or BLE operation is authorized by this documentation task.
 
-## Evidence and boundaries
+## Evidence and deferrals
 
-The first installed Stage 1C observer reached `2A18` subscription, failed, and aborted before testing `2A34` or custom `1524`. The revised real run connected through Home Assistant and attempted all three: `2A18` and `2A34` failed with safe `BleakError` summaries; custom `1524` subscribed successfully. It observed zero notifications over 30 seconds, then stopped the successful subscription and disconnected cleanly. The user pressed arrow/navigation keys while observation was active. The meter displayed its only existing uric-acid result throughout; no new measurement was made. This physical meter has only had a uric-acid measurement. Passive subscription plus display/navigation of that record did not produce a custom notification in this window.
+Stage 1A established real local name/connectability, controlled Home Assistant Advertisement Monitor visibility in Active mode, and sanitized advertisement fields. Stage 1B established Home Assistant connectable-device resolution, successful connection, five-service GATT inventory including Device Information, complete standard Glucose structure, custom `1523`/`1524`, and clean disconnect without application I/O. Stage 1C established that standard `2A18`/`2A34` subscriptions failed with safe `BleakError`, custom `1524` subscribed, and zero custom notifications arrived over 30 seconds while the user navigated the only existing uric-acid result. Cleanup and disconnect were clean. Only uric acid has been measured on this physical meter. Do not generalize passive notification behavior to other analytes or infer that `1524` requires a command.
 
-Do not infer that a command is required for `1524`, that other analytes behave the same, or that bonding caused the standard subscription failures. The Glucose Profile security requirement and earlier bonded iPhone observation make missing bonding/encryption a strong hypothesis; proxy or descriptor failure remains possible. An application-level request to emit stored data is only a later Stage 2 hypothesis. No private address, scanner identifier, payload, health value, or raw capture was added. No Python/Bluetooth behavior changed; no pairing, characteristic read/write, RACP, retrieval, decoding, or FORA command is authorized.
+The Stage 1 review explicitly deferred fresh Auto-mode advertisement and Bluetooth address stability/randomization/identity to **Stage 6** production discovery and duplicate-device handling. The exact scanner/ESPHome proxy selected for successful GATT connections is deferred to **Stage 9** end-to-end proxy validation. Manufacturer-data meaning remains unknown; revisit in Stage 6 if useful for identification or earlier only if later protocol evidence establishes relevance. None is silently resolved, and none blocks Stage 1 closure.
+
+The Bluetooth SIG Glucose Profile specifies bonding/security for the standard Glucose path. The earlier bonded iPhone connection does not prove why Home Assistant's standard subscriptions failed. Whether the GD82 enforces this security in the tested path, whether later RACP requires pairing, and whether custom `1524` operations require pairing all remain unknown. Proxy/descriptor failure is another possible explanation. Pairing remains unauthorized. No characteristic read/write, RACP command, record retrieval, decoding, or FORA command was implemented or performed.
 
 ## Checks actually run
 
 - `python3 -m unittest discover -s tests -v` — pass, 44 tests, 0 failures.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
-- `git diff --check` — pass after correction of one Markdown EOF blank line; final rerun follows.
-- Ruff not installed; not run. Privacy diff audit found no real Bluetooth/scanner address, raw packet/payload, measurement value, serial number, or secret. The only long hexadecimal string added is the prior Git checkpoint SHA.
+- `git diff --check` — pass; final rerun follows.
+- Ruff unavailable (`command -v ruff` returned no path); not run. Tracked-Markdown audit found no current Stage 1 in-progress or pending Stage 1C wording; historical failed-probe sections remain identified as earlier observations. Privacy diff audit found no private address, raw payload, serial number, health value, or secret.
 - No BLE operation, push, tag, or release performed in this repository task.
 
 ## Exact next gate
 
-Explicitly review unresolved fresh Auto-mode advertisement and address behavior, then decide whether they block Stage 1 closure or can be deferred to later production discovery. Stage 1C passive observation is complete and requires no additional run for this gate. Keep Stage 1 in progress until that decision; pairing and Stage 2 remain unauthorized.
+**Explicit authorization of Stage 2 — protocol acquisition / reverse engineering.** The Stage 1 evidence-review condition is met; Stage 2 authorization is not. Stop at this gate.
