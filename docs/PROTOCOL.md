@@ -28,7 +28,7 @@ The iPhone scanner showed these GATT entries:
 
 This confirms the documentary custom service/characteristic and its properties on the physical meter. It does not establish proprietary commands, frames, records, or the behavior of the standard Glucose Service.
 
-In the initial tested state, Home Assistant's Advertisement Monitor did not display FORA while the iPhone scanner saw the meter and Home Assistant displayed other BLE devices. See the controlled retest below. Home Assistant-side connection and GATT have not been validated.
+In the initial tested state, Home Assistant's Advertisement Monitor did not display FORA while the iPhone scanner saw the meter and Home Assistant displayed other BLE devices. See the controlled retest and later successful Home Assistant GATT result below.
 
 ## Home Assistant/ESPHome advertisement retest — user-supplied observation
 
@@ -65,17 +65,45 @@ The development-only probe accepts the private Bluetooth address copied from the
 
 **Latest real Stage 1B retest, user-supplied:** the installed deduplication/timestamp revision still returned `No fresh FORA 6 CONNECT advertisement was observed during the targeted active wait.` It did not resolve a FORA BLEDevice, attempt connection, enumerate GATT, or transmit a FORA operation. Home Assistant Advertisement Monitor separately showed FORA with Lounge manually Active. Callback delivery and UI visibility are distinct; the cause of the action timeout remains unknown. Duplicate suppression was a plausible hypothesis, not confirmed by this retest.
 
-The development-only Stage 1B action now bypasses the callback-freshness gate to test the **Home Assistant → eligible Bluetooth adapter/proxy → GATT** path directly. The user privately supplies the address from a positively identified, visibly current/refreshing `FORA 6 CONNECT` Advertisement Monitor row while Lounge is temporarily Active. The action first asks Home Assistant for a connectable BLEDevice at that runtime address. Optional `async_last_service_info(..., connectable=False)` supplies only a normalized local-name diagnostic and may be absent or stale; it does not establish live advertisement freshness. If no connectable device resolves, the action returns a sanitized Home Assistant outgoing-connection reachability explanation. If one resolves, it connects without pairing, inventories service/characteristic UUIDs and properties only, and disconnects. This would test GATT transport without proving Auto-mode or production discovery, which remain later work. The code does not choose or hard-code Lounge. No real direct-connect result has yet been observed.
+The development-only Stage 1B action now bypasses the callback-freshness gate to test the **Home Assistant → eligible Bluetooth adapter/proxy → GATT** path directly. Its controlled procedure asks the user to privately supply the address from a positively identified, visibly current/refreshing `FORA 6 CONNECT` Advertisement Monitor row and temporarily set Lounge to Active. The action first asks Home Assistant for a connectable BLEDevice at that runtime address. Optional `async_last_service_info(..., connectable=False)` supplies only a normalized local-name diagnostic and may be absent or stale; it does not establish live advertisement freshness. If no connectable device resolves, the action returns a sanitized Home Assistant outgoing-connection reachability explanation. If one resolves, it connects without pairing, inventories service/characteristic UUIDs and properties only, and disconnects. This tests GATT transport without proving Auto-mode or production discovery, which remain later work. The code does not choose or hard-code Lounge. The later real direct-connect result is recorded below.
+
+## Home Assistant Stage 1B direct-connect GATT inventory — user-supplied real result
+
+The development-only action ran against the real FORA 6 Connect through Home Assistant's Bluetooth stack. Its privacy-safe response reported `device_found=true`, normalized `local_name=FORA 6 CONNECT`, `advertised_name_confirmed=true`, `last_service_info_available=true`, `connectable_device_resolved=true`, `connectable_scanner_count=2`, `gatt_connection_attempted=true`, `connection_successful=true`, `connected_via_ha_bluetooth=true`, `gatt_service_count=5`, and `disconnected_cleanly=true`. The response did not identify which scanner/adapter made the connection. It confirms Home Assistant-side GATT transport and clean disconnect, without proving a particular ESPHome proxy path. No characteristic was read or written, no notification was started, and no FORA application operation was transmitted by this probe.
+
+The probe returned these **actual service and characteristic UUIDs/properties**. Standard 16-bit UUIDs below are shown in their observed full Bluetooth SIG base-UUID form; `1523`/`1524` use the FORA custom base:
+
+| Service UUID | Characteristic UUID | Properties returned |
+| --- | --- | --- |
+| `00001800-0000-1000-8000-00805f9b34fb` Generic Access | `00002a00-0000-1000-8000-00805f9b34fb` | Read |
+| `00001800-0000-1000-8000-00805f9b34fb` | `00002a01-0000-1000-8000-00805f9b34fb` | Read |
+| `00001800-0000-1000-8000-00805f9b34fb` | `00002a04-0000-1000-8000-00805f9b34fb` | Read |
+| `00001801-0000-1000-8000-00805f9b34fb` Generic Attribute | — | No characteristics returned by the probe. |
+| `0000180a-0000-1000-8000-00805f9b34fb` Device Information | `00002a23-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a24-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a25-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a26-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a27-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a28-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a29-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a2a-0000-1000-8000-00805f9b34fb` | Read |
+| `0000180a-0000-1000-8000-00805f9b34fb` | `00002a50-0000-1000-8000-00805f9b34fb` | Read |
+| `00001808-0000-1000-8000-00805f9b34fb` Glucose | `00002a18-0000-1000-8000-00805f9b34fb` | Notify |
+| `00001808-0000-1000-8000-00805f9b34fb` | `00002a34-0000-1000-8000-00805f9b34fb` | Notify |
+| `00001808-0000-1000-8000-00805f9b34fb` | `00002a51-0000-1000-8000-00805f9b34fb` | Read |
+| `00001808-0000-1000-8000-00805f9b34fb` | `00002a52-0000-1000-8000-00805f9b34fb` | Indicate, Write |
+| `00001523-1212-efde-1523-785feabcd123` FORA custom | `00001524-1212-efde-1523-785feabcd123` | Notify, Write |
+
+**Comparison with prior iPhone GATT observation:** Device Information `0x180A`, Glucose `0x1808`, custom `1523`, and all expected Glucose/custom characteristic properties were present. This independently confirms the earlier inventory. The read/write/notify/indicate labels are GATT properties; they do **not** establish command formats, record semantics, or which service carries non-glucose analytes. The complete standard Bluetooth Glucose Service and the custom FORA service coexist. Future, separately authorized protocol acquisition should examine two possible paths: Bluetooth SIG Glucose Service/RACP for standard glucose functionality and 1523/1524 for FORA-specific functionality. Whether non-glucose analytes use 1523/1524 remains a hypothesis. Earlier callback timeouts were discovery-layer results and did not demonstrate a meter or GATT failure. Auto-mode discovery and raw notification behavior remain unverified.
 
 ## Working hypotheses
 
 - The meter may expose historical measurements over the documented write/notify characteristic. This is a product goal, not a verified protocol fact.
-- The meter may be reachable for GATT through an eligible ESPHome Bluetooth proxy via Home Assistant's stack. Advertisement forwarding has been observed; GATT operation remains untested.
 - The previous Lounge scan timing may have contributed to missed advertisements, but the override removal and firmware reflash were combined, so causation remains unproven.
 
 ## Unknown
 
-- Whether bonding is required, address behavior, manufacturer payload meaning, any additional advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and Home Assistant-side GATT connectability.
+- Whether bonding is required, address behavior, manufacturer payload meaning, any additional advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and the exact selected Home Assistant GATT scanner/adapter.
 - Commands and responses.
 - Framing and checksums.
 - Device identification response.

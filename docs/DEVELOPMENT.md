@@ -23,7 +23,7 @@ ruff check .
 ruff format --check .
 ```
 
-These checks use mocks and do not prove that a real Home Assistant instance can connect to the meter. The installed deduplication/timestamp build also timed out at the targeted advertisement wait; the direct-connect revision has not yet run on the real system. HACS and production validation remain later-stage work.
+These checks use mocks; the separately reported real direct-connect action confirms Home Assistant-side GATT connection, inventory, and disconnect. It does not confirm which scanner/adapter was selected. HACS and production validation remain later-stage work.
 
 ## Temporary Stage 1B Home Assistant GATT probe
 
@@ -31,7 +31,9 @@ This **development-only** action requires a privately supplied Bluetooth address
 
 The action immediately calls Home Assistant's `bluetooth.async_ble_device_from_address(hass, address, connectable=True)`. If no connectable BLEDevice resolves, it returns Home Assistant's outgoing-connection reachability explanation after redacting private identifiers. The [official Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/) treats that explanation as human-readable and subject to change; the integration does not parse it. If resolution succeeds, optional `async_last_service_info(hass, address, connectable=False)` supplies only a normalized advertised-name diagnostic. It may be missing or stale and **does not gate GATT**. The action uses a fresh retry-safe, no-pair client with a 20-second connection timeout, enumerates GATT service and characteristic UUIDs/properties, compares them with prior iPhone evidence, and disconnects. It does not read or write characteristics, subscribe, pair, retrieve records, or parse measurements.
 
-The user independently saw a FORA packet in Advertisement Monitor with a Complete Local Name padded by five trailing NULs. The packet was **not** returned by the action. The installed name-normalization and later deduplication/timestamp builds both timed out at their targeted advertisement wait. Neither reached BLEDevice resolution or GATT connection. This does not show a meter or proxy GATT failure. Advertisement Monitor visibility and integration callback delivery are separate observations; the cause of those waits remains unknown. The direct-connect revision bypasses that gate solely to validate transport. No real direct-connect result has yet been observed. Production automatic discovery remains Stage 6 work.
+The user independently saw a FORA packet in Advertisement Monitor with a Complete Local Name padded by five trailing NULs. The packet was **not** returned by the action. The installed name-normalization and later deduplication/timestamp builds both timed out at their targeted advertisement wait. Neither reached BLEDevice resolution or GATT connection. Advertisement Monitor visibility and integration callback delivery are separate observations; the cause of those waits remains unknown. The direct-connect revision bypassed that gate solely to validate transport. Production automatic discovery remains Stage 6 work.
+
+**Real Stage 1B result, user-supplied:** the direct-connect action resolved a connectable FORA BLEDevice, connected through Home Assistant, returned five GATT services with all expected Glucose and FORA custom metadata/properties, and disconnected cleanly. Its normalized local name was `FORA 6 CONNECT`; two connectable scanners were reported, but the selected scanner/adapter was not identified. See the [sanitized inventory](PROTOCOL.md). No characteristic I/O, notification, pairing, or FORA application operation occurred. Stage 1B transport/GATT validation succeeded; Stage 1 remains in progress for remaining discovery/raw notification observations, and Stage 2 is not authorized. Auto-mode discovery remains unresolved separately.
 
 To install and invoke this build in the user's private Home Assistant instance:
 
