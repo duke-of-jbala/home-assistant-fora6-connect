@@ -2,7 +2,7 @@
 
 ## Stage discipline
 
-Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. The current files are a Stage 0 skeleton. Protocol, config flow, transport, and entities are intentionally inactive.
+Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. The integration code remains a Stage 0 skeleton during Stage 1A capture preparation. Protocol, config flow, transport, and entities are intentionally inactive.
 
 Document every future protocol conclusion with its source, date, capture conditions, confidence, and sanitized fixture when possible. Add parser tests before using decoded data in Home Assistant. Never substitute the time of synchronization for the original meter timestamp.
 

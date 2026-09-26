@@ -1,6 +1,6 @@
 # Home Assistant — FORA 6: master roadmap
 
-This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next.
+This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 is complete; Stage 1 is in progress; Stage 2 is not authorized.**
 
 ## Project identity and goal
 
@@ -40,8 +40,8 @@ Advertisement name and fields, address behavior, manufacturer data, advertised U
 | Stage | Scope | Status | Entry criterion | Exit criterion |
 | --- | --- | --- | --- | --- |
 | 0 — Repository/bootstrap | Skeleton, tests, documentation, architecture freeze, local checkpoint. | **Complete** | Fixed project decisions supplied. | Requested files, guardrails, validation baseline, and local Stage 0 commit exist. |
-| 1 — FORA 6 BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **Not started** | Explicit authorization; controlled meter and capture path available. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded. |
-| 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **Not started** | Stage 1 evidence reviewed and stage authorized. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
+| 1 — FORA 6 BLE discovery | Establish advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT structure, characteristic properties, and raw notification behavior. | **In progress: Stage 1A preparation complete; real advertisement observation pending** | Stage 1A explicitly authorized; controlled meter and capture path to be verified. | Observations, provenance, gaps, and sanitized/non-sensitive findings recorded; Stage 1B requires a separate candidate review. |
+| 2 — Protocol acquisition / reverse engineering | Use legitimate public documentation and/or controlled device/app observations to establish actual commands and responses. | **Not authorized** | Stage 1 evidence reviewed and Stage 2 explicitly authorized. | Each claimed protocol behavior has a source or captured observation, confidence, and open questions. |
 | 3 — Protocol parser and captured-frame fixtures | Build an HA-independent parser with sanitized, evidence-derived regression fixtures. | **Not started** | Protocol behavior supported by Stage 2 evidence. | Decoding tests cover supported frames, invalid data, and evidence-backed record semantics without HA or hardware. |
 | 4 — Home Assistant Bluetooth transport | Implement connection, notification, and retry-safe handling through supported HA Bluetooth APIs for local adapters and ESPHome proxies. | **Not started** | Validated protocol operations and explicit authorization. | Transport handles documented communication and recoverable connection failures without a hard-coded local interface. |
 | 5 — Measurement/entity model | Represent validated analytes, units, status, and one-device association in HA. | **Not started** | Validated record semantics. | Supported entities expose correct measurements; control-solution results stay distinct when the protocol supplies status. |
@@ -53,9 +53,14 @@ Advertisement name and fields, address behavior, manufacturer data, advertised U
 | 11 — Documentation and release candidate | Public installation, compatibility, privacy, troubleshooting, and release-candidate validation. | **Not started** | Validated functionality and packaging. | Documentation and release-candidate checks are complete. |
 | 12 — v1.0.0 release | Stable public release. | **Not started** | Release candidate validated and explicit release authorization. | v1.0.0 is published after approval. |
 
+### Stage 1 subdivisions
+
+- **Stage 1A — passive Bluetooth discovery and environment verification:** preparation is complete. `docs/CAPTURE_GUIDE.md` and the blank private-use `docs/STAGE1_OBSERVATION_TEMPLATE.md` describe Home Assistant's Adapters, Advertisement Monitor, and Connection Monitor observations for the M5Stack Atom Lite ESPHome proxy. No real-device advertisement has been supplied or assessed yet. The pending observation must record provenance, scanner state/capability, source and RSSI, candidate fields, and address behavior privately. A UUID or name match is not proof of identity.
+- **Stage 1B — observational GATT inspection:** planned in the capture guide, **not implemented or authorized**. After candidate advertisement review, use Home Assistant Bluetooth APIs to resolve a connectable path and enumerate GATT services/characteristics/properties. Notification subscription needs separate authorization. No FORA application writes during Stage 1.
+
 ## Current next gate
 
-**Stage 1 — FORA 6 BLE discovery.** It has not been authorized or started. Follow `docs/CAPTURE_GUIDE.md` when authorized. Stage 1 is observational and must not invent or send application commands to create traffic.
+**Obtain and review the user's Home Assistant Advertisement Monitor observation** plus the Atom Lite proxy/environment fields in `docs/CAPTURE_GUIDE.md`. Stage 1A preparation is complete, but discovery evidence is pending. Do not begin Stage 1B before a real candidate advertisement is reviewed. Do not begin Stage 2 or invent/send FORA application commands.
 
 ## Deferred product work
 

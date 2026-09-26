@@ -11,3 +11,4 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Initial architecture and development documentation.
 - Initial BLE protocol discovery framework and roadmap.
 - Durable master roadmap, repository status, and Codex handover workflow.
+- Stage 1A Home Assistant Bluetooth observation guide and blank private capture template.

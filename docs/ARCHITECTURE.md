@@ -27,7 +27,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. The
 - `config_flow.py`: future setup and discovery after device identity can be established beyond the documented UUID pair.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
-No connection, parser, config flow, or entities are active in Stage 0. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
+As of Stage 1A, no connection, parser, config flow, or entities are active. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
 
 ## Documentation and packaging
 
