@@ -1,39 +1,71 @@
-# Current status
+# Current Stage
 
-Updated: 2026-09-26 (Europe/London)
+Stage 0 — repository/bootstrap is complete. Stage 1 has not begun.
 
-- **Current stage:** Stage 0 — repository/bootstrap, complete. Stage 1 has not begun.
-- **Repository path:** `<former local checkout>`.
-- **Git branch:** `main`.
-- **Current commit:** the Stage 0 bootstrap checkpoint. Run `git rev-parse HEAD` for its full SHA; a commit cannot contain its own hash.
-- **Remote:** local `origin` points to `https://github.com/duke-of-jbala/home-assistant-fora6`. No network contact or remote repository creation was made.
+# Current Gate
 
-## Completed work
+Waiting for explicit authorization to start **Stage 1 — FORA 6 BLE discovery**. The handover-workflow update does not authorize BLE discovery or protocol work.
 
-- Created the Home Assistant custom integration skeleton, HACS metadata, MIT license, test layout, and project documentation.
-- Recorded the documented GATT UUIDs without implementing commands or parsing.
-- Kept config flow, Bluetooth discovery, transport, sensors, diagnostics, and historical sync inactive.
-- Added bootstrap guardrail tests. Five tests pass with Python 3.12.3; Python compilation and four JSON syntax checks pass. Ruff is unavailable in the current environment, so Ruff checks did not run.
+# Repository
 
-## Known facts and provenance
+- **Local path:** `<former local checkout>`
+- **GitHub repository:** `duke-of-jbala/home-assistant-fora6` (target; no remote repository was created or contacted in this task)
+- **Branch:** `main`
+- **Last completed checkpoint commit SHA:** `34cf585f90bf2b7630651860931bcda9d0616576`
+- **Checkpoint commit message:** `chore: bootstrap FORA 6 Home Assistant integration`
+- **Remote:** local `origin` is `https://github.com/duke-of-jbala/home-assistant-fora6`
+- **Changes after checkpoint:** yes — the six Markdown files listed below form the separate handover-workflow task. At the pre-commit review, the working tree was dirty with exactly these six files and no staged files. The new task commit SHA and final `git status --short` are reported after commit, outside the tracked files.
 
-- The project targets FORA 6 Connect GD82, domain `fora6`, display name FORA 6.
-- The Stage 0 project brief cites FORA documentation for service UUID `00001523-1212-efde-1523-785feabcd123`, characteristic UUID `00001524-1212-efde-1523-785feabcd123`, and write/notify properties. The underlying document and physical GATT have not been independently checked here.
-- Home Assistant requires a version in custom integration manifests; `0.0.0` is a development placeholder, not a release.
+# Completed Work
 
-## Unvalidated assumptions and outstanding questions
+- Stage 0 committed the Home Assistant custom integration skeleton, HACS metadata, MIT license, test layout, architecture decisions, and initial documentation.
+- The documented GATT UUIDs are recorded without commands, parsing, discovery, connection, sensors, diagnostics, or historical sync implementation.
+- This task created the authoritative `FORA6_MASTER_ROADMAP.md`, converted `ROADMAP.md` to a pointer, established `CODEX_HANDOVER.md`, and updated `AGENTS.md` and `CHANGELOG.md` for Markdown-based handover.
 
-- Actual advertisement name, address behavior, manufacturer data, advertised UUIDs, connectability, GATT inventory, and notification behavior are unknown.
-- The application command/response protocol, device identity response, records, timestamps, flags, units, and supported GD82 analytes are unknown.
-- End-to-end operation through the user's ESPHome Bluetooth Proxy is untested.
-- HACS packaging is a later gate; brand assets and public repository metadata remain outstanding.
+# Validated Facts
 
-## Next gate
+- Project target: FORA 6 Connect GD82; integration domain `fora6`; display name FORA 6.
+- The Stage 0 brief reports FORA documentation listing service UUID `00001523-1212-efde-1523-785feabcd123`, characteristic UUID `00001524-1212-efde-1523-785feabcd123`, and write/notify properties. This is documentary information supplied in the brief; the underlying document and physical GATT have not been independently checked here.
+- The UUID pair alone does not establish device identity.
+- The existing local Stage 0 checkpoint is the baseline for this task. Manifest version `0.0.0` is a development placeholder required for a custom integration, not a release.
 
-**Stage 1 — FORA 6 BLE discovery.** Begin only on explicit authorization. Gather and document the observations listed in `ROADMAP.md` and `docs/CAPTURE_GUIDE.md`, with private capture handling.
+# Unvalidated / Unknown
 
-## Actions not authorized or not performed
+- Advertisement/local name, address behavior, manufacturer data, advertised UUIDs, connectability, actual GATT structure/properties, and raw notification behavior.
+- Application commands/responses, framing, checksums, device identification, memory retrieval, record layout, analyte codes, timestamps, status/control-solution flags, units/scaling, error responses, and exact GD82 analyte support.
+- End-to-end use of the user's ESPHome Bluetooth Proxy and Home Assistant runtime behavior.
 
-- No Stage 1 discovery, real hardware connection, or protocol reverse engineering.
-- No push, remote repository creation, merge, tag, publication, or release.
-- No unrelated repository files were read or changed.
+# Tests and Validation
+
+- `python3 -m unittest discover -s tests -v` — **pass:** 5 total, 5 passed, 0 failed, 0 skipped.
+- `python3 -m compileall -q custom_components tests` — **pass**.
+- `python3 -m tabnanny custom_components tests` — **pass**.
+- `python3 -c 'import json,pathlib; files=list(pathlib.Path("custom_components").rglob("*.json"))+[pathlib.Path("hacs.json")]; [json.loads(p.read_text()) for p in files]; print(f"Validated {len(files)} JSON files")'` — **pass:** 4 JSON files.
+- `ruff check .` and `ruff format --check .` — **unavailable:** `ruff: command not found` (exit 127); no Ruff result is claimed.
+- File and privacy audit: only intended FORA 6 project files and ignored Python caches were found; caches generated by validation are removed before handover. No private capture or secret was added.
+
+# Files Changed in Latest Task
+
+- **Added:** `FORA6_MASTER_ROADMAP.md`, `CODEX_HANDOVER.md`.
+- **Modified:** `AGENTS.md`, `ROADMAP.md`, `CURRENT_STATUS.md`, `CHANGELOG.md`.
+- **Deleted:** none.
+
+# Outstanding Issues
+
+- The six Markdown changes are a separate documentation task after the Stage 0 checkpoint. No duplicate bootstrap commit was created. The task commit's exact SHA and final working-tree state are in the post-commit response.
+- Ruff is unavailable in this environment. Home Assistant runtime and HACS packaging checks remain later-stage gates.
+- No Stage 1 observations or protocol evidence have been collected.
+
+# Explicitly Not Yet Authorized
+
+- Do not begin Stage 1 discovery, connect to real hardware, or reverse engineer/implement the FORA application protocol.
+- Do not push, create a GitHub repository remotely, merge, tag, publish, or release.
+- Do not access or modify unrelated repositories.
+
+# Exact Next Gate
+
+**Stage 1 — FORA 6 BLE discovery**, only after explicit authorization. Gather the advertisement and GATT observations in `FORA6_MASTER_ROADMAP.md` and `docs/CAPTURE_GUIDE.md`; protect private captures.
+
+# Last Updated
+
+2026-09-26 (Europe/London), at handover-workflow pre-commit review. Post-commit SHA and status are reported separately.
