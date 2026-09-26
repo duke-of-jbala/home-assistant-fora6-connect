@@ -140,7 +140,8 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
                 "pair": False,
             },
         )
-        self.assertEqual(result["subscriptions_started"], 3)
+        self.assertEqual(result["subscriptions_successful"], 3)
+        self.assertEqual(result["subscriptions_attempted"], 3)
         self.assertEqual(result["notifications_observed"], 5)
         self.assertTrue(result["connection_successful"])
         self.assertTrue(result["disconnected_cleanly"])
@@ -148,8 +149,8 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
         measure = by_uuid[self.observer.GLUCOSE_MEASUREMENT_UUID]
         self.assertEqual(measure["notification_count"], 3)
         self.assertEqual(measure["payload_lengths"], [5, 6])
-        self.assertEqual(measure["payload_length_counts"], {"5": 2, "6": 1})
-        self.assertEqual(measure["unique_payload_count"], 2)
+        self.assertEqual(measure["length_counts"], {"5": 2, "6": 1})
+        self.assertEqual(measure["distinct_payload_count"], 2)
         self.assertEqual(
             by_uuid[self.observer.GLUCOSE_CONTEXT_UUID]["notification_count"], 1
         )
@@ -173,7 +174,7 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
                 self.hass, self.address
             )
         self.assertEqual(result["notifications_observed"], 0)
-        self.assertEqual(result["subscriptions_started"], 3)
+        self.assertEqual(result["subscriptions_successful"], 3)
         self.assertTrue(
             all(item["notification_count"] == 0 for item in result["characteristics"])
         )
@@ -181,7 +182,10 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
             all(item["payload_lengths"] == [] for item in result["characteristics"])
         )
         self.assertTrue(
-            all(item["unique_payload_count"] == 0 for item in result["characteristics"])
+            all(
+                item["distinct_payload_count"] == 0
+                for item in result["characteristics"]
+            )
         )
         self.client.disconnect.assert_awaited_once()
         self.assertNotIn(self.address, str(recorded_logs.call_args_list))
@@ -203,28 +207,113 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
         self.client.start_notify.assert_not_awaited()
         self.client.disconnect.assert_awaited_once()
 
-    async def test_partial_subscription_failure_cleans_successful_subscription(self):
+    async def test_first_subscription_failure_continues_and_cleans_successes(self):
         attempts = 0
 
         async def subscribe(_characteristic, _callback):
             nonlocal attempts
             attempts += 1
-            if attempts == 2:
+            if attempts == 1:
                 raise RuntimeError(self.address)
 
         self.client.start_notify.side_effect = subscribe
-        with self.assertRaisesRegex(
-            self.observer.ObservationError, "subscription failed"
-        ) as caught:
-            await self.observer.async_observe_notifications(self.hass, self.address)
-        self.assertNotIn(self.address, str(caught.exception))
-        self.assertEqual(self.client.start_notify.await_count, 2)
+        with patch.object(logging.Logger, "_log") as recorded_logs:
+            result = await self.observer.async_observe_notifications(
+                self.hass, self.address
+            )
+        self.assertNotIn(self.address, json.dumps(result))
+        self.assertNotIn(self.address, str(recorded_logs.call_args_list))
+        self.assertEqual(self.client.start_notify.await_count, 3)
+        self.assertEqual(result["subscriptions_attempted"], 3)
+        self.assertEqual(result["subscriptions_successful"], 2)
+        self.assertEqual(self.client.stop_notify.await_count, 2)
+        self.assertEqual(
+            [call.args[0].uuid for call in self.client.stop_notify.call_args_list],
+            [self.observer.CHARACTERISTIC_UUID, self.observer.GLUCOSE_CONTEXT_UUID],
+        )
+        by_uuid = {item["uuid"]: item for item in result["characteristics"]}
+        self.assertFalse(
+            by_uuid[self.observer.GLUCOSE_MEASUREMENT_UUID]["subscription_successful"]
+        )
+        self.assertEqual(
+            by_uuid[self.observer.GLUCOSE_MEASUREMENT_UUID]["subscription_error"],
+            "RuntimeError",
+        )
+        self.assertTrue(
+            by_uuid[self.observer.GLUCOSE_CONTEXT_UUID]["subscription_successful"]
+        )
+        self.client.disconnect.assert_awaited_once()
+        self.assert_boundary()
+
+    async def test_all_subscriptions_fail_returns_normal_result(self):
+        self.client.start_notify.side_effect = RuntimeError(self.address)
+        with patch.object(self.observer.asyncio, "sleep", new=AsyncMock()) as sleep:
+            result = await self.observer.async_observe_notifications(
+                self.hass, self.address
+            )
+        sleep.assert_not_awaited()
+        self.assertEqual(result["subscriptions_attempted"], 3)
+        self.assertEqual(result["subscriptions_successful"], 0)
+        self.assertEqual(result["observation_duration_seconds"], 0.0)
+        self.assertEqual(result["notifications_observed"], 0)
+        self.assertEqual(self.client.start_notify.await_count, 3)
+        self.client.stop_notify.assert_not_awaited()
+        self.client.disconnect.assert_awaited_once()
+        self.assertTrue(
+            all(
+                not item["subscription_successful"] for item in result["characteristics"]
+            )
+        )
+        self.assertNotIn(self.address, json.dumps(result))
+        self.assert_boundary()
+
+    async def test_only_custom_subscription_succeeds(self):
+        async def subscribe(characteristic, _callback):
+            if characteristic.uuid != self.observer.CHARACTERISTIC_UUID:
+                raise RuntimeError("GATT descriptor failure")
+
+        self.client.start_notify.side_effect = subscribe
+        result = await self.observer.async_observe_notifications(
+            self.hass, self.address
+        )
+        self.assertEqual(result["subscriptions_successful"], 1)
         self.client.stop_notify.assert_awaited_once()
         self.assertEqual(
             self.client.stop_notify.call_args.args[0].uuid,
-            self.observer.GLUCOSE_MEASUREMENT_UUID,
+            self.observer.CHARACTERISTIC_UUID,
         )
-        self.client.disconnect.assert_awaited_once()
+        self.assert_boundary()
+
+    async def test_only_standard_subscriptions_succeed(self):
+        async def subscribe(characteristic, _callback):
+            if characteristic.uuid == self.observer.CHARACTERISTIC_UUID:
+                raise RuntimeError("Insufficient Authentication")
+
+        self.client.start_notify.side_effect = subscribe
+        result = await self.observer.async_observe_notifications(
+            self.hass, self.address
+        )
+        self.assertEqual(result["subscriptions_successful"], 2)
+        self.assertEqual(
+            [call.args[0].uuid for call in self.client.stop_notify.call_args_list],
+            [self.observer.GLUCOSE_CONTEXT_UUID, self.observer.GLUCOSE_MEASUREMENT_UUID],
+        )
+        self.assert_boundary()
+
+    async def test_structured_error_code_is_reported_without_private_text(self):
+        error = RuntimeError(self.address + " private payload")
+        error.dbus_error = "org.bluez.Error.NotAuthorized"
+        self.client.start_notify.side_effect = error
+        with patch.object(logging.Logger, "_log") as recorded_logs:
+            result = await self.observer.async_observe_notifications(
+                self.hass, self.address
+            )
+        self.assertEqual(
+            result["characteristics"][0]["subscription_error"],
+            "RuntimeError (org.bluez.Error.NotAuthorized)",
+        )
+        self.assertNotIn(self.address, json.dumps(result))
+        self.assertNotIn(self.address, str(recorded_logs.call_args_list))
         self.assert_boundary()
 
     async def test_observation_exception_unsubscribes_and_disconnects(self):
@@ -256,22 +345,24 @@ class NotificationObserverTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_stop_failure_still_stops_others_and_disconnects(self):
         self.client.stop_notify.side_effect = [RuntimeError(self.address), None, None]
-        with self.assertRaisesRegex(
-            self.observer.ObservationError, "cleanup"
-        ) as caught:
-            await self.observer.async_observe_notifications(self.hass, self.address)
-        self.assertNotIn(self.address, str(caught.exception))
+        result = await self.observer.async_observe_notifications(
+            self.hass, self.address
+        )
+        self.assertFalse(result["subscriptions_stopped_cleanly"])
+        self.assertTrue(result["disconnected_cleanly"])
+        self.assertNotIn(self.address, json.dumps(result))
         self.assertEqual(self.client.stop_notify.await_count, 3)
         self.client.disconnect.assert_awaited_once()
         self.assert_boundary()
 
     async def test_disconnect_failure_is_sanitized(self):
         self.client.disconnect.side_effect = RuntimeError(self.address)
-        with self.assertRaisesRegex(
-            self.observer.ObservationError, "disconnect"
-        ) as caught:
-            await self.observer.async_observe_notifications(self.hass, self.address)
-        self.assertNotIn(self.address, str(caught.exception))
+        result = await self.observer.async_observe_notifications(
+            self.hass, self.address
+        )
+        self.assertFalse(result["disconnected_cleanly"])
+        self.assertTrue(result["subscriptions_stopped_cleanly"])
+        self.assertNotIn(self.address, json.dumps(result))
         self.assertEqual(self.client.stop_notify.await_count, 3)
         self.assert_boundary()
 

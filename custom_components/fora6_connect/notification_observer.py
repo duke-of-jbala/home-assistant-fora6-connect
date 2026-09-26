@@ -34,6 +34,22 @@ class ObservationError(Exception):
     """A privacy-safe failure for the development action."""
 
 
+def _subscription_error(error: Exception) -> str:
+    """Report only a structured error class/code, never upstream private text."""
+    error_class = type(error).__name__
+    if not error_class.isidentifier() or len(error_class) > 80:
+        error_class = "BluetoothError"
+    # BleakDBusError exposes the D-Bus error name independently of its message.
+    code = getattr(error, "dbus_error", None)
+    if (
+        isinstance(code, str)
+        and len(code) <= 100
+        and all(part.isidentifier() for part in code.split("."))
+    ):
+        return f"{error_class} ({code})"
+    return error_class
+
+
 def _find_targets(services: Any) -> list[Any]:
     """Find the three observed Notify characteristics in their services."""
     by_service = {str(service.uuid).lower(): service for service in services}
@@ -97,11 +113,13 @@ async def async_observe_notifications(
     length_counts = {uuid: {} for _, uuid in TARGETS}
     payload_digests = {uuid: set() for _, uuid in TARGETS}
     notification_counts = {uuid: 0 for _, uuid in TARGETS}
+    subscription_errors: dict[str, str | None] = {uuid: None for _, uuid in TARGETS}
     started: list[Any] = []
     accepting = True
     elapsed = 0.0
     failure: ObservationError | None = None
-    cleanup_failed = False
+    unsubscribe_failed = False
+    disconnect_failed = False
 
     def callback_for(uuid: str):
         def on_notification(_sender: Any, data: bytearray) -> None:
@@ -127,16 +145,16 @@ async def async_observe_notifications(
                     client.start_notify(characteristic, callback_for(uuid)),
                     timeout=NOTIFY_TIMEOUT,
                 )
-            except Exception:
-                raise ObservationError(
-                    f"Notification subscription failed for {uuid}."
-                ) from None
+            except Exception as err:
+                subscription_errors[uuid] = _subscription_error(err)
+                continue
             started.append(characteristic)
-        started_at = time.monotonic()
-        await asyncio.sleep(OBSERVATION_SECONDS)
-        elapsed = time.monotonic() - started_at
-        if not client.is_connected:
-            raise ObservationError("The meter disconnected during observation.")
+        if started:
+            started_at = time.monotonic()
+            await asyncio.sleep(OBSERVATION_SECONDS)
+            elapsed = time.monotonic() - started_at
+            if not client.is_connected:
+                raise ObservationError("The meter disconnected during observation.")
     except ObservationError as err:
         failure = err
     except Exception:
@@ -150,17 +168,13 @@ async def async_observe_notifications(
                         client.stop_notify(characteristic), timeout=NOTIFY_TIMEOUT
                     )
                 except Exception:
-                    cleanup_failed = True
+                    unsubscribe_failed = True
         finally:
             try:
                 await asyncio.wait_for(client.disconnect(), timeout=DISCONNECT_TIMEOUT)
             except Exception:
-                cleanup_failed = True
+                disconnect_failed = True
 
-    if cleanup_failed:
-        raise ObservationError(
-            "Notification cleanup or disconnect did not complete cleanly."
-        )
     if failure is not None:
         raise failure
     result = {
@@ -169,23 +183,26 @@ async def async_observe_notifications(
         "connection_successful": True,
         "connected_via_ha_bluetooth": True,
         "observation_duration_seconds": round(elapsed, 3),
-        "subscriptions_started": len(started),
+        "subscriptions_attempted": len(TARGETS),
+        "subscriptions_successful": len(started),
         "notifications_observed": sum(notification_counts.values()),
         "characteristics": [
             {
                 "uuid": uuid,
-                "subscription_successful": True,
+                "subscription_successful": subscription_errors[uuid] is None,
+                "subscription_error": subscription_errors[uuid],
                 "notification_count": notification_counts[uuid],
                 "payload_lengths": sorted(length_counts[uuid]),
-                "payload_length_counts": {
+                "length_counts": {
                     str(size): count
                     for size, count in sorted(length_counts[uuid].items())
                 },
-                "unique_payload_count": len(payload_digests[uuid]),
+                "distinct_payload_count": len(payload_digests[uuid]),
             }
             for _, uuid in TARGETS
         ],
-        "disconnected_cleanly": True,
+        "subscriptions_stopped_cleanly": not unsubscribe_failed,
+        "disconnected_cleanly": not disconnect_failed,
     }
     for digests in payload_digests.values():
         digests.clear()
