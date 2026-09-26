@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Stage 2B static iFORA HM evidence record for mirror packages 1.7.6/1.7.9: matching published hashes, valid shared signing certificate, TD4183-linked multifunction handler, custom `1523/1524` path, provisional command framing, and uric-acid code path. Official signing provenance and real GD82 command/response remain unconfirmed; no app or meter operation was run.
 - Stage 2A public source register and proposed iFORA HM static-analysis plan. Manufacturer FAQ and GD82 manual confirm GATT metadata and official app association; no application command bytes were verified or transmitted.
 - Initial Home Assistant FORA 6 Connect integration project structure.
 - Initial architecture and development documentation.

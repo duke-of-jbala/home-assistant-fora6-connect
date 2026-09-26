@@ -91,3 +91,9 @@ This is a plan, not work performed in Stage 2A. A **separately scoped authorizat
 5. Review an exact request and its expected behavior before proposing any first live write. If static evidence remains insufficient, propose a separately authorized controlled official-app traffic capture. **Do not choose a speculative first command.**
 
 **Exact next gate:** explicit authorization of **Stage 2B static acquisition and inspection of iFORA HM**, with a verified acquisition route and package provenance. Stage 2 remains in progress; no live protocol operation has been sent.
+
+## Stage 2B follow-up — 2026-09-26
+
+The gate above records the **Stage 2A decision at that time**. Stage 2B was subsequently authorized and performed: mirror-distributed iFORA HM 1.7.6 and 1.7.9 were acquired for static inspection outside Git. Both locally computed hashes matched the mirror's listings, and all inspected APKs had valid signatures with one shared certificate. No independent official Google Play/ForaCare certificate fingerprint was available, so the packages remain corroborated mirror specimens rather than officially authenticated binaries. The [Stage 2B evidence register](STAGE2_IFORA_HM_STATIC_ANALYSIS.md) records their URLs, full hashes, signatures, versions, tools, call paths, qualified command candidates, and unresolved GD82 applicability. These later findings do not retroactively turn Stage 2A's public-source search into command evidence.
+
+**Current exact next gate:** separate authorization of a controlled official-app traffic capture for physical GD82 corroboration, or acquisition of an independently authenticated official package for further static review. Neither option authorizes an independent first write to the meter.

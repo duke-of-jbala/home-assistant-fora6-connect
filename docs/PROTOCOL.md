@@ -143,8 +143,8 @@ The meter was new and had only one real measurement so far, for **uric acid**. I
 - Exact Home Assistant scanner/ESPHome proxy selected for the successful GATT connection: Stage 9 end-to-end proxy validation.
 - Manufacturer-data meaning: unknown; revisit in Stage 6 if useful for identification, or earlier only if later protocol evidence establishes relevance.
 - Any additional advertised UUIDs and detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source remain unknown; no unsupported identity claim is made.
-- Commands and responses.
-- Framing and checksums.
+- Real GD82 commands and responses; Stage 2B has provisional app-derived candidates, not a captured physical response.
+- Physical GD82 framing/checksum confirmation; the app uses an eight-byte summed frame on its reviewed path.
 - Device identification response.
 - Memory retrieval protocol.
 - Measurement record format and analyte codes.
@@ -175,4 +175,34 @@ An explicit request may precede stored-data notifications on `1524`; the zero-no
 
 The first GD82 application request bytes, opcode, framing, checksum, response, record layout, and analyte mapping remain unknown. The FAQ-linked Box share was inaccessible in the Stage 2A environment, so its contents are unknown. See [the source register](STAGE2_PROTOCOL_ACQUISITION.md) for access outcome and Stage 2B plan.
 
-Stage 0 and Stage 1 (1A, 1B, 1C) are **complete**. Stage 2 is **in progress — evidence acquisition**. The Stage 1 review explicitly deferred the named discovery questions; none is silently resolved. **Exact next gate: explicit authorization of Stage 2B static acquisition and inspection of a provenance-verified iFORA HM package.** Do not add protocol behavior or send an application command until exact evidence, provenance, and a separate scoped authorization exist. See `CAPTURE_GUIDE.md`.
+## Stage 2B static application evidence — reviewed 2026-09-26
+
+### OBSERVED
+
+No additional physical-device observation was made. The real meter still has only one known uric-acid measurement; Stage 1C's zero custom notifications and failed standard subscriptions remain as recorded. No application command was transmitted.
+
+### DOCUMENTED
+
+The manufacturer FAQ and GD82 manual still establish only product/app association and GATT/transfer metadata. They do not document the app-derived command bytes below.
+
+### STATICALLY OBSERVED
+
+Two mirror-distributed iFORA HM packages, versions 1.7.6 and 1.7.9, had matching published file hashes, valid APK signatures, the same signing certificate, and package `com.foracare.tdlink.hm`. The certificate has a ForaCare-labelled subject, but no independently trusted official Play signing fingerprint was available. [The static-analysis record](STAGE2_IFORA_HM_STATIC_ANALYSIS.md) contains exact hashes, split composition, tools, code locations, and provenance limits.
+
+In both inspected versions, the app's BLE transport selects custom service `1523` / characteristic `1524`, enables its notifications, writes constructed command bytes there, and processes incoming notifications. Its project-code branch maps `TD4183` to a multifunction handler. The reviewed command builder creates eight-byte frames with a final byte equal to the preceding seven-byte sum modulo 256; the parser checks response command identifiers and the final sum. A provisional project-code query candidate is `51 24 00 00 00 00 A3 18` (hex). The ordinary app detection sequence has an earlier wake-up frame, so this query is **not** an established standalone first operation. No exact standard Glucose UUID strings appeared in either package's decompiled sources/resources; this does not rule out other constructed or unreviewed paths.
+
+The TD4183-linked multifunction handler has a uric-acid record branch. In the 1.7.9 import path, the parsed uric-acid numeric value is divided by ten before storage. No real GD82 record was retrieved or decoded, and the physical unit/scaling remains unverified. Android bond-state changes are handled in the generic BLE path; no GD82-specific bonding requirement was established.
+
+### INFERRED
+
+`TD4183` likely represents the FORA 6 Connect GD82 because the official GD82 manual carries an `4183D` identifier, the app includes a FORA 6 Connect manual, and its import flow selects the TD4183 handler after project-code detection. The real meter's project-code response has **not** been observed. Mirror cross-version signatures support provisional app-code analysis but do not authenticate an official Play binary.
+
+### HYPOTHESES
+
+The app may retrieve GD82 uric-acid history through custom `1524`. This is not yet a physical-device observation or permission to send a command. The app-derived project-code query appears informational, but its standalone behavior and side effects are untested. Bonding causation remains unproven.
+
+### UNKNOWN
+
+Actual GD82 first command/response, write mode, security state, project code, physical frame validation, uric-acid units, and whether standard RACP is used in any GD82 state remain unknown. The preceding wake-up frame is not established as read/query-only. No independent first write meets the gate. A controlled official-app capture or independently authenticated official package is needed before considering a live request.
+
+Stage 0 and Stage 1 are **complete**; Stage 2A public review and Stage 2B mirror-package static analysis have been performed, and Stage 2 remains **in progress**. **Exact next gate: separately authorize a controlled official-app traffic capture (Stage 2C evidence acquisition), or provide an authenticated official Play package for further static corroboration.** No independent first live write, pairing, RACP operation, or record retrieval is authorized by this review.
