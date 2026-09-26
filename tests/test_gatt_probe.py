@@ -98,6 +98,46 @@ def _load_setup(probe_module):
     return module, gatt, exceptions
 
 
+class LocalNameNormalizationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.probe, _, _ = _load_probe()
+
+    def test_five_trailing_nuls_and_clean_name(self) -> None:
+        self.assertEqual(
+            self.probe.normalize_local_name("FORA 6 CONNECT\x00\x00\x00\x00\x00"),
+            "FORA 6 CONNECT",
+        )
+        self.assertEqual(
+            self.probe.normalize_local_name("FORA 6 CONNECT"),
+            "FORA 6 CONNECT",
+        )
+
+    def test_none_and_other_characters_are_preserved(self) -> None:
+        self.assertIsNone(self.probe.normalize_local_name(None))
+        for name in (
+            "FORA 6 CONNECT ",
+            "FORA 6 CONNECT!",
+            "\x00FORA 6 CONNECT",
+            "FORA\x00 6 CONNECT",
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(self.probe.normalize_local_name(name), name)
+
+    def test_general_discovery_service_info_name_is_normalized(self) -> None:
+        # Current manual-address probe does not consult the discovery cache.
+        # The same accessor handles its service-info representation if used.
+        general_info = types.SimpleNamespace(
+            advertisement=types.SimpleNamespace(
+                local_name="FORA 6 CONNECT\x00\x00\x00\x00\x00"
+            ),
+            name="UNRELATED RESOLVED NAME",
+        )
+        self.assertEqual(
+            self.probe._advertised_local_name(general_info),
+            self.probe.TARGET_LOCAL_NAME,
+        )
+
+
 class GattProbeTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.probe, self.bluetooth, self.connector = _load_probe()
@@ -240,6 +280,23 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["advertised_name_confirmed"])
         self.assertEqual(result["gatt_service_count"], 3)
         self.client.disconnect.assert_awaited_once()
+
+    async def test_trailing_nul_padding_is_removed_from_advertised_name(self) -> None:
+        self.fresh_info.advertisement.local_name = (
+            "FORA 6 CONNECT\x00\x00\x00\x00\x00"
+        )
+        result = await self.probe.async_probe_gatt(self.hass, self.address)
+
+        self.assertEqual(result["local_name"], "FORA 6 CONNECT")
+        self.assertTrue(result["advertised_name_confirmed"])
+        self.assertTrue(result["fresh_advertisement_observed"])
+        self.client.disconnect.assert_awaited_once()
+
+    async def test_internal_nul_is_not_treated_as_padding(self) -> None:
+        self.fresh_info.advertisement.local_name = "FORA\x00 6 CONNECT"
+        with self.assertRaisesRegex(self.probe.ProbeError, "no fresh"):
+            await self.probe.async_probe_gatt(self.hass, self.address)
+        self.connector.establish_connection.assert_not_awaited()
 
     async def test_missing_local_name_allows_read_only_inventory(self) -> None:
         self.fresh_info.advertisement.local_name = None

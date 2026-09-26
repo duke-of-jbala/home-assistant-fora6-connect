@@ -34,9 +34,16 @@ def _uuid128(value: str) -> str:
     return f"0000{value}{SIG_BASE}" if len(value) == 4 else value
 
 
+def normalize_local_name(name: str | None) -> str | None:
+    """Remove only trailing NUL padding from an advertised local name."""
+    return name.rstrip("\x00") if name is not None else None
+
+
 def _advertised_local_name(info: Any) -> str | None:
-    """Read the packet local name, separate from HA's resolved device name."""
-    return getattr(getattr(info, "advertisement", None), "local_name", None)
+    """Get the normalized packet name, separate from HA's resolved name."""
+    return normalize_local_name(
+        getattr(getattr(info, "advertisement", None), "local_name", None)
+    )
 
 
 def _enumerate_services(services: Any) -> list[dict[str, Any]]:

@@ -44,7 +44,22 @@ Multiple calls to the first development Home Assistant probe failed with `No fre
 
 The later general-discovery retest reported `general discoveries: 214; name matches: 0; connectable scanners: 2`. Home Assistant Bluetooth and two connectable scanners were operating, but the intermittently advertising meter was absent by name from the current cache. The action stopped before its targeted wait; no HA GATT connection or FORA operation occurred. [Home Assistant's Bluetooth API documentation](https://developers.home-assistant.io/docs/core/bluetooth/api/) states that `async_discovered_service_info` contains devices still present in the cache. These counts do not indicate a meter, proxy, or GATT failure.
 
-The development-only probe now accepts the private Bluetooth address copied from the previously identified `FORA 6 CONNECT` Advertisement Monitor row. It does not require a cached candidate. It uses `async_process_advertisements` with that runtime address, `BluetoothScanningMode.ACTIVE`, and `connectable=False` while Lounge remains in Auto. A replayed cached packet cannot count as fresh. A live local name must match if present; when absent, read-only GATT inventory may proceed because the user selected the address privately. This allowance does not establish production identity. Only after the fresh packet does Home Assistant attempt `async_ble_device_from_address(..., connectable=True)`. The resulting service/characteristic inventory is compared with the iPhone evidence, especially the custom 1523/1524 pair. No characteristic I/O occurs. This revision has not yet been tested on the real system; production automatic discovery remains deferred to Stage 6.
+The development-only probe accepts the private Bluetooth address copied from the previously identified `FORA 6 CONNECT` Advertisement Monitor row. It does not require a cached candidate. It uses `async_process_advertisements` with that runtime address, `BluetoothScanningMode.ACTIVE`, and `connectable=False` while Lounge remains in Auto. A replayed cached packet cannot count as fresh. A live local name must match after removing trailing NUL padding if present; when absent, read-only GATT inventory may proceed because the user selected the address privately. This allowance does not establish production identity. Only after the fresh packet does Home Assistant attempt `async_ble_device_from_address(..., connectable=True)`. The resulting service/characteristic inventory is compared with the iPhone evidence, especially the custom 1523/1524 pair. No characteristic I/O occurs. Production automatic discovery remains deferred to Stage 6.
+
+## Sanitized Home Assistant advertisement-detail observation
+
+**Source: user-supplied, manually viewed in Settings → Connectivity → Bluetooth → Advertisement Monitor.** The user opened the `FORA 6 CONNECT` device row and read its detail popup. This advertisement was **not returned by `fora6_connect.probe_gatt`**.
+
+| Popup field | Observed sanitized finding |
+| --- | --- |
+| Connectable | Yes. |
+| BLE flags | Present. |
+| Complete Local Name | Canonical text `FORA 6 CONNECT` followed by **five trailing NUL characters** (`\x00` × 5). |
+| Advertised 16-bit services | `0x1808` Glucose; `0x180A` Device Information. |
+| Manufacturer-specific data | Present; payload withheld. |
+| Custom `0x1523` service | **Absent from this observed advertisement.** |
+
+**Advertised services are not the complete connected GATT inventory.** The earlier connected iPhone GATT observation independently confirmed FORA custom service `0x1523` and characteristic `0x1524` after connection. The popup proves the padded local-name format in Home Assistant's advertisement view. A raw exact-name comparison would reject that representation, so the development probe now removes trailing NUL padding before comparison. The latest development action still failed with `No fresh FORA 6 CONNECT advertisement was observed during the targeted active wait` and did not reach GATT. Padding may explain rejection **if** the probe received that representation, but the popup does not prove that its wait callback received it. A separate advertisement-wait/API-path issue remains possible. No private address, scanner identifier, raw packet, or manufacturer payload is recorded.
 
 ## Working hypotheses
 
@@ -54,7 +69,7 @@ The development-only probe now accepts the private Bluetooth address copied from
 
 ## Unknown
 
-- Whether bonding is required, address behavior, manufacturer/service advertisement data, advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and Home Assistant-side connectability/GATT.
+- Whether bonding is required, address behavior, manufacturer payload meaning, any additional advertised UUIDs, fresh Auto-mode advertisement behavior, detailed Home Assistant scanner-source/RSSI relationship beyond the reported Lounge source, and Home Assistant-side GATT connectability.
 - Commands and responses.
 - Framing and checksums.
 - Device identification response.

@@ -1,42 +1,35 @@
 # Current Stage
 
-Stage 0 is complete. **Stage 1 — FORA 6 Connect BLE discovery remains in progress; Stage 2 is not authorized.** Stage 1B is a development-only transport/GATT probe. Real runs of earlier builds stopped at discovery. In the latest user-supplied retest, Home Assistant reported `general discoveries: 214; name matches: 0; connectable scanners: 2`. Home Assistant Bluetooth and two connectable scanners were operational, but the intermittently advertising meter was absent by name from the current cache. No targeted wait, Home Assistant GATT connection, or FORA operation occurred. This does not indicate a meter, proxy, or GATT failure. The manual-address revision in this task has not been run on the real system.
+Stage 0 is complete. **Stage 1 remains in progress; Stage 2 is not authorized.** Stage 1B is a development-only Home Assistant transport/GATT probe. The real meter's GATT inventory was independently observed on iPhone, but Home Assistant-side GATT connection and inventory remain unvalidated.
 
-# Exact Next Gate
+## Observed evidence and limits
 
-Replace the installed `<Home Assistant config>/custom_components/fora6_connect/` directory with this checkout's complete `custom_components/fora6_connect/` directory and restart Home Assistant Core. Leave Lounge in Auto. Privately copy the Bluetooth address from the Advertisement Monitor row already positively identified as `FORA 6 CONNECT`; do not put it in Git or shared messages. During the meter's Bluetooth transfer window, invoke **Developer Tools → Actions → `fora6_connect.probe_gatt`**, fill the required **Bluetooth address (private)** field, and leave target empty. Share only the privacy-safe response or sanitized error. Review whether a live packet was received, whether its local name was present and matched, connectable BLEDevice resolution, actual GATT metadata and expected comparison, and disconnect. Check the selected HA connection path privately if needed. Stage 1 remains open until a real result is reviewed; production automatic discovery remains Stage 6 work; do not begin Stage 2.
+- **User-supplied Home Assistant UI observation:** the user manually opened the `FORA 6 CONNECT` row in **Settings → Connectivity → Bluetooth → Advertisement Monitor**. Its detail popup marked the device connectable, showed BLE flags, advertised `0x1808` Glucose and `0x180A` Device Information, showed manufacturer-specific data present, and displayed Complete Local Name `FORA 6 CONNECT` followed by **five trailing NUL characters**. The custom `0x1523` service was absent from this observed advertisement. The earlier connected iPhone GATT inventory did contain custom `0x1523` / `0x1524`. Advertised services are not the complete connected GATT inventory.
+- **Separate real action result:** `fora6_connect.probe_gatt` did **not** return the popup's packet. Its latest reported error was `No fresh FORA 6 CONNECT advertisement was observed during the targeted active wait.` No Home Assistant GATT connection or FORA operation followed. The popup proves a trailing-NUL name-comparison defect, but it does not prove that the action's wait callback received that packet. A separate advertisement-wait/API-path issue remains possible.
+- **Earlier real cache result:** `general discoveries: 214; name matches: 0; connectable scanners: 2`. The intermittent meter was absent by name from the current cache in that run. This did not establish a meter, proxy, or GATT failure.
+- **This task's change:** `normalize_local_name(str | None)` removes only trailing NUL characters. The manual-address targeted predicate and privacy-safe `local_name` response use it through the shared packet-name accessor. There is no current general/cached candidate lookup; the same accessor is tested against a general-discovery service-info shape. The private address field and read-only GATT boundary remain.
+- **Still unknown:** whether the corrected targeted wait receives a live packet through Lounge in Auto, whether any remaining wait/API-path issue exists, whether a connectable BLEDevice resolves, and whether Home Assistant can connect and enumerate GATT. No probe success is claimed.
 
-# Repository State at Pre-Commit Review
+## Exact Next Gate
 
-- **Date/branch:** 2026-09-26 (Europe/London), `main`.
-- **Checkout:** `<local checkout>`.
-- **Last completed checkpoint:** `f98cc0cc26330ec8fd6852e7581e4749a482031e` — `fix: separate FORA discovery from connectable resolution`.
+Replace the installed development integration with this checkout's complete `custom_components/fora6_connect/` directory, check the Home Assistant configuration, and restart Home Assistant Core. Leave Lounge in Auto. Privately enter the address from the previously identified FORA Advertisement Monitor row in **Developer Tools → Actions → `fora6_connect.probe_gatt`** during the meter's transfer window. Do not share the address or raw logs. Report only the sanitized action result/error, clearly separate from Advertisement Monitor observations. Determine whether the action actually receives a new packet after this normalization fix. If it still times out, investigate the active-wait/API path within Stage 1B. Proceed to connectable resolution and read-only GATT inventory only if the fresh packet gate succeeds. Production automatic discovery remains Stage 6 work; do not begin Stage 2.
+
+## Repository State at Pre-Commit Review
+
+- **Date/branch/checkout:** 2026-09-26 (Europe/London), `main`, `<local checkout>`.
+- **Last completed checkpoint:** `9178e0fd88de5e82d5d2937503796c3a7a711a40` — `fix: allow private address for Stage 1B probe`.
 - **Starting tree:** clean; `git status --short --branch` showed `## main`.
-- **Changes after checkpoint:** yes, the 14 files listed below. This document describes the dirty pre-commit state; verify/report the new commit SHA and final status separately.
-- **Remote actions:** none. No push, tag, or release.
+- **Changes after checkpoint:** yes. The files below are modified in this dirty pre-commit state. Verify and report the post-commit state separately.
+- **Files changed:** `custom_components/fora6_connect/gatt_probe.py`, `tests/test_gatt_probe.py`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `CHANGELOG.md`.
+- **Remote actions:** none; no push, tag, or release.
 
-# Evidence, Implementation, and Limits
+## Checks Actually Run
 
-- **Observed, user-supplied:** iPhone discovery/GATT inventory and earlier HA Advertisement Monitor visibility through Lounge in Active mode. The latest real action returned no known FORA candidate with 214 general discoveries, zero exact-name matches, and two connectable scanners. The meter's intermittent, short Bluetooth transfer window explains why a prior monitor row need not remain in the current cache; causation of any future live wait or GATT result remains untested. The latest run never reached targeted scanning or connection.
-- **Platform fact reviewed 2026-09-26:** [Home Assistant Bluetooth APIs](https://developers.home-assistant.io/docs/core/bluetooth/api/) say `async_discovered_service_info` contains devices still present in the cache and document `async_process_advertisements` with an address-targeted active wait. [Home Assistant service-action guidance](https://developers.home-assistant.io/docs/dev_101_services/) documents fields and selectors. These describe platform behavior, not a real probe success.
-- **Changed:** the development action requires a private `address` field. The handler validates it with a sanitized error, keeps it in memory, and passes it to the probe. The probe no longer consults discovery caches. It waits up to 20 seconds for a packet from that address with `connectable=False` and `BluetoothScanningMode.ACTIVE`, rejecting replay by wait-start time. A present advertised local name must match `FORA 6 CONNECT`; an absent name may proceed because the user selected the previously identified row, and the response reports `local_name: null` plus `advertised_name_confirmed: false`. Only after a live packet does HA resolve a `BLEDevice` with `connectable=True`, connect without pairing, list GATT UUIDs/properties, compare expected metadata including 1523/1524, and disconnect.
-- **Boundary/privacy:** no characteristic reads/writes, notifications, CCCDs, pairing, RACP, records, protocol parsing, sensors, or production discovery. The private runtime address is not persisted, returned, or logged by this integration. No real address or health data is in tracked files.
-- **Unknown:** whether the manual-address active wait sees a live packet with Lounge in Auto, whether a connectable path resolves, and whether HA can connect/enumerate GATT. No HA-side GATT success is claimed.
-
-# Files Changed in This Task
-
-`custom_components/fora6_connect/__init__.py`, `custom_components/fora6_connect/gatt_probe.py`, `custom_components/fora6_connect/services.yaml`, `custom_components/fora6_connect/translations/en.json`, `tests/test_gatt_probe.py`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/DEVELOPMENT.md`, `docs/CAPTURE_GUIDE.md`, `docs/PROTOCOL.md`, `CHANGELOG.md`, `README.md`, `ROADMAP.md`.
-
-# Checks Actually Run
-
-- `python3 -m unittest discover -s tests -v` — pass, 26 tests, 0 failures, 0 skipped.
+- `python3 -m unittest discover -s tests -v` — pass, 31 tests, 0 failures, 0 skipped.
 - `python3 -m compileall -q custom_components tests` — pass.
 - `python3 -m tabnanny custom_components tests` — pass.
-- `git diff --check` — pass; final pre-commit rerun follows this status update.
-- Ruff — not installed (`command -v ruff` returned no path); not run.
-- Service metadata — `services.yaml` parsed with PyYAML; `translations/en.json` parsed with `python3 -m json.tool`.
-- Privacy/source audit — inspected changed source, tests, and documentation; no real Bluetooth address, CoreBluetooth identifier, serial number, health measurement, raw capture, or secret added. Changed lines contain no MAC-formatted address or private 128-bit identifier. Probe source contains no characteristic read/write, notification, or pairing calls; tests exercise this boundary.
+- `git diff --check` — pass before this status update; rerun after the final handover edit and before commit.
+- Ruff — unavailable (`command -v ruff` returned no path); not run.
+- Privacy audit — inspected added code, tests, and documentation. No real Bluetooth/scanner address, raw packet, manufacturer payload, serial number, health measurement, credential, or private UUID was added. An automated check found zero new MAC-formatted addresses and zero unexpected UUID-formatted identifiers. The probe source still has no characteristic read/write, notification, pairing, or RACP call; tests verify the boundary.
 
-# Last Updated
-
-2026-09-26 (Europe/London), pre-commit review. Post-commit SHA and status belong in the final report.
+Updated 2026-09-26 (Europe/London), pre-commit.
