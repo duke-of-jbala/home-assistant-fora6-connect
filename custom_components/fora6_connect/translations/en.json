@@ -2,7 +2,7 @@
   "services": {
     "probe_gatt": {
       "name": "Probe GATT (development only)",
-      "description": "Development-only. Wait for a live advertisement from the privately supplied Bluetooth address, then list GATT metadata without characteristic I/O.",
+      "description": "Development-only. With FORA 6 CONNECT visibly current in Advertisement Monitor, connect through Home Assistant Bluetooth and list GATT metadata without characteristic I/O.",
       "fields": {
         "address": {
           "name": "Bluetooth address (private)",
