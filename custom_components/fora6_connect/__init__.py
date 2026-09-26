@@ -19,9 +19,14 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         """Return sanitized GATT evidence or a sanitized service error."""
         if probe_lock.locked():
             raise ServiceValidationError("A FORA GATT probe is already running.")
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development probe."
+            )
         try:
             async with probe_lock:
-                return await async_probe_gatt(hass)
+                return await async_probe_gatt(hass, address.strip())
         except ProbeError as err:
             raise ServiceValidationError(str(err)) from None
         except Exception:

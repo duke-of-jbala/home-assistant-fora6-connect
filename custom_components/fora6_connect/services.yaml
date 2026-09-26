@@ -1,5 +1,16 @@
 probe_gatt:
   name: Probe GATT (development only)
   description: >-
-    Request a one-shot active scan, connect to a freshly observed FORA 6
-    CONNECT through Home Assistant Bluetooth, and list GATT metadata only.
+    Development-only. Wait for a live FORA 6 CONNECT advertisement through
+    Home Assistant Bluetooth, then list GATT metadata only.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Development-only. Copy the Bluetooth address for FORA 6 CONNECT from
+        Settings -> Connectivity -> Bluetooth -> Advertisement Monitor. The
+        address is used only in memory for this probe and is not returned or
+        persisted. Do not share it publicly.
+      required: true
+      selector:
+        text: {}

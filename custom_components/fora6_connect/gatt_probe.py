@@ -34,10 +34,9 @@ def _uuid128(value: str) -> str:
     return f"0000{value}{SIG_BASE}" if len(value) == 4 else value
 
 
-def _local_name(info: Any) -> str | None:
-    """Prefer the packet local name, then HA's resolved service-info name."""
-    advertised = getattr(getattr(info, "advertisement", None), "local_name", None)
-    return advertised or getattr(info, "name", None)
+def _advertised_local_name(info: Any) -> str | None:
+    """Read the packet local name, separate from HA's resolved device name."""
+    return getattr(getattr(info, "advertisement", None), "local_name", None)
 
 
 def _enumerate_services(services: Any) -> list[dict[str, Any]]:
@@ -98,54 +97,27 @@ def _expected_gatt(observed: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
+async def async_probe_gatt(hass: HomeAssistant, address: str) -> dict[str, Any]:
     """Find a fresh advertisement, connect through HA, and list GATT metadata."""
     scanner_count = bluetooth.async_scanner_count(hass, connectable=True)
-    discoveries = tuple(
-        bluetooth.async_discovered_service_info(hass, connectable=False)
-    )
-    candidates = {
-        info.address: info
-        for info in discoveries
-        if _local_name(info) == TARGET_LOCAL_NAME
-    }
-    _LOGGER.debug(
-        "GATT probe: general discoveries=%d; FORA name matches=%d; "
-        "connectable scanners=%d; cached candidate found=%s",
-        len(discoveries),
-        len(candidates),
-        scanner_count,
-        bool(candidates),
-    )
+    _LOGGER.debug("GATT probe: connectable scanners=%d", scanner_count)
     if not scanner_count:
         _LOGGER.debug("GATT probe: no connectable Home Assistant scanner")
         raise ProbeError(
             "No connectable Home Assistant Bluetooth scanner is available."
         )
 
-    if not candidates:
-        raise ProbeError(
-            "No known FORA 6 CONNECT candidate is available for targeted active "
-            "scanning; first observe it in Home Assistant Bluetooth "
-            f"(general discoveries: {len(discoveries)}; name matches: 0; "
-            f"connectable scanners: {scanner_count})."
-        )
-    if len(candidates) > 1:
-        raise ProbeError("Multiple matching devices are known; probe stopped.")
-
-    cached_info = next(iter(candidates.values()))
-    address = cached_info.address  # Runtime only; never returned or logged.
-    cached_time = cached_info.time
     wait_started = bluetooth.MONOTONIC_TIME()
 
     def _is_fresh_fora(info: Any) -> bool:
         # async_process_advertisements may replay cached history on registration.
-        # A replay can be newer than this candidate if another scanner heard
-        # the device later, so it must also postdate the start of this wait.
+        # A live packet may omit the local name; the user selected its address
+        # privately from the previously identified Advertisement Monitor row.
+        local_name = _advertised_local_name(info)
         return (
             info.address == address
-            and _local_name(info) == TARGET_LOCAL_NAME
-            and info.time > max(cached_time, wait_started)
+            and (not local_name or local_name == TARGET_LOCAL_NAME)
+            and info.time > wait_started
         )
 
     _LOGGER.debug("GATT probe: targeted active advertisement wait started")
@@ -173,7 +145,8 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
         _LOGGER.debug("GATT probe: targeted wait returned no valid fresh candidate")
         raise ProbeError("Targeted wait returned no fresh FORA 6 CONNECT advertisement.")
 
-    _LOGGER.debug("GATT probe: fresh FORA advertisement received")
+    local_name = _advertised_local_name(fresh_info)
+    _LOGGER.debug("GATT probe: fresh targeted advertisement received")
     ble_device = bluetooth.async_ble_device_from_address(
         hass, fresh_info.address, connectable=True
     )
@@ -238,7 +211,8 @@ async def async_probe_gatt(hass: HomeAssistant) -> dict[str, Any]:
     assert result is not None
     return {
         "device_found": True,
-        "local_name": TARGET_LOCAL_NAME,
+        "local_name": local_name,
+        "advertised_name_confirmed": local_name == TARGET_LOCAL_NAME,
         "active_scan_requested": True,
         "fresh_advertisement_observed": True,
         "connectable_device_resolved": True,

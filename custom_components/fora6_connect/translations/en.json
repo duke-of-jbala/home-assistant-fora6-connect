@@ -2,7 +2,13 @@
   "services": {
     "probe_gatt": {
       "name": "Probe GATT (development only)",
-      "description": "Request a fresh Bluetooth advertisement, connect, and list GATT metadata without reading measurements or writing characteristics."
+      "description": "Development-only. Wait for a live advertisement from the privately supplied Bluetooth address, then list GATT metadata without characteristic I/O.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Development-only. Copy the Bluetooth address for FORA 6 CONNECT from Settings → Connectivity → Bluetooth → Advertisement Monitor. It is used only in memory for this probe and is not returned or persisted. Do not share it publicly."
+        }
+      }
     }
   }
 }
