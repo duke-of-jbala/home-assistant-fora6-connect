@@ -15,7 +15,7 @@ Home Assistant Bluetooth stack --> custom_components/fora6_connect
                                    |-- entities and diagnostics
 ```
 
-The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. The integration will resolve connectable devices through Home Assistant's Bluetooth APIs so either a local adapter or an eligible proxy can carry a future connection. The exact connection and retry design belongs to Stage 4 and must follow the APIs available then.
+The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Production transport will resolve connectable devices through Home Assistant's Bluetooth APIs so either a local adapter or an eligible proxy can carry a future connection. The exact production connection and retry design belongs to Stage 4 and must follow the APIs available then.
 
 ## Boundaries
 
@@ -27,7 +27,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. The
 - `config_flow.py`: future setup and discovery after device identity can be established beyond the documented UUID pair.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
-At the current Stage 1B checkpoint, a manually invoked development-only Home Assistant GATT probe is available in `gatt_probe.py`; it is separate from the future production `bluetooth.py` transport. The real meter has been connected and its GATT inventory viewed with an iPhone scanner, but the Home Assistant connection path remains unvalidated until the probe runs on the user's system. No parser, production config flow, or entities are active. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
+The manually invoked development-only `gatt_probe.py` has validated Home Assistant-side connectable-device resolution, connection, five-service GATT enumeration, and clean disconnect on the real meter. The exact scanner/adapter selected is unknown. This establishes transport capability, not production discovery or FORA application protocol behavior. The temporary probe is separate from the future production `bluetooth.py` transport. No parser, production config flow, synchronization, or entities are active. Expected analytes, subject to exact GD82 support and protocol validation, are glucose, haematocrit, haemoglobin, beta-ketone/beta-hydroxybutyrate, total cholesterol, and uric acid. Potential diagnostics include last measurement time, last successful sync, sync state, record position/count, and signal strength.
 
 ## Documentation and packaging
 

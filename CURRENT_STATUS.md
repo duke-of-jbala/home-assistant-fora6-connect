@@ -17,11 +17,11 @@ Review remaining Stage 1 discovery questions and plan a controlled, privacy-safe
 ## Repository State at Pre-Commit Review
 
 - **Date/branch/checkout:** 2026-09-26 (Europe/London), `main`, `<local checkout>`.
-- **Last completed checkpoint:** `d9a850139163624ea0adba3a81676852fb15ea44` — `fix: connect directly in Stage 1B GATT probe`.
+- **Last completed checkpoint:** `3d00f18e822e332f7a671bd90e69ffa29da92b3a` — `docs: record successful FORA GATT validation`.
 - **Starting tree:** clean; `git status --short --branch` showed `## main`.
-- **Changes after checkpoint:** yes; the seven documentation files below are modified in this dirty pre-commit state. Verify and report the post-commit state separately.
-- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `docs/PROTOCOL.md`, `docs/CAPTURE_GUIDE.md`, `docs/DEVELOPMENT.md`, `CHANGELOG.md`.
-- **Code/remote actions:** no functional code change; no push, tag, or release.
+- **Changes after checkpoint:** yes; the six documentation files below are modified in this dirty pre-commit state. Verify and report the post-commit state separately.
+- **Files changed:** `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/STAGE1_OBSERVATION_TEMPLATE.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`.
+- **Code/remote actions:** no Python change, BLE operation, push, tag, or release.
 
 ## Checks Actually Run
 
@@ -30,6 +30,7 @@ Review remaining Stage 1 discovery questions and plan a controlled, privacy-safe
 - `python3 -m tabnanny custom_components tests` — pass.
 - `git diff --check` — pass before this status update; final rerun follows.
 - Ruff — unavailable (`command -v ruff` returned no path); not run.
-- Privacy audit — reviewed the final documentation diff: zero MAC-formatted literals; UUIDs are only the supplied public GATT service/characteristic identifiers. No private address, scanner/source identifier, raw packet, manufacturer payload bytes, serial value, health measurement, or secret was added.
+- Tracked-Markdown audit — enumerated and searched all 13 tracked Markdown paths for stale GATT/discovery status, then reviewed the affected current-state passages. Updated the README, roadmap pointer, architecture page, and materially stale GATT heading in the blank Stage 1 template. Historical failed-probe evidence and accepted ADRs were preserved.
+- Privacy audit — reviewed added lines: zero MAC- or UUID-formatted literals, and no private identifier, raw capture, measurement, or secret was added.
 
 Updated 2026-09-26 (Europe/London), pre-commit.

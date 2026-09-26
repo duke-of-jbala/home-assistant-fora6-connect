@@ -73,9 +73,9 @@
 - Connection Monitor observation: [existing connection/source or none shown]
 - Reachability conclusion: [not tested in Stage 1A]
 
-## H. GATT inventory — not yet collected
+## H. GATT inventory — blank private template
 
-Stage 1B only after candidate review and explicit authorization. Record all services, characteristics, and properties privately then; do not fill this section from documentation alone.
+The real Stage 1B Home Assistant inventory is recorded in [PROTOCOL.md](PROTOCOL.md). Use this blank section only for an additional, separately authorized private observation; do not fill it from documentation alone.
 
 ## I. Passive notifications — not yet collected
 
