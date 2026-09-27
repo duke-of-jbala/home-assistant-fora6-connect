@@ -2,6 +2,7 @@
 
 import ast
 import importlib.util
+import logging
 import sys
 import types
 import unittest
@@ -26,6 +27,7 @@ def _load_entity():
     helpers = types.ModuleType("homeassistant.helpers")
     registry = types.ModuleType("homeassistant.helpers.device_registry")
     registry.DeviceInfo = dict
+    registry.CONNECTION_BLUETOOTH = "bluetooth"
     platform = types.ModuleType("homeassistant.helpers.entity_platform")
     platform.AddEntitiesCallback = object
     modules = {
@@ -49,11 +51,13 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
         self.state = sensor_state.MeasurementState()
         self.entry = types.SimpleNamespace(
             unique_id="SYNTHETIC-SERIAL-A", entry_id="SYNTHETIC-ENTRY-A",
-            runtime_data=types.SimpleNamespace(measurement_state=self.state),
+            runtime_data=types.SimpleNamespace(
+                address="SYNTHETIC-LOCATOR-A", measurement_state=self.state
+            ),
         )
         self.entity = self.module.Fora6UricAcidSensor(self.entry, self.state)
 
-    async def test_one_entity_uses_exact_serial_only_for_device_identifier(self):
+    async def test_one_entity_uses_exact_serial_and_bluetooth_connection(self):
         add = Mock()
         await self.module.async_setup_entry(object(), self.entry, add)
         add.assert_called_once()
@@ -61,9 +65,19 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(entities), 1)
         entity = entities[0]
         self.assertEqual(entity._attr_device_info["identifiers"], {("fora6_connect", self.entry.unique_id)})
+        self.assertEqual(entity._attr_device_info["serial_number"], self.entry.unique_id)
+        self.assertEqual(entity._attr_device_info["connections"], {("bluetooth", "SYNTHETIC-LOCATOR-A")})
+        self.assertEqual(self.entry.unique_id, "SYNTHETIC-SERIAL-A")
         self.assertEqual(entity._attr_unique_id, "SYNTHETIC-ENTRY-A_uric_acid")
         self.assertNotIn(self.entry.unique_id, entity._attr_unique_id)
-        self.assertNotIn("serial_number", entity._attr_device_info)
+        self.assertNotIn(("fora6_connect", "SYNTHETIC-LOCATOR-A"), entity._attr_device_info["identifiers"])
+        self.assertNotEqual(self.entry.unique_id, "SYNTHETIC-LOCATOR-A")
+        self.assertEqual(entity._attr_device_info["name"], "FORA 6 Connect")
+        self.assertEqual(entity._attr_device_info["manufacturer"], "ForaCare")
+        self.assertEqual(entity._attr_device_info["model"], "GD82")
+        self.assertNotIn("model_id", entity._attr_device_info)
+        self.assertFalse(any(key.startswith("default_") for key in entity._attr_device_info))
+        self.assertFalse(any("ip" in key.lower() for key in entity._attr_device_info))
         self.assertEqual(entity._attr_native_unit_of_measurement, "mg/dL")
         self.assertFalse(entity._attr_should_poll)
         self.assertFalse(hasattr(entity, "_attr_device_class"))
@@ -88,9 +102,34 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
         other = self.module.Fora6UricAcidSensor(self.entry, sensor_state.MeasurementState())
         self.assertEqual(other._attr_device_info["identifiers"], self.entity._attr_device_info["identifiers"])
 
+    async def test_new_locator_preserves_serial_identity(self):
+        self.entry.runtime_data.address = "SYNTHETIC-LOCATOR-B"
+        other = self.module.Fora6UricAcidSensor(self.entry, sensor_state.MeasurementState())
+        self.assertEqual(other._attr_device_info["identifiers"], self.entity._attr_device_info["identifiers"])
+        self.assertEqual(other._attr_device_info["serial_number"], self.entity._attr_device_info["serial_number"])
+        self.assertEqual(other._attr_device_info["connections"], {("bluetooth", "SYNTHETIC-LOCATOR-B")})
+        self.assertEqual(other._attr_unique_id, self.entity._attr_unique_id)
+
+    async def test_visible_serial_is_not_canonicalized(self):
+        self.entry.unique_id = "  SYNTHETIC-é-01  "
+        entity = self.module.Fora6UricAcidSensor(self.entry, self.state)
+        self.assertEqual(entity._attr_device_info["serial_number"], "  SYNTHETIC-é-01  ")
+        self.assertEqual(
+            entity._attr_device_info["identifiers"],
+            {("fora6_connect", "  SYNTHETIC-é-01  ")},
+        )
+
+    async def test_serial_and_locator_are_not_logged_or_exposed_as_state(self):
+        with patch.object(logging.Logger, "_log") as logged:
+            entity = self.module.Fora6UricAcidSensor(self.entry, self.state)
+            self.assertIsNone(entity.native_value)
+        logged.assert_not_called()
+        self.assertNotIn(self.entry.unique_id, entity._attr_name)
+        self.assertNotIn(self.entry.runtime_data.address, entity._attr_name)
+
     async def test_entity_has_no_bluetooth_or_auto_update_code(self):
         source = (INTEGRATION / "sensor.py").read_text()
-        for forbidden in ("async_ble_device_from_address", "write_gatt_char", "start_notify", "async_update", "asyncio.create_task", "address"):
+        for forbidden in ("async_ble_device_from_address", "write_gatt_char", "start_notify", "async_update", "asyncio.create_task", "CONNECTION_NETWORK_MAC"):
             self.assertNotIn(forbidden, source)
         tree = ast.parse(source)
         self.assertFalse(any(isinstance(node, ast.FunctionDef) and node.name == "async_update" for node in ast.walk(tree)))

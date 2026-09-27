@@ -1,20 +1,22 @@
 # FORA 6 Connect Codex Handover
 
-## Temporary placeholder branding checkpoint
+## Pre-GitHub device metadata checkpoint
 
-Created four original, transparent PNG assets under `custom_components/fora6_connect/brand/`: a square F6/Bluetooth mark at 256 and 512 pixels, and landscape “FORA 6 Connect” lockups at 1024×256 and 2048×512. The glyphs and label use simple generic geometry and plain sans-serif text. The repository does not contain official ForaCare art or wordmark. See [the branding note](docs/BRANDING.md); manufacturer branding may replace the placeholder if permission is obtained.
+The Stage 6B sensor now puts exact confirmed `0x2A25` text into `DeviceInfo.serial_number`, intentionally visible on the authenticated local Home Assistant device page. The same text remains ConfigEntry unique ID and `(DOMAIN, serial)` identifier. Home Assistant's supported `CONNECTION_BLUETOOTH` type carries the current runtime address as entity registration connection metadata. The address does not become a ConfigEntry unique ID or DeviceInfo identifier, and no IP is assigned to this BLE meter. Name, manufacturer, and model remain `FORA 6 Connect`, `ForaCare`, and `GD82`; `model_id` is omitted because it would duplicate `GD82`. The connection tuple is a registration snapshot; automatic removal of stale registry connections after a confirmed address change remains unresolved. No physical metadata validation was run by Codex.
 
 - **Branch/date:** `main`, 2026-09-27 (Europe/London).
-- **Last completed/checkpoint commit before task:** `67454a67c158cb9138703e2dcd34506a4d891ebc` — `docs: define Stage 7 history traversal`.
+- **Last completed/checkpoint commit before task:** `c095475018c1042b85cea284c11af6d2cfd33cc9` — `chore: add temporary integration branding`.
 - **Starting working tree:** clean, verified before edits.
-- **Changes after checkpoint:** yes, four PNG assets and documentation only at this pre-commit observation.
-- **Files changed:** `custom_components/fora6_connect/brand/icon.png`, `icon@2x.png`, `logo.png`, `logo@2x.png`, `docs/BRANDING.md`, `CHANGELOG.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`.
-- **Stage boundary:** no Python, manifest, translations, integration action, command sequence, or runtime behavior changed. No official artwork or font files were copied or committed.
+- **Changes after checkpoint:** yes, focused device metadata, synthetic tests, and documentation at this pre-commit observation.
+- **Files changed:** `custom_components/fora6_connect/sensor.py`, `tests/test_stage6b_entity.py`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md`.
+- **Stage boundary:** no Config Flow, transport, development action, protocol, measurement, command, or synchronization change. Serial/address remain absent from integration logs, diagnostics, action results, and public examples.
 
 ## Checks
 
-- PNG validity, exact dimensions, alpha channel, file sizes, and light-background rendering: passed. Sizes are 14,499 B, 29,211 B, 43,676 B, and 88,276 B respectively.
-- Existing unit suite: **239 passed** (`python3 -m unittest discover -s tests -q`); `git diff --check`: passed.
-- Privacy/artifact/scope audit passed for eight changed paths; no private address/path, capture, package, font file, or runtime-code change was found. Post-commit status will be verified and reported separately.
+- Full unit suite: **242 passed** (`python3 -m unittest discover -s tests -q`); three new synthetic tests extend entity metadata coverage.
+- `python3 -m compileall -q custom_components tests`: passed.
+- `python3 -m tabnanny custom_components tests`: passed.
+- Four JSON and one YAML file parsed successfully.
+- `git diff --check` and `git diff --cached --check`: passed after staging. Full eight-file diff reviewed; scope, deprecated-field, serial/address leakage, privacy, and artifact audits passed. The only runtime change is `sensor.py` DeviceInfo metadata; this pre-commit tree is not described as clean.
 
-**Exact next gate:** separately authorize Stage 7B bounded probe implementation and user-run physical validation as specified in [Stage 7A](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). Do not begin production history synchronization until traversal, latest ordering, and deduplication have evidence.
+**Exact next gate:** separately authorize Stage 7B bounded development probe implementation and user-run physical validation under [the Stage 7A design](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). General traversal, latest ordering, deduplication, resume/persistence, and production entity updates remain deferred.

@@ -24,7 +24,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 - `models.py`: pure-Python Stage 3 combined TD4183 record over the two validated protocol parts. It preserves meter-local time, unknown/opaque fields, and QC category without introducing sync time, units, or Home Assistant entities.
 - `measurement.py`: pure-Python Stage 5/5A product measurement mapping. It applies `/10` only to valid identified uric acid, retains category/transmitted/meter-local time, and assigns the app's evidenced mg/dL base unit to that valid analyte only.
 - `sensor_state.py`: pure Stage 5/5A ordinary uric-acid state mapping and inert per-entry runtime holder.
-- `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; no BLE I/O or polling.
+- `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; the local device page shows the exact validated serial and the runtime Bluetooth address is connection metadata. No BLE I/O or polling.
 - `coordinator.py`: future retrieval and synchronization state; Stage 7A added no runtime coordinator behavior.
 - `config_flow.py`: Stage 6B passive candidate, user review, bounded active project/serial confirmation, and private persistent identity.
 - `diagnostics.py`: future non-sensitive diagnostics.
@@ -48,3 +48,7 @@ The custom integration uses `translations/en.json` for runtime localization. `st
 ## Stage 7A history gate
 
 [Stage 7A](STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) reviewed raw-count parsing, indexed pair retrieval, multi-parameter companion logic, and deduplication without adding a data path. The app's observed `1 → 0 → 1` access does not establish general history traversal or latest-record ordering. No collision-safe record ID or resume state is known. The one existing entity remains unavailable; `coordinator.py` is still inert. A separately authorized bounded Stage 7B probe is the next gate before production synchronization.
+
+## Device metadata refinement
+
+The entity's `DeviceInfo` now places the exact validated `0x2A25` text in `serial_number` for the authenticated local device page. `(DOMAIN, serial)` remains the logical device identifier and ConfigEntry unique ID. The current runtime address uses Home Assistant's dedicated `CONNECTION_BLUETOOTH` type in `connections`, without becoming the canonical identifier. Name, ForaCare manufacturer, and GD82 model remain as before; the BLE meter has no IP address. [The Stage 6B record](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) documents the privacy and address-rotation limits. No entity value, BLE command, or sync path changed.
