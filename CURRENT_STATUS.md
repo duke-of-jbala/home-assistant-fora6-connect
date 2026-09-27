@@ -16,14 +16,14 @@ The development-only `fora6_connect.probe_protocol_record` action reuses the Sta
 
 Install the development build in Home Assistant and invoke `fora6_connect.probe_protocol_record` **once** against the existing stored record, sharing only its privacy-safe structured result. Stage 2F remains in progress until that physical result is reviewed. If any request fails, do not retry, send `0x33`, or infer a missing prerequisite without further evidence. Do not start a later stage automatically.
 
-## Repository state at pre-commit review
+## Repository state at documentation-correction review
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed checkpoint:** `c791a3ec3523478bb9dc2697eb557e6ba342d8f1` — `docs: record successful Stage 2E identity probe`.
-- **Starting tree after checkpoint:** clean (`git status --short` empty after the Stage 2E closure commit).
-- **Changes after checkpoint:** yes; this Stage 2F implementation and documentation are uncommitted at this stated pre-commit point. Report the final Stage 2F SHA and post-commit tree state separately.
+- **Last completed checkpoint:** `4ae3efa7a1993140afbfe4575b35917a11192dfd` — `feat: add bounded TD4183 single-record probe` (the 22-file Stage 2F implementation commit).
+- **Starting tree after checkpoint:** clean (`git status --short` empty before this wording correction).
+- **Changes after checkpoint:** yes; this follow-up changes only `FORA6_MASTER_ROADMAP.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md` to align the opening roadmap state and handover. Report the follow-up SHA and post-commit tree state separately.
 - **Live actions in this repository task:** none. The Stage 2E physical success is user-supplied evidence; Codex did not connect, deploy, push, tag, or release.
-- **Changed files:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md`, `docs/STAGE2F_TD4183_RECORD_PROBE.md`, `custom_components/fora6_connect/__init__.py`, `protocol.py`, `protocol_probe.py`, `services.yaml`, `translations/en.json`, `tests/test_gatt_probe.py`, `tests/test_protocol.py`, and `tests/test_record_probe.py`.
+- **Stage 2F implementation file set:** the exact 22-file set remains in the preceding commit, verified with `git show --name-only`; no implementation file changed in this correction.
 
 ## Checks actually run
 
@@ -31,6 +31,6 @@ Install the development build in Home Assistant and invoke `fora6_connect.probe_
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
 - `git diff --check` and `git diff --cached --check`: passed.
 - Manifest/translation JSON and service YAML parsed successfully. Ruff was not installed.
-- Reviewed the 22-file staged diff and action write scope. The staged privacy/artifact audit found no private path, MAC-like address, actual health value, capture/APK/keystore artifact, or protocol-layer Home Assistant/Bleak import.
+- The preceding 22-file implementation diff, action write scope, and privacy/artifact audit passed before its commit. For this documentation-only correction, the full suite was rerun (94 passed); compileall, tabnanny, manifest/translation JSON, service YAML, and `git diff --check` passed. The correction's staged diff check follows this pre-commit observation and is reported separately.
 
 Updated 2026-09-27 (Europe/London), pre-commit.

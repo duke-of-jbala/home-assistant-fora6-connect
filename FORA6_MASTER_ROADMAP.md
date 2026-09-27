@@ -1,6 +1,6 @@
 # Home Assistant — FORA 6 Connect: master roadmap
 
-This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 and Stage 1 are complete; Stage 2 is in progress.** Stages 2A–2E are complete. The real Stage 2E Home Assistant identity action succeeded with the meter ON. Stage 2F is authorized, beginning with a mandatory offline evidence gate before any new record command.
+This is the authoritative project roadmap. `ROADMAP.md` points here. Stage gates require explicit user authorization; completing one stage does not start the next. **Stage 0 and Stage 1 are complete; Stage 2 is in progress.** Stages 2A–2E are complete. The real Stage 2E Home Assistant identity action succeeded with the meter ON. **Stage 2F remains in progress:** its offline evidence gate passed and its development-only one-slot record probe is implemented; physical Home Assistant validation is pending.
 
 ## Project identity and goal
 

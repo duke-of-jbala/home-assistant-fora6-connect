@@ -5,9 +5,9 @@
 Stage 0, Stage 1, and Stages 2A–2E are complete. Stage 2F is in progress. The user-supplied real Stage 2E action succeeded with the GD82 **ON**: custom `1524` subscription, captured wake/project exchanges, project `0x4183`, and clean cleanup. The separate Stage 1C connection while the display appeared off is not off-state Stage 2E evidence.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `c791a3ec3523478bb9dc2697eb557e6ba342d8f1` — `docs: record successful Stage 2E identity probe`.
-- **Starting tree after checkpoint:** clean, verified with `git status --short`.
-- **Changes after checkpoint:** yes; this handover describes the dirty Stage 2F pre-commit state. The changed files are listed in `CURRENT_STATUS.md`; report the Stage 2F commit SHA and post-commit status separately.
+- **Last completed checkpoint:** `4ae3efa7a1993140afbfe4575b35917a11192dfd` — `feat: add bounded TD4183 single-record probe`, the reviewed 22-file implementation commit.
+- **Starting tree after checkpoint:** clean, verified with `git status --short` before this correction.
+- **Changes after checkpoint:** yes; this follow-up changes `FORA6_MASTER_ROADMAP.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md` only. It corrects the roadmap opening to say the offline gate passed and physical validation is pending. Report the follow-up commit SHA and post-commit status separately.
 - **Live actions:** none performed by Codex. No deployment, push, tag, or release.
 
 ## Offline evidence decision
@@ -22,10 +22,12 @@ The same static import path calls `0x33` to set the clock. Its necessity for sub
 
 **Exact next gate:** user installs the development build and runs `fora6_connect.probe_protocol_record` once against the existing stored record, then returns only the privacy-safe result. Stage 2F is not physically validated or complete. If it fails, do not retry commands, add clock setting, or advance stages without a new evidence review.
 
-## Checks actually run at this pre-commit point
+## Stage 2F implementation checks already completed
 
 - `python3 -m unittest discover -s tests -v`: 94 passed.
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
 - `git diff --check` and `git diff --cached --check`: passed.
 - Manifest/translation JSON and service YAML parsed. Ruff was not installed.
 - Reviewed the 22-file staged diff. Staged privacy and artifact checks found no private path, MAC-like address, actual health value, raw capture, APK/keystore, or production sync path. `protocol.py` imports only standard-library modules.
+
+For this documentation-only correction, the full suite was rerun (94 passed); compileall, tabnanny, manifest/translation JSON parsing, service YAML parsing, and `git diff --check` passed. The committed Stage 2F file set still has exactly 22 files. No probe command boundary changed. The staged correction diff check follows this pre-commit observation and is reported separately.
