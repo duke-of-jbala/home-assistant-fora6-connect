@@ -1,6 +1,6 @@
 # Stage 13A-P — bounded GD82 advertisement-state observation
 
-**Gate status: partial user-run physical evidence; remaining states pending.** The starting
+**Gate status: partial user-run physical evidence; callback-level observation needed.** The starting
 checkpoint is clean `main` at `c858338481031e9c0090705666af664b72e5260d`
 (`docs: review automatic refresh trigger architecture`); `origin/main`
 matched. The released `v1.0.0` tag still resolves to
@@ -40,8 +40,16 @@ previously seen it update. After an HAOS restart, the Bluetooth view resumed
 updating. This failed UI refresh is **inconclusive about the meter's radio**;
 it may reflect cached/stale UI or HA Bluetooth state. It is not evidence that
 the GD82 failed to advertise. A new controlled OFF → ON comparison after the
-restart remains pending. Monitor liveness must be checked before interpreting
-an unchanged row in any state.
+restart was then performed. After updating to Home Assistant Core 2026.9.4 and
+restarting HAOS, the first normal power-on appeared in the monitor almost
+immediately. Subsequent normal OFF → ON cycles did not reset its `Updated`
+time. The displayed name and shape remained stable: two service UUIDs, one
+manufacturer-data entry, no service data, `connectable: true`, and the same
+proxy source. Neither the second UUID nor private payload was reported.
+The UI cannot distinguish absent packets, Home Assistant deduplication, and
+a stale frontend/monitor row. The recent Core update makes a regression
+possible, but **no regression is established**. Monitor liveness cannot be
+assumed for a future episode.
 
 The user has at least two Atom Lite proxies. Give them private source aliases
 `Proxy A` and `Proxy B`; keep their actual addresses and deployment details
@@ -83,32 +91,36 @@ screenshot, raw log, or payload bytes.
 
 ## Sanitized physical evidence table
 
-The OFF row below uses the user-supplied detail-view observation. Other rows
-remain pending; `pending` means **not observed**, not an inferred result.
+The OFF row uses the earlier detail-view observation. The two later ON rows
+use the post-update observation. `Pending` means **not observed**, not an
+inferred result. No packet receipt or callback was directly observed.
 
 | State | Fresh event | Local name | Service UUID shape | Manufacturer shape | Service-data shape | Connectable | Source behavior | Relative appearance/disappearance | Distinct from normal ON? |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Fully OFF | No live update seen; cached row | FORA 6 CONNECT | Includes standard Glucose; full set not reported | One entry; key/length not reported | Absent | Not shown | Previous proxy source retained | `Updated` age increased; row retained | Unresolved |
 | Normal manual ON, first attempt | Inconclusive: monitor did not update; HAOS restart restored view updates | Pending | Pending | Pending | Pending | Not shown before restart | Pending | No reliable live timing | Reference unresolved |
+| Normal manual ON after HAOS restart | First ON appeared in monitor; callback/packet unknown | FORA 6 CONNECT | Two UUIDs; second not reported | One entry; key/length not reported | Absent | Yes, as displayed | Same proxy source displayed | Almost immediate UI appearance; no measured interval | Reference state, UI only |
 | Post-measurement flashing | Pending naturally appropriate session | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
 | History-arrow mode | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
 | Normal power-off | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
-| Second OFF → ON | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
+| Repeated normal OFF → ON after restart | `Updated` did not reset; packet/callback unknown | Unchanged | Two UUIDs displayed, unchanged | One entry displayed, unchanged | Absent | Yes, as displayed | Same proxy source displayed | No new UI update; actual appearance/disappearance unknown | No structural UI difference shown |
 
 ## Critical comparisons and current limits
 
-1. **Normal ON vs post-measurement:** unresolved. The first ON monitor attempt
-   was inconclusive because the HA view was stale until restart. The earlier
-   post-measurement subscription failure is live connection evidence, not an
-   advertisement comparison.
+1. **Normal ON vs post-measurement:** unresolved. The later normal-ON view is
+   a useful reference, but no post-measurement advertisement was captured.
+   The earlier post-measurement subscription failure is live connection
+   evidence, not an advertisement comparison.
 2. **Normal ON vs history mode:** unresolved. The prior observation that
    history-arrow use stopped the Bluetooth light does not establish a packet
    change or disappearance.
-3. **OFF → ON fresh episode:** unresolved. HA callback replay, duplicate
-   suppression, and delayed unavailable tracking cannot be inferred from a
-   retained monitor row.
-4. **Multi-proxy deduplication:** unresolved for this meter episode. A monitor
-   may combine sources while a per-packet callback can fire once per scanner.
+3. **OFF → ON fresh episode:** the first ON after restart reached the UI almost
+   immediately, but subsequent OFF → ON cycles did not refresh `Updated`.
+   This does **not** establish whether packets reached Home Assistant or a
+   live callback. The monitor cannot establish an episode boundary.
+4. **Multi-proxy deduplication:** unresolved. The same proxy source was shown
+   throughout this UI observation; that does not exclude packets from the
+   other proxy or show callback-level deduplication.
 5. **Transaction readiness:** not inferable from connectability alone; one
    flashing state connected but failed notification subscription.
 6. **One bounded attempt per episode:** not yet justified. It needs a
@@ -121,25 +133,34 @@ callback, retry, polling, or connection is added by this record.
 
 ## Observer decision and next gate
 
-The HA detail view supplies structural information, so an observer is **not
-yet justified**. Continue with that UI first. It still may not reveal a
-connectable flag, exact live callback delivery, or every per-proxy packet. If
-those gaps remain material after the state comparison, the exact possible
-tracked change is a development-only, configured-entry-targeted action in the
-existing probe convention: an explicitly invoked, bounded registration of
-HA's per-packet advertisement callback for the configured address, always
-cancelled afterward. A live changed-advertisement callback with cached replay
-disabled could be compared. Return only sanitized shape, per-invocation
-`Proxy A/B` aliases, relative event timing, and counts, never address, raw
-payload, RSSI value, health data, or real clock time. No GATT connection,
-FORA command, persistent state, startup registration, or production refresh.
-Tests would cover cancellation, time/memory bounds, privacy, multiple
-sources, and no connection/protocol calls. This observer is **not implemented**
-or approved by the UI observation alone.
+The repeated unchanged `Updated` time makes the UI insufficient to decide
+whether Home Assistant receives a new episode. The smallest next gate is
+**Stage 13A-P1: a separately authorized, development-only Bluetooth callback
+observer**. The [current Home Assistant Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/)
+documents the key distinction: `async_register_callback` reports changed
+advertisement data and can replay cache unless `BluetoothCallbackReplay.DISABLED`
+is selected; `async_register_advertisement_callback` reports every delivered
+advertisement for one address, including unchanged packets, once per scanner.
+Its non-raw advertisement fields can be merged across packets. These two
+callbacks, observed together, can distinguish packet delivery from changed-data
+dispatch without relying on the monitor's `Updated` field. The packet callback
+still only proves delivery through Home Assistant, not GATT readiness.
 
-**Current category: PARTIAL EVIDENCE — physical observations pending.** The
-exact next gate is user-run sanitized detail-view observation of normal ON,
-history mode, power-off, and a repeated OFF/ON. Decide about any observer
-only after those results. A
-naturally occurring post-measurement state remains pending. Stage 13B
-automatic synchronization is not authorized or implemented.
+Use the configured entry's private address only as an in-memory callback
+filter. Explicitly start one bounded session; do not register at startup.
+Observe an OFF → normal ON → OFF → normal ON sequence, with safe history mode
+separately and post-measurement only during natural use. Report bounded
+packet and changed-callback counts, session-relative monotonic timing,
+structural field shapes, and per-session `Proxy A/B` aliases. Do not return
+addresses, source identifiers, payloads, hashes, RSSI values, health data,
+wall-clock times, or logs. Cap events and memory; cancel both subscriptions on
+normal completion, failure, cancellation, and unload. No GATT connection,
+write, FORA command, active scan request, cache clearing, production refresh,
+or persistent state. Tests should prove these boundaries and callback cleanup.
+No timing constant for a production trigger is selected. The observer is
+**not implemented in this gate**.
+
+**Current category: PARTIAL EVIDENCE.** The exact next gate is separate
+authorization for Stage 13A-P1, then user-run sanitized callback observation.
+Post-measurement advertising and history-mode behavior remain pending. Stage
+13B automatic synchronization is not authorized or implemented.

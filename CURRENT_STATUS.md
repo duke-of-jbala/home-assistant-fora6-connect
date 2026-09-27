@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P — post-update monitor assessment, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `1c05d62165879f32b85dfb4dbab7f7ac0bed8714` — `docs: note inconclusive Bluetooth monitor refresh`; `origin/main` matched. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **User-supplied physical observation:** after updating Home Assistant Core to 2026.9.4 and restarting HAOS, first normal ON appeared in Advertisement Monitor almost immediately. Repeated normal OFF → ON cycles did not reset `Updated`. The displayed name, two service UUIDs, one manufacturer-data entry, absent service data, connectable flag, and same proxy source appeared stable. The UI does not establish whether packets failed to arrive, were deduplicated, or were received but not shown. A Core/frontend regression is possible but unproven. No post-measurement or history-mode advertisement observation was provided.
+- **Assessment:** [Stage 13A-P evidence](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) now justifies a separately authorized, bounded development-only observer comparing HA's per-packet and live changed-data callbacks. It must make no connection, command, refresh, or persistent change. Production remains manual-only; Stage 13B is not authorized.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, and `ROADMAP.md`. This is a modified pre-commit observation; post-commit state must be verified separately.
+- **Checks actually run on the modified tree:** current official HA Bluetooth callback documentation and baseline refs reviewed; full `unittest` suite **375/375** passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; `git diff --check` passed. Five changed Markdown files passed added-line private address/IP/path, credential, health-value/time, screenshot/capture, and tracked-artifact scans; no runtime files changed. Final staged diff check and pushed CI remain to be verified.
+
+**Exact next gate:** separately authorize Stage 13A-P1, a strictly read-only bounded development Bluetooth callback observer; then gather sanitized OFF/ON/history and naturally occurring post-measurement evidence. No Stage 13B auto-sync implementation.
+
 ## Stage 13A-P — monitor-liveness caveat follow-up, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `66dcdb35716794cda7b8410b15e358af96ac3f6a` — `docs: record partial GD82 advertisement observation`; `origin/main` matched after its normal push and HACS/hassfest validation passed. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P — callback observer assessment, pre-commit
+
+The starting checkpoint was clean `main` at `1c05d62165879f32b85dfb4dbab7f7ac0bed8714` (`docs: note inconclusive Bluetooth monitor refresh`) on 2026-09-28 (Europe/London), with matching `origin/main`; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. After the user's Home Assistant Core 2026.9.4 update and HAOS restart, the first normal meter ON appeared in Advertisement Monitor almost immediately, but subsequent normal OFF → ON cycles did not reset `Updated`. Stable displayed name/structural fields, connectable flag, and one proxy source cannot distinguish absent packets, Bluetooth deduplication, or a stale UI. A Core/frontend regression is unproven. History and post-measurement advertisements remain unobserved.
+
+The [Stage 13A-P evidence table](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) and current official HA API review support **a separately authorized development-only callback observer** as the next smallest evidence tool. It would compare per-packet callbacks with live changed-data callbacks, with no GATT, command, write, refresh, startup registration, or persistent state. This task implements no observer and does not authorize Stage 13B. Production remains manual-only.
+
+This task changes `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, and `ROADMAP.md`; the tree is modified at this pre-commit observation. The full `unittest` suite passed **375/375**; compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, changed-Markdown private-data/credential/artifact audit, and no-runtime-diff check passed. Verify staged diff and post-push CI/state separately.
+
+**Exact next gate:** separate authorization for Stage 13A-P1 bounded development-only Bluetooth callback observer, followed by sanitized user-run OFF/ON/history and naturally occurring post-measurement observations. No automatic sync.
+
 ## Stage 13A-P — HA monitor-liveness caveat, pre-commit
 
 The prior partial-evidence checkpoint was clean pushed `main` at `66dcdb35716794cda7b8410b15e358af96ac3f6a` (`docs: record partial GD82 advertisement observation`) on 2026-09-28 (Europe/London), with `origin/main` matching and HACS/hassfest green. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user's first normal-ON attempt did not refresh the HA Advertisement Monitor row; an HAOS restart restored view updates. Treat that attempt as an **inconclusive UI/Bluetooth observability failure**, never as evidence of no GD82 broadcast. [The Stage 13A-P table](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) now separates the stale-view attempt from the pending post-restart comparison.
