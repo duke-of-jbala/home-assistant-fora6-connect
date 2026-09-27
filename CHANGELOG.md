@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Evidence
+- Stage 9 offline review defines a controlled M5Stack Atom Lite ESPHome Bluetooth Proxy connection-path test. Actual proxy traversal and physical refresh through it remain pending; no runtime command or synchronization behavior changed.
 - Closed Stage 7H after user-run real-device count-four validation. The existing uric-acid entity became available and no duplicate entity appeared. The actual value, timestamp, screenshot, and identifiers were not added. Broader history synchronization and automatic refresh remain out of scope.
 
 ### Fixed

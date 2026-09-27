@@ -1,5 +1,19 @@
 # Current Status — FORA 6 Connect
 
+**Stage 9 is pending user-run physical validation.** The offline review found no integration change needed before testing the intended M5Stack Atom Lite ESPHome Bluetooth Proxy path. Home Assistant may choose a local adapter or another proxy, so a successful manual refresh alone is insufficient. [The Stage 9 plan](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) requires actual Atom Lite connection evidence or a valid sole-route isolation run. No physical Stage 9 operation has occurred in this task.
+
+## Stage 9 route-evidence preparation — pre-commit observation
+
+- **Branch/date:** `main`, 2026-09-27 (Europe/London).
+- **Starting checkpoint:** `9b4be25b396bee63a3b1c66c06fa2b1ec3935e81` — `fix: harden manual uric acid refresh`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin was the expected public repository.
+- **Changes after checkpoint:** yes, documentation/status only. This is a pre-commit observation; verify/report post-commit and remote state separately.
+- **Findings:** the existing transport resolves a connectable `BLEDevice` through HA Bluetooth and passes it to the connector without scanner pinning. Current source/advertisement metadata can show reachability but cannot by itself prove the completed GATT route. The Atom Lite physical connection, selected source, and proxy cleanup remain unobserved. The review defined two acceptable proof methods and a reversible user procedure. No runtime behavior, protocol command, test, entity, or action changed.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and new `docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md`.
+- **Checks actually run:** full verbose unit suite **374/374 passed** (baseline 374); compileall and tabnanny passed; four JSON and one YAML file parsed; unstaged diff check passed. `pytest` is not installed, so the established unittest suite is the test gate. Changed-file privacy scan found no real MAC, IP, health value/time, private path, or secret assignment; tracked/untracked artifact scan found no prohibited artifact. Source/diff review found no logging, automatic-sync, history-import, or runtime change. Final staged diff check/review remains to be recorded after staging.
+
+**Exact next gate:** user-run controlled Stage 9 Atom Lite connection-path validation followed by sanitized result review. Do not mark Stage 9 complete without direct connection evidence or valid sole-route isolation. Stage 8H and Stage 10 remain unstarted.
+
 **Stage 8 is complete for its authorized offline/synthetic scope.** The Stage 7H manual count-two/four current-state behavior remains the only production-facing refresh. A simultaneous cleanup failure no longer hides the primary refresh failure; cleanup errors remain separately visible. Repeat refresh, failure retention, reload, and two-entry isolation received additional synthetic coverage. No physical operation, history import, automatic trigger, identity change, or new command was made.
 
 ## Stage 8 hardening — pre-commit observation

@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 9 pending physical route proof:** [the Atom Lite validation plan](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) uses the existing HA-selected connectable `BLEDevice` and unmodified transport. A successful action or proxy advertisement alone cannot identify the actual GATT carrier. Connection-specific Atom Lite evidence or a valid sole-route isolation run is required. No scanner pinning or production instrumentation was added.
+
 **Stage 8 hardening:** the per-entry manual coordinator retains an earlier refresh failure when cleanup also fails and reports cleanup errors separately. Repeat calls replace the current process-local value in the same state holder and entity; reload creates a fresh unavailable state. No restore, new attribute, diagnostic entity, automatic trigger, or history import is added. Separate entries retain separate locks and state. See [the Stage 8 review](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md).
 
 **Stage 7H physical closure:** the user validated a count-four manual refresh on the real GD82. The existing sensor became available with the selected current state; no duplicate entity appeared. The physical result confirms this bounded path and does not generalize ordering to other snapshots/counts. See [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
@@ -29,7 +31,7 @@ Home Assistant Bluetooth stack --> custom_components/fora6_connect
                                    |-- entities and diagnostics
 ```
 
-The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Stage 4 transport resolves connectable devices through Home Assistant's Bluetooth APIs so either a local adapter or an eligible proxy can carry a connection. Home Assistant chooses the actual path; Stage 9 will validate which proxy or adapter is used in an end-to-end run.
+The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Stage 4 transport resolves connectable devices through Home Assistant's Bluetooth APIs so either a local adapter or an eligible proxy can carry a connection. Home Assistant chooses the actual path; the Stage 9 plan is awaiting a user-run route-specific physical result.
 
 ## Boundaries
 

@@ -1,5 +1,9 @@
 # Architecture decisions
 
+## Stage 9 — require connection-specific proxy evidence
+
+**Status:** Accepted as an offline validation plan, not a physical pass. Keep Home Assistant's supported connectable-device resolution and existing connector; do not pin the scanner or add debug output to the production action. A current advertisement or successful refresh with several scanners available is insufficient to identify the route. A time-correlated Atom Lite GATT connection record, or a successful run with Atom Lite as the only enabled connectable route, can establish traversal. Keep private source identifiers/logs out of Git. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
+
 ## Stage 8 — retain process-local current state and primary failure codes
 
 **Status:** Accepted for the Stage 8 offline/synthetic hardening scope. Repeat manual refresh writes to the same existing sensor; only a complete, clean session replaces its value. A later failed refresh keeps the previous in-process value. Reload/restart intentionally starts unavailable until another explicit refresh; HA-native restoration is deferred because an old private health reading could appear current. The private action response already supplies selected meter-local time and bounded status, so no time/status entity attributes or diagnostic entity are added. When a refresh and its cleanup both fail, retain the original failure code and list cleanup errors separately. See [Stage 8](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md). Stage 8H and Stage 9 remain separately gated.

@@ -1,5 +1,7 @@
 # Development
 
+**Stage 9 physical validation pending:** [the Atom Lite procedure](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) requires evidence of the actual active GATT route, not just a visible advertisement or a successful action. The offline review found no justified runtime change. The user-run test will use normal manual meter ON, no history-arrow browsing, the existing configured-entry action, and private HA/ESPHome connection evidence or reversible sole-route scanner isolation. No Stage 8H or Stage 10 work starts here.
+
 **Stage 8 offline/synthetic review:** [the hardening record](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md) covers repeat refresh, later failure retention, reload, two-entry isolation, product UX, and Stage 8H/9 readiness. One bounded error-reporting fix preserves the first refresh failure when cleanup also fails. No physical operation was run and no new trigger or command was added. The exact next proposed gate is separately authorized Stage 9 explicit proxy-path validation; Stage 8H bounded manual history exposure remains optional and separately gated.
 
 **Stage 7H physical closure:** the user deployed/restarted Home Assistant, turned the GD82 on normally without history-arrow browsing, and ran `fora6_connect.refresh_current_uric_acid` once. The count-four action succeeded; the existing uric-acid entity became available and no duplicate appeared. The private value/time and screenshot are not recorded. See [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).

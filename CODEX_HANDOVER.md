@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 9 proxy-route preparation — pre-commit observation
+
+At the start, public `main` was clean at `9b4be25b396bee63a3b1c66c06fa2b1ec3935e81` (`fix: harden manual uric acid refresh`), on 2026-09-27 (Europe/London), with the expected origin. This task changes the documentation/status files listed in `CURRENT_STATUS.md`; the working tree is currently modified. This is a pre-commit observation. The task commit SHA, remote result, and final status belong in the post-commit report.
+
+Stage 9 **remains pending physical validation**. The integration still resolves a connectable GD82 `BLEDevice` via HA Bluetooth and passes it to its existing connector. HA can choose between reachable local adapters and proxies. The offline review did not observe the Atom Lite carrying an active GATT connection and found no justified runtime fix or diagnostic instrumentation. The [Stage 9 validation document](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) separates advertisement/source metadata from actual connection evidence, defines direct Atom Lite connection evidence or valid sole-route isolation as proof, and gives the user a reversible run/restoration procedure and sanitized checklist.
+
+No physical meter operation, Stage 8H exposure, automatic refresh, history import, protocol expansion, or production identity/unit change occurred. The full verbose suite passed **374/374** (baseline 374). Compileall, tabnanny, four JSON and one YAML parse, and the unstaged diff check passed. `pytest` is unavailable; unittest is the established suite. Privacy, artifact, logging, automatic-sync, and historical-import scans found no newly introduced prohibited content or code. Stage and inspect the final diff, then run `git diff --cached --check` before the authorized documentation commit.
+
+**Exact next gate:** user-run controlled Stage 9 M5Stack Atom Lite proxy connection-path validation and sanitized result review. Do not close Stage 9 from a successful refresh alone. Stage 8H and Stage 10 are not started.
+
 ## Stage 8 current-state hardening — pre-commit observation
 
 At the start, public `main` was clean at `0775869d2fd7daf5a904795f4d468ac40bcc7798` (`docs: close Stage 7H manual refresh validation`), on 2026-09-27 (Europe/London), with the expected origin. This task has changed files after that checkpoint; the working tree is currently modified. This is a pre-commit observation. The task commit SHA, remote result, and final status belong in the post-commit report.
