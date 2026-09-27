@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Stage 3 offline immutable TD4183 record model and ten synthetic, checksummed fixture cases. Invalid `0xFFFF` remains unusable as a numeric measurement; contextual raw/10 scaling applies only to valid identified uric-acid records. No live action or BLE behavior changed.
 - Evidence-backed, Home Assistant-independent TD4183 `0x25`/`0x26` offline parsers for packed meter-local minute, transmitted flag, raw measurement, analyte selector, QC/category, and invalid sentinel, with synthetic tests. Private in-memory capture validation confirmed the uric-acid index-zero and hematocrit/QC sentinel companion classifications; no private bytes or result were committed. The live probe and production paths are unchanged.
 - Stage 2G offline evidence map for the TD4183 `0x25`/`0x26` response envelope, sanitized comparison of the retained private HCI import pairs, unresolved payload fields, and missing private decompilation dependency. Parser implementation is paused at the user's request; no semantic parser or BLE transport change was made.
 - Closed Stage 2F after the real GD82, with meter ON, returned valid User1 `0x2B` slot metadata and User1/raw-index-zero `0x25`/`0x26` frames through the bounded Home Assistant probe. The run needed no `0x33` in the tested meter state, cleaned up successfully, and exposed no analyte, value, or timestamp. Earlier wake-write and subscription failures stopped before record commands.

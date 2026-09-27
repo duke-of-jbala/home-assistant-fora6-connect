@@ -1,35 +1,31 @@
 # Current Status — FORA 6 Connect
 
-**Stage 0, Stage 1, and Stages 2A–2G: complete for their authorized scope.** Stage 2G added an offline TD4183 parser for evidence-backed `0x25`/`0x26` fields. The development BLE action remains privacy-safe and unchanged. No production record synchronization, entities, or decoded real-result exposure exists.
+**Stages 0, 1, and 3 are complete for their authorized scope.** Stage 2 remains in progress, with Stages 2A–2G complete. Stage 3 added only an offline combined TD4183 record model and ten synthetic fixture cases. The live development actions, BLE command set, and response schemas remain unchanged. There is no production record synchronization or measurement entity.
 
-## Stage 2F physical result
+## Stage 3 result
 
-The user ran the corrected one-slot Home Assistant action on the real GD82 with the meter ON. The `0x22`/`0x24`/`0x4183` identity gate, User1 `0x2B` metadata, and User1/raw-index-zero `0x25`/`0x26` command-matched frames all validated; notification stop and disconnect succeeded. No `0x33` was sent or required for this bounded read in the tested meter state. Earlier wake-write and subscription failures stopped before record requests.
+`models.py` now combines the validated `0x25` and `0x26` protocol parts in a frozen, Home Assistant-independent `TD4183Record`. It preserves meter-local time, transmitted status, raw integer, analyte selector, category, auxiliary byte, overlapping app code number, and both opaque payloads. Raw `0xFFFF` remains visible as wire data but has no usable numeric value. Contextual raw/10 scaling is available only for an identified valid uric-acid record. Unknown analyte selectors stay unknown; QC, AC, PC, and General remain distinct. No timezone, unit, sync time, record ID, or production exclusion policy was invented.
 
-## Stage 2G offline result
-
-The retained private iFORA HM 1.7.6 and 1.7.9 decompilations became accessible after the earlier evidence-only checkpoint. Their TD4183 call paths agree on packed `0x25` date/hour/minute, transmitted flag, `0x26` little-endian raw value, analyte selector, category, and invalid `0xFFFF` sentinel. [The Stage 2G evidence record](docs/STAGE2G_TD4183_RECORD_SCHEMA.md) gives the byte maps and source locations. Private in-memory validation against the retained HCI import capture classified raw index zero as uric acid/General with valid time and non-sentinel raw value; repeated index one classified as hematocrit/QC with sentinel raw value. No private value, timestamp, address, or raw response was published. The displayed result/time could not be independently checked because no separate specimen was available.
-
-`protocol.py` now has immutable offline record-part structures and parsers. `0x25` time stays meter-local with minute precision and unknown timezone; malformed calendar fields are rejected. `0x26` preserves unknown type codes and opaque payload bits, keeps QC distinct, and flags invalid raw values. Existing raw/10 uric-acid scaling is conditional on separately decoded uric-acid identity and a valid raw value. The live probe, BLE command set, and production behavior were not changed.
+[The Stage 3 record](docs/STAGE3_RECORD_MODEL_AND_FIXTURES.md) documents the ten entirely synthetic, checksummed pair fixtures and field evidence. They cover supported category, analyte, status, timestamp, and sentinel variants; no captured frame or private health data was copied. The stale roadmap statement about having no record parser was corrected: Stage 2G has an offline parser, while production decoding and synchronization remain absent.
 
 ## Exact next gate
 
-Review the Stage 2G evidence, implementation, and privacy-safe tests. **Stage 3** wider sanitized fixture/record-model work or a focused evidence follow-up for units, reserved flags, and multi-parameter behavior requires separate authorization. No physical `0x2F` query, decoded real-result exposure, or production synchronization is authorized by Stage 2G.
+Separately authorize **Stage 4 — Home Assistant Bluetooth transport**, with its exact evidence-bound behavior defined before implementation. Stage 3 does not authorize any new BLE command, physical meter test, `0x2F` or `0x33` query, record loop, decoded real-result action, polling, production sync, config flow, or entity.
 
-## Repository state at Stage 2G parser pre-commit review
+## Repository state at Stage 3 pre-commit review
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed checkpoint:** `0397e30d9a63c126b1719ee0471969c139fce203` — `docs: record Stage 2G offline schema evidence`.
-- **Starting tree:** clean (`git status --short` empty immediately after that commit).
-- **Changes after checkpoint:** yes; offline parser, synthetic tests, and durable Markdown are changed at this pre-commit point. Report this task commit SHA and post-commit tree state separately.
-- **Live actions by Codex:** none. Private HCI analysis and parser validation were offline only. No deployment, push, tag, or release.
-- **Files changed:** `custom_components/fora6_connect/protocol.py`, `tests/test_record_schema.py`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, and `docs/STAGE2G_TD4183_RECORD_SCHEMA.md`.
+- **Last completed checkpoint:** `338d1b759dbc7f60a0eb305de09442856a5950c0` — `feat: add evidence-backed TD4183 record parser`.
+- **Starting tree:** clean (`git status --short` returned no entries before Stage 3 edits).
+- **Changes after checkpoint:** yes; offline model, synthetic fixtures/tests, and durable Markdown are changed at this pre-commit point. Report the task commit SHA and post-commit status separately.
+- **Files changed:** `custom_components/fora6_connect/models.py`, `tests/fixtures_td4183.py`, `tests/test_record_model.py`, `docs/STAGE3_RECORD_MODEL_AND_FIXTURES.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and `docs/PROTOCOL.md`.
+- **Live actions by Codex:** none. No physical meter test, deployment, push, tag, or release.
 
 ## Checks actually run
 
-- `python3 -m unittest discover -s tests -v`: 106 passed, including 12 new synthetic schema tests.
+- `python3 -m unittest discover -s tests -q`: 119 passed (106 prior plus 13 new model tests).
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
 - Manifest, translation, and strings JSON parsing plus `services.yaml` YAML parsing: passed.
-- `git diff --check`: passed; the parser, synthetic tests, and full Markdown diff were inspected. A private in-memory capture parse confirmed semantic classifications without printing or storing value/time. None of the tracked synthetic four-byte fixture payloads matched the private `0x25`/`0x26` payloads.
-- No new BLE command ID or live transport/production sync path was added. `protocol.py` imports only standard-library modules. Privacy/artifact review found no private result, timestamp, address, raw response, capture, APK, keystore, or private absolute path in the changes.
-- The 14-file staged diff was inspected and `git diff --cached --check` passed. The staged addition scan and tracked-file artifact audit found no private capture material, identifiers, health values, private paths, or proprietary source. No untracked file was present at this pre-commit review.
+- `git diff --check` and `git diff --cached --check`: passed. The full 14-file staged diff was inspected.
+- Staged privacy/artifact scan found no private path, address, captured frame, capture/package artifact, proprietary source, real health value, or timestamp. All 21 generated synthetic frames had zero exact matches in the retained private capture; only the match count was reported. No untracked file remained after staging.
+- AST import review confirmed `protocol.py` and `models.py` have no Home Assistant, Bleak, ESPHome, or Bluetooth dependency. The only staged integration code file is `models.py`; `protocol.py`, `protocol_probe.py`, `__init__.py`, service definitions, and translations have no diff. No BLE command ID or live action result schema changed.
