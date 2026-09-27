@@ -1,4 +1,4 @@
-"""FORA 6 Connect development-only Home Assistant entry point."""
+"""FORA 6 Connect setup and bounded development actions."""
 
 import asyncio
 
@@ -192,3 +192,22 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         supports_response=SupportsResponse.ONLY,
     )
     return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
+    """Create inert state and forward one sensor without connecting."""
+    from .sensor_state import MeterRuntime
+
+    if not isinstance(entry.unique_id, str) or not entry.unique_id.strip():
+        return False
+    address = entry.data.get("address")
+    if not isinstance(address, str) or not address:
+        return False
+    entry.runtime_data = MeterRuntime(address=address)
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
+    """Unload the inert sensor platform; no transport owns a session."""
+    return await hass.config_entries.async_unload_platforms(entry, ["sensor"])

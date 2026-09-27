@@ -98,3 +98,7 @@ changes, identity/read failures, candidate versus model confirmation, and
 one-device-per-meter association. Population-wide uniqueness, reset/update
 stability, and equality with the printed SN remain unresolved; do not state
 them as facts or silently auto-merge on their assumption.
+
+## Stage 6B follow-up
+
+[Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) implements this conditional policy with exact validated serial text in private Home Assistant entry/device identity, a mutable locator, collision checks, and one unavailable uric-acid sensor. It has synthetic validation only. Population uniqueness, reset/update stability, and controlled real Config Flow behavior remain unresolved.

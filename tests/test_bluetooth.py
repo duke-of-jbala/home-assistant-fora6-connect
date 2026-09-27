@@ -23,9 +23,13 @@ class BluetoothBootstrapTests(unittest.TestCase):
             "00001524-1212-efde-1523-785feabcd123",
         )
 
-    def test_discovery_is_not_enabled(self) -> None:
+    def test_discovery_matcher_requires_name_service_and_connectability(self) -> None:
         manifest = json.loads((INTEGRATION / "manifest.json").read_text())
         self.assertEqual(manifest["domain"], "fora6_connect")
         self.assertEqual(manifest["name"], "FORA 6 Connect")
-        self.assertNotIn("bluetooth", manifest)
-        self.assertNotIn("config_flow", manifest)
+        self.assertTrue(manifest["config_flow"])
+        self.assertEqual(manifest["bluetooth"], [{
+            "local_name": "FORA 6 CONNECT*",
+            "service_uuid": "00001808-0000-1000-8000-00805f9b34fb",
+            "connectable": True,
+        }])

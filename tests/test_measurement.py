@@ -36,7 +36,7 @@ const = load_module("const")
 protocol = load_module("protocol")
 record_models = load_module("models")
 measurement = load_module("measurement")
-sensor = load_module("sensor")
+sensor = load_module("sensor_state")
 CASES = {case.name: case for case in SYNTHETIC_CASES}
 
 
@@ -214,7 +214,7 @@ class SensorBoundaryTests(unittest.TestCase):
             sensor.meter_device_identifier(" ")
 
     def test_sensor_layer_is_inert_and_has_no_transport_imports(self) -> None:
-        tree = ast.parse((PACKAGE_DIR / "sensor.py").read_text())
+        tree = ast.parse((PACKAGE_DIR / "sensor_state.py").read_text())
         imports = [
             node.module or ""
             for node in ast.walk(tree)
@@ -232,7 +232,7 @@ class SensorBoundaryTests(unittest.TestCase):
                 for name in imports
             )
         )
-        source = (PACKAGE_DIR / "sensor.py").read_text()
+        source = (PACKAGE_DIR / "sensor_state.py").read_text()
         self.assertNotIn("SensorEntity", source)
         for token in (
             "establish_connection",

@@ -1,1 +1,24 @@
-{}
+{
+  "config": {
+    "step": {
+      "confirm": {
+        "title": "Confirm FORA 6 Connect",
+        "description": "Connect once to confirm the GD82 model and its private device identity?"
+      },
+      "update_locator": {
+        "title": "Update FORA 6 Connect connection",
+        "description": "The confirmed meter is already configured at another Bluetooth locator. Update its connection locator after checking that the old locator is no longer connectable?"
+      }
+    },
+    "abort": {
+      "not_fora6_connect": "This advertisement does not match the supported FORA candidate.",
+      "cannot_connect": "Cannot connect to the meter. Try again when it is on.",
+      "identity_failed": "Meter identity confirmation failed. Try again.",
+      "serial_unavailable": "A usable device serial is unavailable. Try again.",
+      "already_configured": "This meter is already configured.",
+      "identity_conflict": "Meter identity or connection locator conflicts with an existing entry.",
+      "locator_updated": "The confirmed meter connection locator was updated.",
+      "bluetooth_required": "Turn on the meter and wait for Bluetooth discovery to begin setup."
+    }
+  }
+}

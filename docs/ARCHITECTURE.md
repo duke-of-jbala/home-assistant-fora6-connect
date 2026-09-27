@@ -23,13 +23,13 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 - `protocol.py`: pure-Python frame validation and evidence-backed offline TD4183 record-part parsing, testable with synthetic bytes alone. No HA, ESPHome, adapter, or physical meter requirement. Meter-local time remains separate from ingestion time; unknown timezone, non-uric-acid units, and flags are not invented.
 - `models.py`: pure-Python Stage 3 combined TD4183 record over the two validated protocol parts. It preserves meter-local time, unknown/opaque fields, and QC category without introducing sync time, units, or Home Assistant entities.
 - `measurement.py`: pure-Python Stage 5/5A product measurement mapping. It applies `/10` only to valid identified uric acid, retains category/transmitted/meter-local time, and assigns the app's evidenced mg/dL base unit to that valid analyte only.
-- `sensor.py`: inert Stage 5 entity-state mapping and stable-identity interface. It starts no platform or I/O; HA entity registration awaits Stage 6 identity/config-entry setup.
+- `sensor_state.py`: pure Stage 5/5A ordinary uric-acid state mapping and inert per-entry runtime holder.
+- `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; no BLE I/O or polling.
 - `coordinator.py`: future retrieval and synchronization state.
-- `sensor.py`: future entities associated with one HA device per physical meter.
-- `config_flow.py`: future setup and discovery after device identity can be established beyond the documented UUID pair.
+- `config_flow.py`: Stage 6B passive candidate, user review, bounded active project/serial confirmation, and private persistent identity.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
-[Stage 6A](STAGE6A_DISCOVERY_IDENTITY_POLICY.md) distinguishes a passive candidate from a project-confirmed TD4183 device and from a uniquely identified physical meter. Current advertisement fields and project `0x4183` reach only the first two states. Device Information exposed readable Serial Number String `0x2A25`, but no value was read. Address and manufacturer-data identity are unresolved; Config Flow and device registration remain inactive pending a separately authorized identity check.
+[Stage 6A](STAGE6A_DISCOVERY_IDENTITY_POLICY.md) distinguishes a passive candidate from a project-confirmed TD4183 device and from a uniquely identified physical meter. At the Stage 6A checkpoint, advertisement fields and project `0x4183` reached only the first two states; Device Information exposed readable `0x2A25` but its value was not yet read. Later Stage 6A1/6A1b and 6B work established tested-meter serial stability and implemented guarded setup. Address stability and manufacturer-data semantics remain unresolved.
 
 [Stage 6A1](STAGE6A1_SERIAL_IDENTITY_READ.md) adds a separate manually invoked, read-only Device Information `0x2A25` action. It uses HA connectable resolution and the proven connector policy, performs one bounded read, returns structural booleans only, and disconnects. The user-run real GD82 result found usable text with clean cleanup. [Stage 6A1b](STAGE6A1B_SERIAL_STABILITY.md) adds one process-local private reference and a manual exact-byte set/compare action; the user-run comparison matched immediately and after a meter OFF/ON cycle. [Stage 6A1c](STAGE6A1C_SERIAL_IDENTITY_POLICY.md) defines a guarded future serial-identity policy with explicit collision handling. None of these stages registers a persistent identity or Config Flow.
 
@@ -40,3 +40,7 @@ The manually invoked development-only `gatt_probe.py` validated Home Assistant c
 ## Documentation and packaging
 
 The custom integration uses `translations/en.json` for runtime localization. `strings.json` is included only to match the requested repository structure; Home Assistant's custom integration guidance does not use it as a runtime translation source. Manifest version `0.0.0` is a development placeholder required for a custom integration, not a release. The repository layout targets HACS; HACS readiness is a Stage 10 gate.
+
+## Stage 6B entry and entity boundary
+
+[Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) enables an observed-shape Bluetooth candidate matcher and user-confirmed active model/serial identification. Exact `0x2A25` text is internal ConfigEntry/DeviceInfo identity; the address is mutable transport location only. Entry setup forwards one unavailable uric-acid sensor backed by inert measurement state. Neither discovery nor entity setup starts record retrieval, polling, or synchronization. Controlled real setup validation remains a separate gate.

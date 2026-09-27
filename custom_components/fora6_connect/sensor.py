@@ -1,68 +1,49 @@
-"""Inert Home Assistant measurement mapping; no entity or BLE I/O is started.
+"""One inert uric-acid sensor for a serial-identified FORA meter."""
 
-The app's unconverted uric-acid value uses mg/dL. Stage 6 must supply the
-stable meter identity and config entry before an entity can register a device.
-"""
+from __future__ import annotations
 
-from dataclasses import dataclass
 from decimal import Decimal
 
-from .const import DOMAIN
-from .measurement import Fora6Measurement, MeasurementValueStatus
-from .protocol import TD4183RecordCategory
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .const import NAME
+from .sensor_state import MeasurementState, meter_device_identifier
 
 
-def measurement_native_value(
-    measurement: Fora6Measurement | None,
-) -> Decimal | None:
-    """Return a safe ordinary sensor value only when value, unit and category
-    policy are established.
+class Fora6UricAcidSensor(SensorEntity):
+    """Expose only validated ordinary uric acid after Stage 7 feeds state."""
 
-    Only valid identified uric acid in the General category qualifies.
-    QC and non-General categories remain in the product model only.
-    """
-    if measurement is None:
-        return None
-    if measurement.unit != "mg/dL" or measurement.scaled_number is None:
-        return None
-    if measurement.value_status is not MeasurementValueStatus.VALID_URIC_ACID:
-        return None
-    if measurement.category is not TD4183RecordCategory.GENERAL:
-        return None
-    return measurement.scaled_number
+    _attr_has_entity_name = True
+    _attr_name = "Uric acid"
+    _attr_native_unit_of_measurement = "mg/dL"
+    _attr_should_poll = False
 
-
-@dataclass(slots=True)
-class MeasurementState:
-    """Inert latest-measurement holder for a future entity/coordinator layer.
-
-    Replacement is explicit; an invalid or unsupported new record replaces
-    the old record, and the derived sensor value becomes unavailable.
-    This class starts no task and performs no Bluetooth or Home Assistant I/O.
-    """
-
-    latest: Fora6Measurement | None = None
-
-    def replace(self, measurement: Fora6Measurement | None) -> None:
-        if measurement is not None and not isinstance(measurement, Fora6Measurement):
-            raise TypeError("Expected a Fora6Measurement or None.")
-        self.latest = measurement
+    def __init__(self, entry: ConfigEntry, state: MeasurementState) -> None:
+        self._state = state
+        # The private serial is limited to entry/device identity, not entity ID.
+        self._attr_unique_id = f"{entry.entry_id}_uric_acid"
+        self._attr_device_info = DeviceInfo(
+            identifiers={meter_device_identifier(entry.unique_id)},
+            name=NAME,
+            manufacturer="ForaCare",
+            model="GD82",
+        )
 
     @property
     def native_value(self) -> Decimal | None:
-        return measurement_native_value(self.latest)
+        return self._state.native_value
+
+    @property
+    def available(self) -> bool:
+        return self.native_value is not None
 
 
-def meter_device_identifier(stage6_stable_identifier: str) -> tuple[str, str]:
-    """Return the shared HA identifier using an identity supplied by Stage 6.
-
-    This helper never derives identity from a Bluetooth address, local name,
-    UUID, or manufacturer data. It is an interface for later entity device
-    registration, not a permanent identity policy or an entity registration.
-    """
-    if (
-        not isinstance(stage6_stable_identifier, str)
-        or not stage6_stable_identifier.strip()
-    ):
-        raise ValueError("A Stage 6 stable meter identifier is required.")
-    return DOMAIN, stage6_stable_identifier
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Register one unavailable sensor; no BLE I/O or initial read."""
+    async_add_entities([Fora6UricAcidSensor(entry, entry.runtime_data.measurement_state)])

@@ -282,3 +282,7 @@ The [Stage 5A evidence record](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) traces both a
 ### Stage 6A1c serial identity policy
 
 [The Stage 6A1c review](STAGE6A1C_SERIAL_IDENTITY_POLICY.md) classifies Bluetooth SIG `0x2A25` instance-serial meaning as standard-documented, the tested meter's power-cycle stability as live-corroborated, and population uniqueness as unresolved. FORA's manual has an SN marking but does not link it to GATT; retained app versions have a separate proprietary serial parser not proven equivalent to `0x2A25`. A future guarded Stage 6B flow may use exact validated serial text internally for one integration-domain config entry and device identifier, with collision and failure handling. No Config Flow or persistent identifier is implemented. **Exact next gate:** separately authorize Stage 6B implementation and controlled validation.
+
+### Stage 6B guarded setup boundary
+
+[Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) reuses only the previously validated wake `0x22` and project `0x24` exchange for model confirmation and the bounded read-only standard Device Information `0x2A25` path for exact private per-meter identity. The candidate advertisement is not itself proof. One serial-backed entry/device and an initially unavailable uric-acid sensor are created only after explicit setup confirmation. No record commands, sync loop, polling, new protocol parser, or physical test were added. Population serial uniqueness and Auto-mode/proxy-path behavior remain unresolved.

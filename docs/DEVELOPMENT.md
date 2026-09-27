@@ -2,7 +2,7 @@
 
 ## Stage discipline
 
-Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. Stage 1B has a development-only GATT probe, and Stage 1C has a separately invoked notification-metadata observer. Stage 2D added HA-independent frame/project/scaling helpers to `protocol.py`; Stage 2E's custom wake/project identity probe succeeded on the real meter. Stage 2F's corrected one-slot record-response probe also succeeded with the meter ON. **Stage 2G is offline only; do not invoke a physical meter action for it.** Protocol decoding and the Stage 5 product model remain offline; production discovery/config flow, synchronization, and numeric entities remain inactive.
+Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. Stage 1B has a development-only GATT probe, and Stage 1C has a separately invoked notification-metadata observer. Stage 2D added HA-independent frame/project/scaling helpers to `protocol.py`; Stage 2E's custom wake/project identity probe succeeded on the real meter. Stage 2F's corrected one-slot record-response probe also succeeded with the meter ON. Stage 2G parsing remains offline. Stage 6B now enables a guarded discovery/setup flow and one initially unavailable uric-acid entity; production synchronization and polling remain inactive.
 
 **Stage 4 complete:** `bluetooth.py` contains the reusable Home Assistant session, and the two bounded `protocol_probe.py` actions use it. Mock validation and user-run physical regression are complete for the authorized scope. The user reported successful identity and bounded record runs on the real GD82 with the meter ON; both stopped notifications and disconnected cleanly. [The Stage 4 transport record](STAGE4_BLUETOOTH_TRANSPORT.md) records the API, safe error codes, cleanup, and regression results. No production discovery, record synchronization, or entity is active. Stages 2A–2G remain complete for their authorized scopes while unresolved semantics remain open.
 
@@ -101,8 +101,12 @@ The Stage 1C action remains available for controlled development diagnostics. Th
 
 ## Integration scaffold
 
-The custom integration manifest has no `config_flow` flag or Bluetooth discovery matcher. This prevents a production user flow from claiming an unverified meter identity. It has `bluetooth_adapters` and `bluetooth` dependencies for the development probe. No entity platform is forwarded. `translations/en.json` provides the development action's UI text. `strings.json` is retained as an empty requested scaffold file, not used at runtime.
+The Stage 6B manifest now enables a narrow connectable name/`0x1808` candidate matcher; the Config Flow checks exact normalized name plus `0x180A` and performs user-confirmed active model/serial identification. Entry setup forwards one inert sensor platform. `translations/en.json` provides runtime flow/action text; `strings.json` mirrors the flow translation source for development. The `bluetooth_adapters` and `bluetooth` dependencies remain, without direct adapter selection.
 
 The `0.0.0` manifest version is a development placeholder needed for a custom integration, not a release number. HACS packaging and brand assets are deferred to Stage 10.
 
 References checked during bootstrap: [Home Assistant integration manifests](https://developers.home-assistant.io/docs/creating_integration_manifest/), [custom integration localization](https://developers.home-assistant.io/docs/internationalization/custom_integration/), [Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/), and [HACS integration requirements](https://www.hacs.xyz/docs/publish/integration/). Recheck them at the relevant later stages because APIs and publication requirements can change.
+
+## Stage 6B guarded setup
+
+[The Stage 6B record](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) describes the new manifest candidate matcher, confirmation forms, existing Stage 4 project exchange and Stage 6A1 serial read, exact serial unique ID, locator collision policy, and inert uric-acid platform. Local validation uses synthetic tests only. No real Config Flow, new application command, record read, polling, or production sync was run. **Exact next gate:** separately authorize a controlled real setup test; Stage 7 synchronization requires separate authorization.

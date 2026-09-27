@@ -116,3 +116,7 @@ read nor a model string alone proves cross-meter uniqueness.
 **Exact next gate:** separately authorize the passive comparison and/or the
 bounded Stage 6A1 Serial Number String read. Review their privacy-safe
 results before implementing full Stage 6 Config Flow or device registration.
+
+## Stage 6B follow-up
+
+[Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) now implements the bounded candidate → model → serial flow, exact private serial identity, and a conservative reviewed locator policy. This updates implementation status only; the Stage 6A evidence classifications and unresolved advertisement/address semantics remain unchanged. Controlled physical setup validation is still pending.
