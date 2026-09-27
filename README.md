@@ -2,7 +2,7 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stages 0–6B3 and 7A–7F are complete for their authorized bounded/review scopes. Stage 7G adds a development-only chronology probe awaiting physical validation; no production sync exists yet. Stage 6B3's non-destructive identity migration has been validated by the user in Home Assistant on the configured GD82. The existing entry, device, and uric-acid entity remain; the entity is unavailable because production synchronization has not been implemented. Address identity behavior across GD82 units, factory resets, and firmware updates remains unresolved.
+**Status:** Stages 0–6B3 and 7A–7G are complete for their authorized bounded/review scopes. Stage 7G's two-primary chronology probe was validated on one real four-slot GD82 snapshot; no production sync exists yet. Stage 6B3's non-destructive identity migration has been validated by the user in Home Assistant on the configured GD82. The existing entry, device, and uric-acid entity remain; the entity is unavailable because production synchronization has not been implemented. Address identity behavior across GD82 units, factory resets, and firmware updates remains unresolved.
 
 Only uric acid currently has evidence-backed numeric scaling and a display unit (mg/dL). Other analytes are not exposed as numeric entities. The uric-acid entity remains unavailable until a later synchronization stage supplies measurements. On the tested GD82, standard Device Information identifiers were unusable as meter-specific identity; the factory-printed Bluetooth MAC matched the Home Assistant address and is the guarded fallback identity. Private captures and health results are excluded from public fixtures and documentation.
 
@@ -25,3 +25,5 @@ This is a development integration, not a validated installation or release. The 
 MIT; see [LICENSE](LICENSE).
 
 The [Stage 7G/G1 probe](docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md) compares two fixed primary slots when raw count is four. Its private development response may include valid uric-acid mg/dL values and timezone-unknown meter-local times for direct comparison with the meter display. It does not update the unavailable entity; the response contains health data and should remain private.
+
+The real bounded comparison found raw primary 0 later than raw primary 2 in one snapshot. [Stage 7G2](docs/URIC_ACID_UNIT_CONVERSION.md) also reviews the app's mmol/L display formatting. The proposed next gate is a separately authorized, manual-only current-state refresh for the tested counts; no history import or automatic sync exists.

@@ -78,3 +78,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## Development — Stage 7G1
 
 - The existing private chronology development action can now return evidence-backed uric-acid mg/dL values and timezone-unknown meter-local minute times for semantically valid primary slots. The protocol sequence and production sensor state are unchanged; physical validation is pending.
+
+## Evidence — Stage 7G2
+
+- Recorded successful real count-four primary chronology: raw 0 had the later parsed meter-local time than raw 2; Stage 7G is complete for its bounded scope. Reviewed both retained app versions' mmol/L record-display floor formatting and revised the proposed manual counts-two/four current-state policy. No runtime behavior changed.

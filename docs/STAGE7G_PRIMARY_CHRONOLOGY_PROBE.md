@@ -29,3 +29,13 @@ If count is not four, the action stops after metadata and gives no chronology ev
 This action does not touch `sensor_state`, the entity, coordinator, ConfigEntry, or a history store. The existing uric-acid entity remains unavailable; production sync and historical import are absent. General traversal, latest selection across arbitrary counts, wrap, durable deduplication, and resume remain unresolved.
 
 **Exact next gate:** user-run bounded Stage 7G1 physical validation and private meter-display correlation. The private action response stays local; only a conclusion without measurement values or timestamps need be reported. After that conclusion is reviewed, separately authorize any further chronology experiment or a narrow current-state sync design. No production sync follows automatically.
+
+## Stage 7G2 physical closure
+
+The user ran the private Stage 7G1 action once with the GD82 manually ON, without browsing meter history first. Model confirmation, count-four gate, both raw-primary semantic gates, chronology comparison, and cleanup all succeeded. The response showed **raw primary 0 later than raw primary 2** by their parsed meter-local times. The private values and times were reviewed by the user and are deliberately absent from this public record. **Stage 7G is complete for its bounded count-four primary chronology scope (LIVE-CORROBORATED).** In this snapshot, a higher raw index was not newer. Neither this result nor the app code proves a universal index order, wrap behavior, reset behavior, or ordering for arbitrary counts.
+
+The user also observed that normal manual power-on gave a Bluetooth-flashing usable state, whereas pressing the history arrow keys stopped the Bluetooth light. This is a **LIVE-CORROBORATED meter-state observation**; the internal cause is unknown. A later production manual refresh should start with the meter normally ON and no history-button browsing, pending separate authorization.
+
+The two distinct private mg/dL records appeared as the same two-decimal mmol/L text on the physical display. The [Stage 7G2 conversion review](URIC_ACID_UNIT_CONVERSION.md) explains the retained app's floor-formatting rule and its limit as evidence about the separate meter firmware. No production value or entity state changed.
+
+**Next gate:** separately authorize Stage 7H, a strict manual current-state uric-acid refresh for only raw counts two and four, with complete fixed-plan validation and fail-closed timestamp ties. Historical import and automatic triggering remain gated.

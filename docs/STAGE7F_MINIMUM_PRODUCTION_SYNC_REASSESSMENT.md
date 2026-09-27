@@ -1,6 +1,6 @@
 # Stage 7F — minimum production sync reassessment
 
-**Decision: Outcome A, conditional current-state refresh only.** An explicitly requested, bounded refresh can be designed for the physically tested raw counts **2 and 4** if it accepts only a *single* valid General uric-acid primary in the complete, internally consistent snapshot. It must decline to choose between two eligible primaries. This is a design conclusion, not implementation or authorization to operate the meter. Full historical synchronization remains unjustified.
+**Original Stage 7F decision (before Stage 7G): Outcome A, conditional current-state refresh only.** An explicitly requested, bounded refresh can be designed for the physically tested raw counts **2 and 4** if it accepts only a *single* valid General uric-acid primary in the complete, internally consistent snapshot. It must decline to choose between two eligible primaries. This original decision is superseded for the two-primary count-four case by the **Stage 7G2 reassessment below**. Neither review implements or authorizes production meter operation. Full historical synchronization remains unjustified.
 
 ## Evidence and scope
 
@@ -67,7 +67,7 @@ The prospective coordinator owns one per-entry lock, confirms project identity e
 
 Retaining a previous value is a failure policy, not evidence that it is fresh. Availability and UI age semantics need explicit Stage 7G implementation review; the current `MeasurementState.replace()` would clear a value when passed an invalid measurement, so a future coordinator must call it only after a successful eligible selection. Stage 7F changes no code.
 
-## Readiness matrix
+## Original Stage 7F readiness matrix (before Stage 7G)
 
 “Ready” below means the **evidence supports a narrowly specified implementation design**, not that production code exists or that this stage authorizes BLE operation.
 
@@ -90,3 +90,21 @@ Retaining a previous value is a failure policy, not evidence that it is fresh. A
 ## Stage 7G update
 
 The separately authorized Stage 7G work is a bounded chronology evidence probe, not the conditional production refresh proposed in this Stage 7F design. It requires exactly four slots and compares only validated raw primaries 0 and 2 privately. Production current-state sync remains a later gate.
+
+## Stage 7G2 reassessment of the Stage 7F design
+
+The real Stage 7G action confirmed two valid General uric-acid primaries in one four-slot snapshot. Their parsed meter-local times differed, and raw index **0** was later than raw index **2** (**LIVE-CORROBORATED**). This directly rejects highest-raw-index selection for that snapshot. It supports selecting the **strict maximum meter-local timestamp among eligible primaries in a complete, bounded current snapshot** as a prospective *meter-clock* policy. It does not prove actual event ordering if the meter clock was reset or changed, or ordering across separate snapshots. Preserve the original naive meter-local time separately from ingestion time.
+
+| Manual current-state case | Revised design readiness | Strict rule |
+| --- | --- | --- |
+| Raw count 2 | **READY for Stage 7H implementation review** | Validate the fixed `1 → 0 → 1` plan and its sole eligible General uric-acid primary at raw 0. No cross-primary comparison is needed. |
+| Raw count 4 | **READY conditionally for Stage 7H implementation review** | Validate the complete fixed `3 → 0 → 1 → 2 → 3` plan, both groups, and eligible General uric-acid primaries. Select the sole eligible primary if there is one; if there are two, select only the one with a strictly greater meter-local timestamp. Equal-minute timestamps are ambiguous: retain the previous valid state and report a safe ambiguity status. Zero eligible primaries produce no update. |
+| Other counts, historical import, automatic refresh, dedup/resume | **NOT READY** | Larger or odd counts, wrap/reset behavior, and durable record identity remain unresolved. |
+
+The timestamp maximum is used **only within the single current snapshot**, with the meter clock treated as the ordering source. Raw index, the wire `0x2B` newest-index label, and sync/ingestion time are not tie-breakers. A plausible but incorrect meter clock is a residual risk; Stage 7H must document what its displayed current value means and never portray the meter-local time as an absolute UTC event time.
+
+A second `0x2B` after traversal could detect a changed count, but not a same-count overwrite or clock adjustment. It would add an unvalidated command placement and is **not required for the first manually triggered, fixed-count implementation** if the meter is normally ON, no new measurement is underway, history arrows are untouched, and the existing repeated-last-slot consistency check succeeds. Any inconsistency detected within the fixed plan must discard the candidate and retain prior state. Revisit an after-traversal metadata read if physical mutation becomes a concrete concern.
+
+The initial trigger remains **explicit manual refresh only**: turn the meter ON normally, do not press history arrows, then request Home Assistant refresh. The user observed that history-button browsing stops the flashing Bluetooth light, and an earlier post-measurement flashing state allowed connection but failed custom subscription; the internal reasons are unknown. Startup, advertisement, post-measurement automatic sync, and polling remain unsupported.
+
+**Exact next gate:** separately authorize **Stage 7H** to implement the above counts-two/four manual current-state refresh with project confirmation, complete semantic validation, strict timestamp selection/tie rejection, one per-entry sync, failure retention, and an unavailable sensor until a successful update. No historical import, persistent dedup, resume, polling, or automatic trigger is authorized by this review.

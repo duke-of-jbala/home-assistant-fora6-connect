@@ -121,3 +121,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 ## Stage 7G update
 
 Stage 7G is a bounded evidence step ahead of Stage 7F’s proposed production refresh. At exactly four raw slots, compare only validated General uric-acid primaries 0 and 2 within one session. Stage 7G1 separately permits their decoded values and meter-local times in the private development response so the user can correlate them locally with the display. It selects no production latest record. A one-snapshot relation does not establish general index order.
+
+## Stage 7G2 — bounded timestamp selection policy
+
+**Status:** Stage 7G bounded chronology scope complete on one real four-slot GD82 snapshot. Raw primary 0 had the later parsed meter-local time than raw primary 2, so highest-index selection is contradicted in that state (**LIVE-CORROBORATED**). For a separately authorized Stage 7H manual-only current-state refresh, prefer the strict maximum naive meter-local time among eligible primaries in a complete tested-count snapshot; equal-minute ties fail closed. This is a meter-clock policy, not a universal actual-time or raw-index rule. No production sync, history import, or persistent dedup is implemented. The retained apps' `m0()` two-decimal mmol/L record display uses `FLOOR`; meter firmware's exact arithmetic remains **UNRESOLVED**. See [conversion evidence](URIC_ACID_UNIT_CONVERSION.md).

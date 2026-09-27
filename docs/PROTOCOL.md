@@ -324,3 +324,5 @@ The successful user-run count-four probe validated the fixed User1 index plan `3
 ## Stage 7G update
 
 The Stage 7G development path uses only established `0x22`, `0x24`, User1 `0x2B`, and two fixed User1 `0x25`/`0x26` pairs (raw 0, then raw 2) when count is four. Existing parsers classify both pairs; their naive meter-local timestamps are compared privately. It adds no command or general traversal rule.
+
+The real Stage 7G count-four run confirmed both fixed primaries as valid General uric acid and placed raw 0 later than raw 2 by parsed meter-local time (**LIVE-CORROBORATED**). Thus higher raw index was not newer in this snapshot. The result does not define wire `0x2B` newest-index meaning, wrap, or arbitrary-count order. [The Stage 7G2 conversion review](URIC_ACID_UNIT_CONVERSION.md) traces both retained app versions' `mg/dL × 59.48 ÷ 1000` calculation and two-decimal `FLOOR` record-display formatting; the physical meter firmware's implementation remains unresolved. No protocol parser or command changed in Stage 7G2.
