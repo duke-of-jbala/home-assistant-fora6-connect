@@ -34,6 +34,15 @@ but neither shared nor copied. No private address, RSSI number, payload, or
 measurement was supplied. Manufacturer key/length and other UUIDs remain
 unreported, not absent.
 
+**User-supplied observation-quality caveat:** on the first normal-ON attempt,
+the FORA Advertisement Monitor row did **not** update, although the user had
+previously seen it update. After an HAOS restart, the Bluetooth view resumed
+updating. This failed UI refresh is **inconclusive about the meter's radio**;
+it may reflect cached/stale UI or HA Bluetooth state. It is not evidence that
+the GD82 failed to advertise. A new controlled OFF → ON comparison after the
+restart remains pending. Monitor liveness must be checked before interpreting
+an unchanged row in any state.
+
 The user has at least two Atom Lite proxies. Give them private source aliases
 `Proxy A` and `Proxy B`; keep their actual addresses and deployment details
 outside Git. Do not disable a proxy merely to simplify this observation.
@@ -80,7 +89,7 @@ remain pending; `pending` means **not observed**, not an inferred result.
 | State | Fresh event | Local name | Service UUID shape | Manufacturer shape | Service-data shape | Connectable | Source behavior | Relative appearance/disappearance | Distinct from normal ON? |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Fully OFF | No live update seen; cached row | FORA 6 CONNECT | Includes standard Glucose; full set not reported | One entry; key/length not reported | Absent | Not shown | Previous proxy source retained | `Updated` age increased; row retained | Unresolved |
-| Normal manual ON, first | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Reference |
+| Normal manual ON, first attempt | Inconclusive: monitor did not update; HAOS restart restored view updates | Pending | Pending | Pending | Pending | Not shown before restart | Pending | No reliable live timing | Reference unresolved |
 | Post-measurement flashing | Pending naturally appropriate session | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
 | History-arrow mode | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
 | Normal power-off | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Unresolved |
@@ -88,9 +97,10 @@ remain pending; `pending` means **not observed**, not an inferred result.
 
 ## Critical comparisons and current limits
 
-1. **Normal ON vs post-measurement:** unresolved. The earlier post-measurement
-   subscription failure is live connection evidence, not an advertisement
-   comparison.
+1. **Normal ON vs post-measurement:** unresolved. The first ON monitor attempt
+   was inconclusive because the HA view was stale until restart. The earlier
+   post-measurement subscription failure is live connection evidence, not an
+   advertisement comparison.
 2. **Normal ON vs history mode:** unresolved. The prior observation that
    history-arrow use stopped the Bluetooth light does not establish a packet
    change or disappearance.

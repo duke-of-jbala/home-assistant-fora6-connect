@@ -1,5 +1,14 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P — monitor-liveness caveat follow-up, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `66dcdb35716794cda7b8410b15e358af96ac3f6a` — `docs: record partial GD82 advertisement observation`; `origin/main` matched after its normal push and HACS/hassfest validation passed. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **User-supplied new observation:** the first normal-ON Advertisement Monitor attempt showed no row update even though previous runs had updated. An HAOS restart restored Bluetooth-view updates. This is an **inconclusive observability failure**, not evidence that the GD82 failed to advertise. [The physical evidence table](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) records the attempted ON state separately and waits for a post-restart OFF/ON comparison. No post-measurement advertisement observation was supplied.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md`. The tree is modified at this pre-commit observation. No runtime code, observer, automatic trigger, v1 tag, or release change.
+- **Checks actually run on the follow-up tree:** full `unittest` suite **375/375** passed; compileall, tabnanny, four JSON/two YAML/one TOML parses, `git diff --check`, and three-file Markdown privacy/credential/identifier/artifact/no-runtime-diff audits passed. The prior partial-evidence commit passed [HACS/hassfest run 36358212153](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36358212153). Staged diff check and follow-up pushed CI remain to be verified.
+
+**Exact next gate:** receive a post-restart user-run normal ON → OFF → second ON detail-view comparison, then safe history-mode observation; wait for a naturally occurring post-measurement state. No Stage 13B implementation.
+
 ## Stage 13A-P — advertisement-state physical observation, partial evidence
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `c858338481031e9c0090705666af664b72e5260d` — `docs: review automatic refresh trigger architecture`; `origin/main` matched. Local and remote `v1.0.0` still resolve to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

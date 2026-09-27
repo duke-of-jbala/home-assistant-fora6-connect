@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P — HA monitor-liveness caveat, pre-commit
+
+The prior partial-evidence checkpoint was clean pushed `main` at `66dcdb35716794cda7b8410b15e358af96ac3f6a` (`docs: record partial GD82 advertisement observation`) on 2026-09-28 (Europe/London), with `origin/main` matching and HACS/hassfest green. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user's first normal-ON attempt did not refresh the HA Advertisement Monitor row; an HAOS restart restored view updates. Treat that attempt as an **inconclusive UI/Bluetooth observability failure**, never as evidence of no GD82 broadcast. [The Stage 13A-P table](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) now separates the stale-view attempt from the pending post-restart comparison.
+
+This follow-up changes `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md`; the working tree is modified at this pre-commit observation. No observer, GATT operation, auto-sync callback, or released ref changes. Follow-up **375/375** tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and changed-Markdown privacy/artifact/no-runtime-diff audit passed. The prior checkpoint's official validators passed; follow-up staged check and CI remain to be verified.
+
+**Exact next gate:** user-run post-restart normal ON → OFF → second ON structural/timing observation, then safe history mode; post-measurement remains pending until normal use. Stage 13B is not authorized.
+
 ## Stage 13A-P — physical advertisement observation with partial OFF evidence
 
 Started from clean `main` on 2026-09-28 (Europe/London) at `c858338481031e9c0090705666af664b72e5260d` (`docs: review automatic refresh trigger architecture`), with `origin/main` matching and `v1.0.0` still peeling to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The installed HA Advertisement Monitor first showed a basic row; clicking it exposed details. In the user-run fully OFF state, `Updated` age increased on a cached last-seen row, with public name, one manufacturer entry, standard Glucose among service UUIDs, no service data, and retained prior proxy source. Connectability was not shown; raw advertisement bytes were not shared. The [Stage 13A-P document](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) records this OFF row and leaves the other five pending. Earlier normal-ON/light and post-measurement subscription evidence is not passed off as advertisement data. No observer or automatic callback has been added.
