@@ -1,19 +1,29 @@
 # Stage 7E — bounded four-slot traversal probe
 
-**Status:** development-only implementation with synthetic tests; no physical Stage 7E result. Production synchronization remains unimplemented. The user must separately decide when to run the physical probe.
+**Status: complete for the authorized bounded physical scope.** The real GD82 passed this fixed four-slot probe in one tested state. No production synchronization, state update, persistence, deduplication, or resume behavior was implemented.
 
-## Evidence and scope
+## Procedure and privacy boundary
 
-[Stage 7D](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) found an app-derived multi-parameter mapping from logical primary `i` to raw index `2*i`, with a possible companion at `2*i+1`. Stage 7B/C physically validated only a raw-count-two state. Stage 7E tests one more fixed state without treating this mapping as a general history algorithm.
+The manually invoked `fora6_connect.probe_history_window_four` action confirms project `0x4183`, queries User1 raw metadata once, and proceeds only for raw slot count exactly four. It reads only indexes `3 → 0 → 1 → 2 → 3`, each with one `0x25`/`0x26` pair. No adaptation occurs for other counts. The action parses pairs in memory, compares index-three repeats privately, then stops notifications and disconnects. It returns structural/classification/equality status only. It does not expose values, timestamps, frames, serial, address, or hashes and does not update the entity. See the implementation checkpoint `bd1fafc097e43ca17ffafbac455f6ea1c513341f`.
 
-The manually invoked `fora6_connect.probe_history_window_four` action takes only a private runtime Bluetooth address. It uses Home Assistant's selected Bluetooth transport without pairing. It confirms project `0x4183` through one `0x22` wake and one `0x24` query, then makes exactly one User1 (`1`) `0x2B` metadata query. **Only when the parsed raw slot count equals four** does it send one `0x25`/`0x26` pair for each literal raw index `3 → 0 → 1 → 2 → 3`. It never changes the plan for another count. Maximum: 13 application writes (two identity, one metadata, ten record requests); no command retry or sixth pair. Every response is validated; failure stops subsequent pairs. Notification and connection cleanup run on success, failure, and cancellation.
+## User-run physical result
 
-The last-slot probe is compared with its second read at index three using exact validated frame bytes, privately in memory. Only part-one, part-two, whole-pair, analyte, category, validity, and combined-semantic equality flags leave the action. Each raw pair is parsed through the existing protocol and record model. The `0/1` and `2/3` structural-group flags mean only that both pairs parsed; they do not assert that a companion is always present or has a specific analyte. Meter-local time equality is compared within those two candidate groups and returned as booleans. Equality is evidence, never a pass/fail gate, because the retained app versions differ on companion-time requirements. The action deliberately gives no chronology relationship between group primaries.
+The user took a normal measurement. In the immediate post-measurement state, strip ejection switched the meter off and the Bluetooth light flashed. During this state Home Assistant resolved and connected, but notification subscription failed. No application command, metadata query, or record read occurred; disconnect was clean. The user then manually switched the meter ON and ran the action once. The second run confirmed identity, queried valid metadata with raw count four, and completed the fixed `3 → 0 → 1 → 2 → 3` sequence. All five record pairs validated and cleanup succeeded.
 
-The result includes connection/identity/count gate and cleanup status, the fixed public index plan, pair-validity, category/validity/QC classification, grouping and equality booleans, and privacy-safe error stage/code. It never returns or logs a frame, value, scaled value, unit for a private record, timestamp, serial, System ID, Bluetooth address, manufacturer data, digest, or hash. No parsed record is retained. The action does not write to sensor state, coordinator, storage, dedup cache, or resume cursor. The uric-acid entity remains unavailable until separately authorized production synchronization.
+Observed classifications:
 
-## Controlled physical gate
+- Raw indexes 0 and 2: analyte identified, General category, valid value, QC false.
+- Raw indexes 1 and 3: analyte identified, QC category, invalid sentinel, QC true.
+- Candidate pair 0/1 parsed structurally and their meter-local times compared equal.
+- Candidate pair 2/3 parsed structurally and their meter-local times compared equal.
+- The repeated index-three first and second frames matched byte-for-byte. Its analyte, category, validity, and combined semantic classifications also matched.
 
-Do not take a health measurement for this probe. If ordinary meter use naturally yields a raw count of four, the user may deploy/restart Home Assistant, turn the meter on, and run `fora6_connect.probe_history_window_four` once with the private address. The user should share only the sanitized action result. If the count is anything else, the action stops after metadata with no record read; wait for a later naturally occurring state. Codex did not run a physical operation.
+The post-measurement subscription failure is a **LIVE-CORROBORATED meter-state observation**: connection was possible while custom notification subscription failed, and manually turning the meter back ON restored the successful custom protocol path. The internal cause is unknown; transport behavior is unchanged.
 
-A count-four run with five valid pairs would establish that this **one** fixed raw-index plan works in that meter state. Equal repeated index-three frames would establish same-session repeat stability; a difference would need separate investigation and must not be hidden. Structural grouping and within-group time equality are observations, not proof of companion meaning. Neither result establishes oldest/newest chronology, capacity, circular wrap, index stability, deduplication, resume, or a production traversal algorithm. A later separately authorized evidence review must interpret the physical flags and define the next narrow gate.
+## Interpretation and limits
+
+The four-slot result materially strengthens, for this GD82 state, the hypothesis that even raw indexes are primary measurement records and odd indexes are QC/invalid companions, with matching meter-local times within each proposed pair. Structural pairing and equal times do not prove a universal companion rule. They do not establish the chronological relationship between group 0 and group 1, or oldest/newest order.
+
+Still unresolved are general traversal order, exact relation between logical group timestamps, capacity, circular-buffer/wrap/overwrite behavior, deletion/reset behavior, durable raw-index identity, collision-safe deduplication, resume, and production-safe arbitrary-size traversal. No new measurement should be taken for a future evidence gate.
+
+**Exact next proposed gate:** separately authorize Stage 7F as an offline reassessment of logical grouping, chronology, and a minimal production-sync design using this result. Stage 7F is not begun here.

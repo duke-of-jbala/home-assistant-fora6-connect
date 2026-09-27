@@ -45,3 +45,5 @@ This physically confirms the fixed two-slot branch is usable in this tested mete
 **Stage 7C follow-up:** [the separately authorized semantic action](STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) was implemented with synthetic validation and then physically validated. Its result matched the expected classifications and repeat comparison with clean cleanup. Stage 7B's action and result remain unchanged.
 
 **Stage 7C physical result:** the separate action confirmed the expected classifications for index zero (uric acid/General/valid/not-QC) and index one (hematocrit/QC/invalid-sentinel/QC); repeated index-one semantic fields matched and cleanup was clean. Stage 7C is complete for its bounded scope. General history behavior remains unresolved.
+
+**Later Stage 7E evidence:** the user-run four-slot probe succeeded in one state. A separate initial attempt in the post-measurement Bluetooth-flashing state connected but failed subscription before any application command; manually turning the meter ON restored the successful path. Stage 7E supports candidate even-primary/odd-QC grouping in that state only. See [Stage 7E](STAGE7E_FOUR_SLOT_TRAVERSAL_PROBE.md).

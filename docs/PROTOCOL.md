@@ -312,3 +312,7 @@ The user-run real GD82 result confirmed index zero as identified uric acid/Gener
 ### Stage 7D general history evidence limit
 
 [Stage 7D](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) rechecked both retained app versions. Both parse the `0x2B` wire newest-index field, but their TD4183 handlers replace it with logical count minus one; the meter meaning remains unknown. The per-slot `0x25`/`0x26` pair and multi-mode `2*i` mapping are app-supported, while general chronological order, capacity, wrap, and index reuse are not. The app's local type/time/value duplicate lookup provides no meter record ID. Stage 7D added no parser, command, runtime traversal, or production synchronization.
+
+## Stage 7E bounded physical result
+
+The successful user-run count-four probe validated the fixed User1 index plan `3 → 0 → 1 → 2 → 3`. Even indexes 0/2 classified General-valid, odd indexes 1/3 QC-invalid, candidate-pair meter-local times compared equal, and repeated index-three frames/classification matched. This is a single-state observation; it does not establish general ordering, capacity, wrap, index identity, or deduplication. The earlier post-measurement subscription failure occurred before any application command.

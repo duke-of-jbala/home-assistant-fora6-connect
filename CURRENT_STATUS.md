@@ -1,19 +1,20 @@
 # Current Status — FORA 6 Connect
 
-**Stage 7E development-only four-slot probe is implemented and synthetically tested, pending user-run physical validation.** Stages 0–6B3 and 7A–7D are complete for their authorized scopes. Production historical synchronization, polling, persistence, deduplication, and resume remain unimplemented. The uric-acid entity remains unavailable.
+**Stage 7E is complete for its authorized bounded four-slot physical scope.** The real GD82 passed the exact count-four `3 → 0 → 1 → 2 → 3` plan, all five pairs parsed, the two proposed raw-slot groups had matching within-pair meter-local times, and repeated index three was byte/semantic stable in-session. A first attempt during the post-measurement Bluetooth-flashing state connected but could not subscribe; no application command was sent. Production synchronization, polling, persistence, deduplication, and resume remain unimplemented. The uric-acid entity remains unavailable.
 
-## Stage 7E pre-commit observation
+## Stage 7E closure observation
 
 - **Branch/date:** `main`, 2026-09-27 (Europe/London).
-- **Last completed/checkpoint commit before this task:** `9a9c85caa870f8743208ec47f5f8889e90e643ca` — `docs: define general TD4183 history semantics`.
-- **Starting tree:** clean (`git status --short` returned no entries); origin was the public repository.
-- **Changes after checkpoint:** yes. Added one manually invoked four-slot probe, fixed index-two/three protocol constructors, registration/service translation, synthetic tests, and evidence/status docs. This is a pre-commit observation; post-commit/push state must be verified separately.
-- **Protocol boundary:** exactly `0x22 → 0x24 → User1 0x2B`, then only if raw count is four, five `0x25`/`0x26` pairs at `3 → 0 → 1 → 2 → 3`. Maximum 13 application writes. No new command IDs.
-- **Privacy/product boundary:** structural, classification, within-group time-equality, and repeated-index-three equality booleans only. No health value, timestamp, raw frame, identifier, hash, entity update, production sync, persistence, dedup, or resume state.
-- **Files changed:** `custom_components/fora6_connect/__init__.py`, `custom_components/fora6_connect/history_window_four.py`, `custom_components/fora6_connect/protocol.py`, `custom_components/fora6_connect/services.yaml`, `custom_components/fora6_connect/translations/en.json`, `tests/test_gatt_probe.py`, `tests/test_history_window_four.py`, `docs/STAGE7E_FOUR_SLOT_TRAVERSAL_PROBE.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `CHANGELOG.md`, `docs/STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md`, and `docs/STAGE7_HISTORY_SYNC.md`.
+- **Starting checkpoint:** `bd1fafc097e43ca17ffafbac455f6ea1c513341f` — `feat: add bounded four-slot history probe`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin is the public repository.
+- **Changes after checkpoint:** documentation/status only. No runtime or test file changed.
+- **Physical evidence:** user ran the probe after naturally taking a measurement. The first attempt in the post-measurement Bluetooth-flashing state resolved and connected, then failed notification subscription; it sent no application command and did no metadata or indexed read, and disconnected cleanly. The user manually switched the meter back on and reran once; the bounded probe succeeded with raw count four and indexes `3 → 0 → 1 → 2 → 3`.
+- **Semantic evidence:** indexes 0 and 2 were identified General records with valid values and QC false. Indexes 1 and 3 were identified QC records with invalid sentinels and QC true. Proposed pairs 0/1 and 2/3 parsed and had equal meter-local times. The repeated index-3 frames and semantic classifications matched within the session.
+- **Limits:** this one four-slot state does not establish general chronology/order, relation between logical groups 0 and 1, capacity, wrap/overwrite/delete/reset, durable index identity, collision-safe dedup, resume, or arbitrary-size traversal.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md`, `docs/STAGE7B_BOUNDED_TRAVERSAL_PROBE.md`, `docs/STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md`, `docs/STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md`, `docs/STAGE7E_FOUR_SLOT_TRAVERSAL_PROBE.md`, and `docs/STAGE7_HISTORY_SYNC.md`.
 
 ## Checks observed before commit
 
-Full verbose unit suite: **341 tests passed** (326 baseline plus 15 new); compileall and tabnanny passed; four JSON and one YAML parsed; `git diff --check` and `git diff --cached --check` passed. Tracked artifact and changed-file privacy scans found no prohibited artifact, real identifier, private path, raw frame, health value, or timestamp. No physical test was run.
+Full verbose unit suite: **341 tests passed** (baseline 341); compileall and tabnanny passed; four JSON and one YAML parsed; `git diff --check` and `git diff --cached --check` passed. Privacy, artifact, real-identifier, health-data/timestamp, and private-path scans found no issue. No runtime source changed.
 
-**Exact next gate:** user-run `probe_history_window_four` once only if a raw-count-four state arises naturally; share the privacy-safe result for a separate interpretation/closure task. Count mismatch stops after metadata. Do not request a new health measurement for this gate. Production sync remains separately unauthorized.
+**Exact next gate:** separately authorize Stage 7F, an offline reassessment of logical-record grouping, chronology, and the minimum production-sync design using the new four-slot evidence. Stage 7F is not implemented here. Production synchronization remains unauthorized.

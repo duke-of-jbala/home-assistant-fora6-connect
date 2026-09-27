@@ -76,3 +76,7 @@ The user-run Stage 7C result confirmed the expected index-zero and index-one cla
 ## Stage 7D offline evidence boundary
 
 [Stage 7D](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) confirms that the TD4183 handler computes its own logical newest index from count and does not use the wire newest-index field for ordering. Both app versions contain an approximate local database existence lookup, but the import threads do not provide a reliable general traversal rule and the lookup supplies no collision-safe meter ID. The [Stage 6B3 identity migration](STAGE6B3_FACTORY_MAC_IDENTITY.md) was physically validated before this review. The configured uric-acid entity stays unavailable; coordinator retrieval, persistence, polling, and production synchronization remain absent.
+
+## Stage 7E physical evidence
+
+Stage 7E’s fixed count-four action was physically validated in one GD82 state. Raw indexes 0/2 classified General-valid and 1/3 QC-invalid; candidate pairs 0/1 and 2/3 had equal meter-local times; repeated index 3 was byte- and semantic-equal in-session. An initial post-measurement Bluetooth-flashing state allowed connection but not notification subscription; no application command was sent until a later successful run after manual power-on. No coordinator/entity/history state changed. General chronology, wrap, and dedup remain unresolved.

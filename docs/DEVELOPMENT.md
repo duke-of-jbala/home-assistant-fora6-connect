@@ -136,3 +136,7 @@ The user-run physical Stage 7C result confirmed the expected index-zero uric-aci
 ## Stage 7D offline review
 
 [The Stage 7D evidence record](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) compares both retained TD4183 handlers and the app's local record lookup. It documents the unavailable/decompiler-damaged import loops, the unused wire newest-index field in the TD4183 handler, and the absence of a collision-safe dedup/resume key. No integration source, action, fixture, or physical meter state changed. A separately authorized Stage 7E read-only four-slot probe is the next proposed evidence gate if the meter naturally reaches that count.
+
+## Stage 7E physical validation
+
+Stage 7E completed its fixed count-four probe on the real GD82 in one state. If invoked in the immediate post-measurement Bluetooth-flashing state, the observed attempt connected but failed notification subscription before any FORA command; manual power-on restored the successful protocol path. The successful run used only indexes `3 → 0 → 1 → 2 → 3`. This observation does not establish why subscription differs by state.
