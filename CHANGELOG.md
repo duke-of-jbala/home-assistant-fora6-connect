@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Stage 2G offline evidence map for the TD4183 `0x25`/`0x26` response envelope, sanitized comparison of the retained private HCI import pairs, unresolved payload fields, and missing private decompilation dependency. Parser implementation is paused at the user's request; no semantic parser or BLE transport change was made.
 - Closed Stage 2F after the real GD82, with meter ON, returned valid User1 `0x2B` slot metadata and User1/raw-index-zero `0x25`/`0x26` frames through the bounded Home Assistant probe. The run needed no `0x33` in the tested meter state, cleaned up successfully, and exposed no analyte, value, or timestamp. Earlier wake-write and subscription failures stopped before record commands.
 - Reconciled Stage 2F record selectors against the retained successful Stage 2C wire requests and both static app builders. Corrected the development-only User1 `0x2B`/`0x25`/`0x26` index-zero requests in a follow-up commit. No Home Assistant Stage 2F record request had been physically sent; physical testing remains paused pending review.
 - Initial Stage 2F offline record-path register and development-only `probe_protocol_record` action. That implementation assumed `CurrentUser = 0` for `0x2B`, `0x25`, and `0x26`; a later pre-test evidence review found this disagreed with the successful app's User1 requests and prompted the corrective entry above. None of the initial record requests was sent from Home Assistant to the physical meter.
