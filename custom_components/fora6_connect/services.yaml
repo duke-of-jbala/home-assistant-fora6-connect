@@ -117,6 +117,21 @@ probe_history_window_four:
       required: true
       selector:
         text: {}
+refresh_current_uric_acid:
+  name: Refresh current uric acid
+  description: >-
+    Turn the FORA 6 Connect meter on normally, do not browse stored records
+    with its arrow keys, then run this action. Refreshes the existing uric-acid
+    sensor for supported two- or four-slot memory only. The private response
+    includes the selected value and meter-local time.
+  fields:
+    config_entry_id:
+      name: FORA 6 Connect entry
+      description: Choose the configured meter to refresh.
+      required: true
+      selector:
+        config_entry:
+          integration: fora6_connect
 probe_history_chronology:
   name: Inspect two primary records (private development action)
   description: >-

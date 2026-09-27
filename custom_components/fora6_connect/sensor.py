@@ -1,4 +1,4 @@
-"""One inert uric-acid sensor for a serial-identified FORA meter."""
+"""One uric-acid sensor for an identity-confirmed FORA meter."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from .sensor_state import MeasurementState, meter_device_identifier
 
 
 class Fora6UricAcidSensor(SensorEntity):
-    """Expose only validated ordinary uric acid after Stage 7 feeds state."""
+    """Expose only validated ordinary uric acid after a manual refresh."""
 
     _attr_has_entity_name = True
     _attr_name = "Uric acid"
@@ -54,9 +54,14 @@ class Fora6UricAcidSensor(SensorEntity):
     def available(self) -> bool:
         return self.native_value is not None
 
+    async def async_added_to_hass(self) -> None:
+        """Publish successful manually refreshed values to the existing entity."""
+        await super().async_added_to_hass()
+        self.async_on_remove(self._state.subscribe(self.async_write_ha_state))
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Register one unavailable sensor; no BLE I/O or initial read."""
+    """Register one initially unavailable sensor; no BLE I/O or initial read."""
     async_add_entities([Fora6UricAcidSensor(entry, entry.runtime_data.measurement_state)])

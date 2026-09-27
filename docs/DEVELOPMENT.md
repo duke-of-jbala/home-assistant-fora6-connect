@@ -1,5 +1,7 @@
 # Development
 
+**Stage 7H validation gate:** the synthetic-tested `fora6_connect.refresh_current_uric_acid` action takes a configured integration entry, not an address. After deployment/restart, turn the GD82 on normally, avoid its history arrows, run the action once, and inspect the existing uric-acid entity. The private response contains selected health value and meter-local time; share only sanitized status and entity behavior. No physical test has been run by Codex. See [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
+
 **Stage 6B3 physical validation:** the user restarted HA and confirmed the existing entry, single device, single unavailable uric-acid entity, Bluetooth connection, and GD82/ForaCare metadata were preserved; no bogus serial or discovery Add card appeared. A privacy-safe storage check found the ConfigEntry unique ID now uses canonical lowercase colon MAC format. No actual value was shared or recorded. The in-place migration is complete for this meter.
 
 **Stage 6B3:** [The factory MAC migration plan](STAGE6B3_FACTORY_MAC_IDENTITY.md) specifies offline-tested setup migration and the controlled user-run HA reload check. It requires no device removal, BLE operation, Stage 7 sync, or disclosure of the private MAC.

@@ -1,5 +1,7 @@
 # Architecture decisions
 
+**Stage 7H decision:** the first production-facing behavior is a manually invoked current-state refresh, limited to exact raw counts two/four and complete fixed plans. QC-invalid odd slots corroborate groups but never update the sensor. Two eligible count-four primaries are ordered solely by their parsed naive meter-local minutes within that snapshot; equal minutes fail closed. A valid previous entity state survives refresh or cleanup failure. A second `0x2B` is deferred because it would not make the snapshot atomic and its placement has no physical validation. Historical import, durable dedup/resume, and automatic triggers remain separate gates. [Design and validation boundary](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
+
 **Stage 6B3 physical decision:** the user-run HA migration confirms the factory BT MAC fallback preserved the configured object graph for this GD82. Keep the exact fallback policy scoped to this meter's observed identity; do not generalize fixed-address or uniqueness claims to all GD82s. Reset/update behavior is open. Stage 7 remains separately gated.
 
 **Stage 6B3 identity decision:** the observed factory BT MAC is the best available fallback for this GD82, formatted as lowercase colon-separated octets. It is a private internal ConfigEntry/DeviceInfo identifier and Bluetooth connection, not a serial display value. An in-place registry update preserves the existing device/entity; no different-MAC merge is inferred. See [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md).

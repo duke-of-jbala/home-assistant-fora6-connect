@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 7H implementation:** `coordinator.py` now owns an explicit, per-entry, single-flight manual current-state refresh. It reuses the Stage 4 transport, validates project identity and only raw counts two/four, reads complete fixed slot plans, filters General uric-acid primaries, and publishes one mg/dL measurement to `MeasurementState` only after clean unsubscribe/disconnect. `sensor.py` listens to explicit state replacements and performs no BLE I/O. Meter-local naive time stays in the product measurement; successful ingestion time is a separate process-local aware UTC field. The action selects a configured entry and requires no manually entered MAC. [Stage 7H details](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md). Real HA validation is pending; there is no startup, advertisement, scheduled, or periodic refresh, and no historical import.
+
 **Stage 6B3 physical closure:** the user confirmed the existing ConfigEntry unique ID now has canonical Bluetooth MAC form after restart. The same entry, device, entity, connection metadata, and GD82/ForaCare metadata remained; the entity is still unavailable and no Add card appeared. This validates the in-place migration on one meter. See [the closure record](STAGE6B3_FACTORY_MAC_IDENTITY.md); broad address stability remains unresolved.
 
 **Stage 6B3:** [Factory MAC identity](STAGE6B3_FACTORY_MAC_IDENTITY.md) is a guarded fallback for the tested GD82 after the generic `0x2A25` text and unusable `0x2A23` result. Existing placeholder entry/device identifiers are migrated in place before the inert sensor loads; the entity unique ID remains based on the unchanged entry ID. No sync or BLE read occurs at setup.
@@ -33,7 +35,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 - `measurement.py`: pure-Python Stage 5/5A product measurement mapping. It applies `/10` only to valid identified uric acid, retains category/transmitted/meter-local time, and assigns the app's evidenced mg/dL base unit to that valid analyte only.
 - `sensor_state.py`: pure Stage 5/5A ordinary uric-acid state mapping and inert per-entry runtime holder.
 - `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; the local device page shows the exact validated serial and the runtime Bluetooth address is connection metadata. No BLE I/O or polling.
-- `coordinator.py`: future retrieval and synchronization state; Stage 7A added no runtime coordinator behavior.
+- `coordinator.py`: Stage 7H manual-only current-state selection and state update for exactly two/four raw slots, with a per-entry lock and failure retention. It does not import history or schedule work.
 - `history_probe.py`: manually invoked Stage 7B fixed two-slot observation through the Stage 4 transport. It selects only the documented User1 count gate and `1 → 0 → 1` pairs, returns structural/equality booleans, and never feeds measurement state.
 - `history_semantics_probe.py`: separate manual Stage 7C action using the same fixed count-gated transport sequence and the existing pure parser/model for private in-memory classification. Its result is boolean-only and does not feed measurement state.
 - `config_flow.py`: Stage 6B passive candidate, user review, bounded active project/serial confirmation, and private persistent identity.

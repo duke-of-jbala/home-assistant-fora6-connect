@@ -19,7 +19,17 @@ def _load_entity():
     ha = types.ModuleType("homeassistant")
     components = types.ModuleType("homeassistant.components")
     sensor_module = types.ModuleType("homeassistant.components.sensor")
-    sensor_module.SensorEntity = type("SensorEntity", (), {})
+    class FakeSensorEntity:
+        async def async_added_to_hass(self):
+            pass
+
+        def async_on_remove(self, callback):
+            self._remove_callback = callback
+
+        def async_write_ha_state(self):
+            self._state_writes = getattr(self, "_state_writes", 0) + 1
+
+    sensor_module.SensorEntity = FakeSensorEntity
     entries = types.ModuleType("homeassistant.config_entries")
     entries.ConfigEntry = object
     core = types.ModuleType("homeassistant.core")
@@ -89,6 +99,15 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
         self.state.replace(measurement.measurement_from_record(fixture_record("uric_general")))
         self.assertTrue(self.entity.available)
         self.assertEqual(str(self.entity.native_value), "123.4")
+
+    async def test_loaded_entity_receives_only_explicit_state_replacement(self):
+        await self.entity.async_added_to_hass()
+        self.assertEqual(getattr(self.entity, "_state_writes", 0), 0)
+        self.state.replace(measurement.measurement_from_record(fixture_record("uric_general")))
+        self.assertEqual(self.entity._state_writes, 1)
+        self.entity._remove_callback()
+        self.state.replace(measurement.measurement_from_record(fixture_record("uric_general")))
+        self.assertEqual(self.entity._state_writes, 1)
 
     async def test_qc_ac_pc_and_invalid_clear_ordinary_state(self):
         self.state.replace(measurement.measurement_from_record(fixture_record("uric_general")))

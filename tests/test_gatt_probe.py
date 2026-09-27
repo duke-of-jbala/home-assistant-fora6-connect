@@ -108,6 +108,8 @@ def _load_setup(probe_module):
     chronology.async_probe_history_chronology = AsyncMock(
         return_value={"chronology_comparison_complete": True}
     )
+    coordinator = types.ModuleType("_fora6_setup_test.coordinator")
+    coordinator.Fora6CurrentRefreshCoordinator = Mock()
     serial = types.ModuleType("_fora6_setup_test.serial_probe")
     serial.async_probe_serial_identity = AsyncMock(
         return_value={"serial_read_successful": True}
@@ -145,6 +147,7 @@ def _load_setup(probe_module):
             "_fora6_setup_test.history_semantics_probe": semantics,
             "_fora6_setup_test.history_window_four": four_slot,
             "_fora6_setup_test.history_chronology_probe": chronology,
+            "_fora6_setup_test.coordinator": coordinator,
             "_fora6_setup_test.serial_probe": serial,
             "_fora6_setup_test.serial_stability": stability,
             "_fora6_setup_test.system_id_probe": system_id,

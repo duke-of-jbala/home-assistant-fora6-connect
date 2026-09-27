@@ -1,5 +1,7 @@
 # Stage 7G — bounded primary chronology probe and Stage 7G1 private output
 
+**Later implementation note:** The user-run Stage 7G chronology result informed the separately authorized [Stage 7H manual current-state refresh](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md). Stage 7G remains a development action; Stage 7H is synthetic-tested and awaits its own physical validation. The chronology result does not establish index ordering or circular-buffer behavior.
+
 Stage 7G implements a **development-only** relative-time check. Stage 7E physically confirmed that raw indexes 0 and 2 were valid General primary candidates in one four-slot GD82 state, with indexes 1 and 3 behaving as companions. The order of the two primaries remained unknown. This action has synthetic test coverage only; no physical Stage 7G result is claimed here.
 
 ## Fixed read and gates

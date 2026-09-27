@@ -1,5 +1,7 @@
 # Stage 7F — minimum production sync reassessment
 
+**Later implementation note:** Stage 7G's real four-slot result resolved the tested snapshot's primary ordering by parsed meter-local time, and separately authorized [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md) implemented a manual-only current-state refresh for exact counts two/four. Stage 7F itself remains an offline design record. Physical Stage 7H validation is pending; historical import, dedup, resume, and automatic triggers are still deferred.
+
 **Original Stage 7F decision (before Stage 7G): Outcome A, conditional current-state refresh only.** An explicitly requested, bounded refresh can be designed for the physically tested raw counts **2 and 4** if it accepts only a *single* valid General uric-acid primary in the complete, internally consistent snapshot. It must decline to choose between two eligible primaries. This original decision is superseded for the two-primary count-four case by the **Stage 7G2 reassessment below**. Neither review implements or authorizes production meter operation. Full historical synchronization remains unjustified.
 
 ## Evidence and scope

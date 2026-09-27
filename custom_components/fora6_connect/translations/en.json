@@ -70,6 +70,16 @@
         }
       }
     },
+    "refresh_current_uric_acid": {
+      "name": "Refresh current uric acid",
+      "description": "Turn the FORA 6 Connect meter on normally, do not browse stored records with its arrow keys, then run this action. Refreshes the existing uric-acid sensor for supported two- or four-slot memory only. The private response includes the selected value and meter-local time.",
+      "fields": {
+        "config_entry_id": {
+          "name": "FORA 6 Connect entry",
+          "description": "Choose the configured meter to refresh."
+        }
+      }
+    },
     "probe_history_chronology": {
       "name": "Inspect two primary records (private development action)",
       "description": "Stage 7G only. At exactly four User1 raw slots, read only indexes 0 and 2. Validated General uric-acid primaries return private mg/dL values and timezone-unknown meter-local times alongside semantic and relative-order results. Do not share this health-data response publicly. No identifiers, persistence, entity update, or production synchronization.",

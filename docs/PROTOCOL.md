@@ -1,5 +1,7 @@
 # Protocol evidence register
 
+**Stage 7H bounded use:** the manual current-state refresh reuses only validated `0x22`, `0x24`, User1 `0x2B`, and indexed `0x25`/`0x26` builders. Count two reads raw `0 → 1`; count four reads `0 → 1 → 2 → 3`; every other count stops after metadata. This adds no frame constructor or command ID. Strictly later parsed naive meter-local time selects between two eligible count-four General uric-acid primaries; index magnitude is not chronological. The parser and record model remain HA/Bleak independent. [Implementation boundary](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md). Real-device refresh validation is pending.
+
 **Stage 6B3 closure:** physical HA validation confirms the placeholder-to-factory-MAC identity migration succeeded for this configured GD82. The System ID remains unusable and `0x2A25` remains a generic placeholder; no protocol command or record behavior changed. See [the identity record](STAGE6B3_FACTORY_MAC_IDENTITY.md).
 
 **Stage 6B3 identity boundary:** user-run Stage 6B2 found `0x2A23` readable and structurally plausible but unusable, so no stability reference was set. `0x2A25` is the generic literal “Serial Number” on this meter. The printed BT MAC privately matched HA's address across repeated power cycles; [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md) uses it as a fallback identity. No FORA command or record semantic changed.

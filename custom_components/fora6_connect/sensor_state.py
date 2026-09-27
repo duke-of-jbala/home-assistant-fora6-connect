@@ -5,7 +5,9 @@ confirmed meter identity separately and performs no transport work itself.
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
+from typing import Any, Callable
 
 from .const import DOMAIN
 from .measurement import Fora6Measurement, MeasurementValueStatus
@@ -34,19 +36,31 @@ def measurement_native_value(
 
 @dataclass(slots=True)
 class MeasurementState:
-    """Inert latest-measurement holder for a future entity/coordinator layer.
+    """Latest valid measurement and synchronous entity change listeners.
 
-    Replacement is explicit; an invalid or unsupported new record replaces
-    the old record, and the derived sensor value becomes unavailable.
-    This class starts no task and performs no Bluetooth or Home Assistant I/O.
+    Replacement is explicit. The Stage 7H coordinator only calls it after a
+    complete successful refresh, so failures retain the previous valid value.
+    This class starts no task and performs no Bluetooth I/O.
     """
 
     latest: Fora6Measurement | None = None
+    _listeners: list[Callable[[], None]] = field(default_factory=list, repr=False)
 
     def replace(self, measurement: Fora6Measurement | None) -> None:
         if measurement is not None and not isinstance(measurement, Fora6Measurement):
             raise TypeError("Expected a Fora6Measurement or None.")
         self.latest = measurement
+        for listener in tuple(self._listeners):
+            listener()
+
+    def subscribe(self, listener: Callable[[], None]) -> Callable[[], None]:
+        """Notify the loaded entity after an explicit successful replacement."""
+        self._listeners.append(listener)
+
+        def unsubscribe() -> None:
+            self._listeners.remove(listener)
+
+        return unsubscribe
 
     @property
     def native_value(self) -> Decimal | None:
@@ -59,6 +73,8 @@ class MeterRuntime:
 
     address: str = field(repr=False)
     measurement_state: MeasurementState = field(default_factory=MeasurementState)
+    refresh_coordinator: Any = field(default=None, repr=False)
+    synchronized_at: datetime | None = field(default=None, repr=False)
 
 
 def meter_device_identifier(stage6_stable_identifier: str) -> tuple[str, str]:

@@ -1,5 +1,17 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 7H manual current-state refresh implementation
+
+Starting checkpoint: clean public `main` at `1ad97c17fe02c8e313c63ecb12c7c8d6aa1fbd2a` (`docs: close Stage 7G chronology validation`) on 2026-09-27 (Europe/London). The current task changed runtime, service metadata, tests, and Markdown files listed in `CURRENT_STATUS.md`. This is a **pre-commit observation**; the working tree currently has those changes and is not clean. Verify/report post-commit and remote state separately.
+
+[Stage 7H](docs/STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md) adds `fora6_connect.refresh_current_uric_acid`, using a configured-entry selector and no manually entered Bluetooth address. A per-entry coordinator requires canonical factory-MAC/locator agreement and project `0x4183`, reads only fixed two-/four-slot User1 plans, validates QC-invalid companions and eligible General uric-acid primaries, selects by strict meter-local time for two eligible four-slot primaries, and rejects equal-minute ties. The selected mg/dL value feeds the existing sensor only after clean unsubscribe/disconnect. A successful ingestion time remains distinct from naive meter-local measurement time. Prior valid state survives failures. There is no history import, persistent dedup/resume, startup, advertisement, scheduled, or periodic refresh.
+
+Full verbose suite: **369/369 passed** (baseline 353). Compileall, tabnanny, five JSON/YAML parses, both diff whitespace checks, and runtime/command/privacy/artifact review passed at this pre-commit observation. Only synthetic test values are tracked. The physical GD82 was not operated by Codex. The action response can privately contain selected health value and meter-local minute; they are not logged or placed in public docs.
+
+**Exact next gate:** user-run Stage 7H validation on the existing HA entry: deploy/restart, turn the meter ON normally, avoid history arrows, run the action once, inspect the existing uric-acid entity, and report sanitized status/behavior. No historical or automatic sync follows without separate authorization.
+
+## Previous Stage 7G2 checkpoint
+
 ## Stage 7G2 physical closure and offline unit-format review
 
 Starting checkpoint: clean public `main` at `623c343429c26f931b2885252b8af56d6fda19db` (`feat: expose private chronology probe values`) on 2026-09-27 (Europe/London). The task changed only the Markdown files listed in `CURRENT_STATUS.md`. This is a **pre-commit observation**; verify and report post-commit/push state separately.

@@ -1,6 +1,20 @@
 # Current Status — FORA 6 Connect
 
-**Stage 7G is complete for its authorized bounded chronology scope after one real four-slot GD82 run.** Stage 7G2 also reviewed retained app mmol/L formatting offline. Stages 0–6B3 and 7A–7F remain complete for their authorized scopes. No production sync, polling, historical import, persistent dedup/resume, or entity update exists; the uric-acid entity remains unavailable.
+**Stage 7H manual current-state refresh is implemented and synthetic-tested; real Home Assistant validation is pending.** It supports only raw counts two/four through an explicit configured-entry action. The existing uric-acid entity starts unavailable and can become available after a successful manual run. Stages 0–6B3 and 7A–7G remain complete for their authorized scopes. No historical import, persistent dedup/resume, polling, startup sync, or advertisement-triggered sync exists.
+
+## Stage 7H pre-commit observation
+
+- **Branch/date:** `main`, 2026-09-27 (Europe/London).
+- **Starting checkpoint:** `1ad97c17fe02c8e313c63ecb12c7c8d6aa1fbd2a` — `docs: close Stage 7G chronology validation`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin was the public project repository.
+- **Changes after checkpoint:** yes. At this pre-commit observation, runtime, action metadata, tests, and documentation are modified; the working tree is not clean. Verify and report the post-commit/push state separately.
+- **Implementation:** `refresh_current_uric_acid` targets a configured entry, verifies canonical MAC/locator and project identity, accepts only count two/four, validates all fixed pairs, excludes QC-invalid companions, and selects an eligible General uric-acid primary. At count four, two eligible primaries require a unique later meter-local minute; ties fail closed. State changes only after clean transport cleanup. One per-entry lock rejects overlapping runs; no background trigger exists.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `custom_components/fora6_connect/__init__.py`, `coordinator.py`, `sensor.py`, `sensor_state.py`, `services.yaml`, `translations/en.json`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md`, `docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md`, `docs/STAGE7_HISTORY_SYNC.md`, new `docs/STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md`, `tests/test_gatt_probe.py`, `tests/test_stage6b_entity.py`, and new `tests/test_manual_refresh.py`.
+- **Checks actually run so far:** full verbose suite **369/369 passed** (baseline 353); compileall and tabnanny passed; all five tracked JSON/YAML files parsed; `git diff --check` and `git diff --cached --check` passed. Runtime diff, command IDs, privacy boundary, automatic-trigger absence, and tracked-artifact inventory were inspected. No real health data, identifier, proprietary artifact, or private path was added. No physical meter operation was performed by Codex.
+
+**Exact next gate:** deploy Stage 7H to the existing Home Assistant installation, restart, manually turn the GD82 ON without pressing its history arrows, run `fora6_connect.refresh_current_uric_acid` once for the configured entry, and inspect the existing uric-acid entity. Share only sanitized status/behavior for closure. Broader sync requires separate authorization.
+
+## Earlier Stage 7G2 checkpoint
 
 ## Stage 7G2 pre-commit observation
 

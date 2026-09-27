@@ -1,4 +1,4 @@
-"""FORA 6 Connect setup and bounded development actions."""
+"""FORA 6 Connect setup, manual refresh, and bounded development actions."""
 
 import asyncio
 
@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 
 from .const import DOMAIN, PLACEHOLDER_SERIAL
+from .coordinator import Fora6CurrentRefreshCoordinator
 from .gatt_probe import ProbeError, async_probe_gatt
 from .history_chronology_probe import async_probe_history_chronology
 from .history_probe import async_probe_history_window
@@ -30,10 +31,11 @@ SERVICE_PROBE_SERIAL_IDENTITY = "probe_serial_identity"
 SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
 SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
 SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
+SERVICE_REFRESH_CURRENT_URIC_ACID = "refresh_current_uric_acid"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Register the manually invoked development-only Bluetooth actions."""
+    """Register explicit manual refresh and development Bluetooth actions."""
     probe_lock = asyncio.Lock()
 
     async def async_handle_probe_gatt(call: ServiceCall) -> dict:
@@ -352,11 +354,35 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         async_handle_probe_system_id_stability,
         supports_response=SupportsResponse.ONLY,
     )
+
+    async def async_handle_refresh_current_uric_acid(call: ServiceCall) -> dict:
+        """Refresh one configured entry only after an explicit user action."""
+        entry_id = call.data.get("config_entry_id")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ServiceValidationError("Select a configured FORA 6 Connect entry.")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError("The selected FORA entry is unavailable.")
+        runtime = getattr(entry, "runtime_data", None)
+        coordinator = getattr(runtime, "refresh_coordinator", None)
+        if coordinator is None:
+            raise ServiceValidationError("Load the selected FORA entry before refreshing.")
+        try:
+            return await coordinator.async_refresh()
+        except Exception:
+            raise ServiceValidationError("FORA manual refresh failed.") from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_REFRESH_CURRENT_URIC_ACID,
+        async_handle_refresh_current_uric_acid,
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
-    """Create inert state and forward one sensor without connecting."""
+    """Create per-entry state/coordinator and forward one sensor without BLE I/O."""
     from .sensor_state import MeterRuntime
 
     if not isinstance(entry.unique_id, str) or not entry.unique_id.strip():
@@ -372,6 +398,9 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
         except Exception:
             raise RuntimeError("FORA identity migration could not be completed safely") from None
     entry.runtime_data = MeterRuntime(address=address)
+    entry.runtime_data.refresh_coordinator = Fora6CurrentRefreshCoordinator(
+        hass, entry, entry.runtime_data
+    )
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     # Refresh retained registry metadata for existing entries without a BLE read.
     from .device_metadata import async_reconcile_device_metadata
@@ -384,5 +413,8 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
-    """Unload the inert sensor platform; no transport owns a session."""
-    return await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    """Unload the sensor platform and disable later manual refresh calls."""
+    unloaded = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+    if unloaded and getattr(entry, "runtime_data", None) is not None:
+        entry.runtime_data.refresh_coordinator = None
+    return unloaded
