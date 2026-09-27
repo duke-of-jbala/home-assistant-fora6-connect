@@ -69,6 +69,7 @@ class Fora6BluetoothTransport:
         self._pending_response: asyncio.Future[ProtocolFrame | None] | None = None
         self._exchange_lock = asyncio.Lock()
         self._close_task: asyncio.Task[CleanupResult] | None = None
+        self._poisoned = False
         self.device_resolved = False
         self.connection_established = False
         self.characteristic_found = False
@@ -94,22 +95,28 @@ class Fora6BluetoothTransport:
         if ble_device is None:
             raise TransportError("resolution", "no_connectable_device")
         self.device_resolved = True
+        connect_task = asyncio.create_task(
+            establish_connection(
+                BleakClientWithServiceCache,
+                ble_device,
+                NAME,
+                max_attempts=2,
+                use_services_cache=False,
+                timeout=CONNECTION_TIMEOUT,
+                pair=False,
+            )
+        )
         try:
             self._client = await asyncio.wait_for(
-                establish_connection(
-                    BleakClientWithServiceCache,
-                    ble_device,
-                    NAME,
-                    max_attempts=2,
-                    use_services_cache=False,
-                    timeout=CONNECTION_TIMEOUT,
-                    pair=False,
-                ),
-                timeout=CONNECT_TOTAL_TIMEOUT,
+                asyncio.shield(connect_task), timeout=CONNECT_TOTAL_TIMEOUT
             )
+        except asyncio.CancelledError:
+            await self._reap_connection(connect_task)
+            raise
         except BleakOutOfConnectionSlotsError:
             raise TransportError("connection", "no_connection_slot") from None
         except Exception:
+            await self._reap_connection(connect_task)
             raise TransportError("connection", "connection_failed") from None
         if not self._is_connected():
             raise TransportError("connection", "peer_disconnected")
@@ -136,6 +143,43 @@ class Fora6BluetoothTransport:
             raise TransportError("gatt", "custom_properties_missing")
         self._characteristic = characteristic
         self.characteristic_found = True
+
+    async def _reap_connection(self, task: asyncio.Task[Any]) -> None:
+        """Own a cancelled connector's result and close any client it returns."""
+        if not task.done():
+            task.cancel()
+        try:
+            client = await asyncio.wait_for(
+                asyncio.shield(task), timeout=CONNECT_TOTAL_TIMEOUT
+            )
+        except asyncio.CancelledError:
+            return
+        except TimeoutError:
+            # A non-cooperative connector cannot be awaited indefinitely.
+            # Retain ownership of any eventual result for bounded cleanup.
+            task.add_done_callback(self._close_late_connection)
+            task.cancel()
+            return
+        except Exception:
+            return
+        self._client = client
+        await self.async_close()
+
+    def _close_late_connection(self, task: asyncio.Task[Any]) -> None:
+        """Recover a client returned after the bounded cancellation wait."""
+        try:
+            client = task.result()
+        except BaseException:
+            return
+        # The session's normal close may already have completed. Disconnect
+        # this late client directly so an old CleanupResult cannot hide it.
+        asyncio.create_task(self._disconnect_late_client(client))
+
+    async def _disconnect_late_client(self, client: Any) -> None:
+        try:
+            await asyncio.wait_for(client.disconnect(), timeout=DISCONNECT_TIMEOUT)
+        except Exception:
+            pass
 
     async def async_subscribe(self) -> None:
         """Subscribe once after validating the custom characteristic."""
@@ -169,6 +213,8 @@ class Fora6BluetoothTransport:
 
     async def async_exchange(self, request: ProtocolFrame) -> ProtocolFrame:
         """Write a request once and return one command-matched response."""
+        if self._poisoned:
+            raise TransportError("exchange", "invalid_session_state")
         if not isinstance(request, ProtocolFrame):
             raise TransportError("exchange", "invalid_request")
         try:
@@ -176,6 +222,8 @@ class Fora6BluetoothTransport:
         except FrameError:
             raise TransportError("exchange", "invalid_request") from None
         async with self._exchange_lock:
+            if self._poisoned:
+                raise TransportError("exchange", "invalid_session_state")
             if not self._is_connected():
                 raise TransportError("exchange", "peer_disconnected")
             if not self._subscribed or self._close_task is not None:
@@ -185,8 +233,10 @@ class Fora6BluetoothTransport:
             )
             self._pending_request = request
             self._pending_response = future
+            write_attempted = False
             try:
                 try:
+                    write_attempted = True
                     await asyncio.wait_for(
                         self._client.write_gatt_char(
                             self._characteristic, request.data, response=True
@@ -212,6 +262,12 @@ class Fora6BluetoothTransport:
                         "exchange", "peer_disconnected", write_succeeded=True
                     )
                 return response
+            except BaseException:
+                if write_attempted:
+                    # No transaction ID can distinguish a late response from
+                    # the next response to the same command in this session.
+                    self._poisoned = True
+                raise
             finally:
                 self._pending_request = None
                 self._pending_response = None

@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Fixed
+- Hardened Stage 4 transport sessions so any failed post-write exchange rejects later exchanges until a fresh session is created, preventing late notification reuse; connection cancellation now owns and disconnects clients returned during cancellation or timeout. Hardware-free regression only.
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 
 ### Added

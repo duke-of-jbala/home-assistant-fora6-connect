@@ -127,6 +127,99 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
             CONNECT_TOTAL_TIMEOUT=0.005,
         ):
             await self.failure(self.transport.async_connect(), "connection_failed")
+        self.client.disconnect.assert_not_awaited()
+
+    async def test_cancel_pending_connection_propagates_without_client(self):
+        started = asyncio.Event()
+        cancelled = asyncio.Event()
+        async def pending(*_args, **_kwargs):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                cancelled.set()
+        self.connector.establish_connection.side_effect = pending
+        connecting = asyncio.create_task(self.transport.async_connect())
+        await started.wait()
+        connecting.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await connecting
+        self.assertTrue(cancelled.is_set())
+        self.client.disconnect.assert_not_awaited()
+
+    async def test_cancel_connection_that_returns_client_closes_it_once(self):
+        started = asyncio.Event()
+        async def return_after_cancel(*_args, **_kwargs):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                return self.client
+        self.connector.establish_connection.side_effect = return_after_cancel
+        connecting = asyncio.create_task(self.transport.async_connect())
+        await started.wait()
+        connecting.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await connecting
+        self.client.disconnect.assert_awaited_once()
+        await self.transport.async_close()
+        self.client.disconnect.assert_awaited_once()
+
+    async def test_connection_timeout_reaps_client_returned_on_cancel(self):
+        async def return_after_cancel(*_args, **_kwargs):
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                return self.client
+        self.connector.establish_connection.side_effect = return_after_cancel
+        with patch.dict(
+            self.probe.Fora6BluetoothTransport.async_connect.__globals__,
+            CONNECT_TOTAL_TIMEOUT=0.005,
+        ):
+            await self.failure(self.transport.async_connect(), "connection_failed")
+        self.client.disconnect.assert_awaited_once()
+        await self.transport.async_close()
+        self.client.disconnect.assert_awaited_once()
+
+    async def test_late_client_after_cancellation_bound_is_disconnected(self):
+        release = asyncio.Event()
+        async def slow_cancel(*_args, **_kwargs):
+            while not release.is_set():
+                try:
+                    await release.wait()
+                except asyncio.CancelledError:
+                    continue
+            return self.client
+        self.connector.establish_connection.side_effect = slow_cancel
+        with patch.dict(
+            self.probe.Fora6BluetoothTransport.async_connect.__globals__,
+            CONNECT_TOTAL_TIMEOUT=0.005,
+        ):
+            await self.failure(self.transport.async_connect(), "connection_failed")
+        await self.transport.async_close()
+        release.set()
+        for _ in range(50):
+            if self.client.disconnect.await_count:
+                break
+            await asyncio.sleep(0)
+        self.client.disconnect.assert_awaited_once()
+
+    async def test_connection_cancellation_error_is_private(self):
+        started = asyncio.Event()
+        async def fail_after_cancel(*_args, **_kwargs):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                raise RuntimeError(self.address) from None
+        self.connector.establish_connection.side_effect = fail_after_cancel
+        connecting = asyncio.create_task(self.transport.async_connect())
+        await started.wait()
+        with patch.object(logging.Logger, "_log") as logs:
+            connecting.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await connecting
+        self.assertNotIn(self.address, str(logs.call_args_list))
 
     async def test_disconnected_client_after_connect_is_cleaned_up(self):
         self.client.is_connected = False
@@ -214,6 +307,8 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
         self.client.write_gatt_char.side_effect = RuntimeError(self.address)
         await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "write_failed")
         self.assertEqual(self.client.write_gatt_char.await_count, 1)
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+        self.assertEqual(self.client.write_gatt_char.await_count, 1)
         await self.transport.async_close()
 
     async def test_write_wait_is_bounded(self):
@@ -234,10 +329,11 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
         self.responses[WAKE_REQUEST] = None
         await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "response_timeout")
         self.assertEqual(self.client.write_gatt_char.await_count, 1)
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+        self.assertEqual(self.client.write_gatt_char.await_count, 1)
         await self.transport.async_close()
 
     async def test_invalid_length_checksum_marker_and_echo_fail_closed(self):
-        await self.connected()
         wrong_marker_head = WAKE_RESPONSE[:6] + b"\xA3"
         wrong_marker = wrong_marker_head + bytes((sum(wrong_marker_head) & 0xFF,))
         for bad in (
@@ -247,11 +343,36 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
             PROJECT_RESPONSE,
         ):
             with self.subTest(kind=len(bad)):
+                self.transport = self.probe.Fora6BluetoothTransport(
+                    self.hass, self.address, response_timeout=0.01
+                )
+                await self.connected()
                 self.responses[WAKE_REQUEST] = bad
                 await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_response")
                 self.assertIsNone(self.transport._pending_request)
                 self.assertIsNone(self.transport._pending_response)
+                await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+                await self.transport.async_close()
         self.assertEqual(self.client.write_gatt_char.await_count, 4)
+
+    async def test_late_notification_cannot_satisfy_next_exchange(self):
+        await self.connected()
+        self.responses[WAKE_REQUEST] = None
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "response_timeout")
+        self.callback(self.characteristic, bytearray(WAKE_RESPONSE))
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+        self.client.write_gatt_char.assert_awaited_once()
+        await self.transport.async_close()
+
+    async def test_post_write_disconnect_poisons_session(self):
+        await self.connected()
+        async def disconnect_after_write(characteristic, data, *, response):
+            self.callback(characteristic, bytearray(WAKE_RESPONSE))
+            self.client.is_connected = False
+        self.client.write_gatt_char.side_effect = disconnect_after_write
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "peer_disconnected")
+        await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+        self.client.write_gatt_char.assert_awaited_once()
         await self.transport.async_close()
 
     async def test_invalid_notification_wins_over_later_valid_frame(self):
@@ -275,12 +396,19 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
         await self.connected()
         await self.failure(self.transport.async_exchange(self.protocol(WAKE_RESPONSE)), "invalid_request")
         self.client.write_gatt_char.assert_not_awaited()
+        response = await self.transport.async_exchange(self.protocol(WAKE_REQUEST))
+        self.assertEqual(response.data, WAKE_RESPONSE)
         await self.transport.async_close()
 
     async def test_exchange_requires_subscribed_connected_session(self):
         await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "peer_disconnected")
         await self.transport.async_connect()
         await self.failure(self.transport.async_exchange(self.protocol(WAKE_REQUEST)), "invalid_session_state")
+        await self.transport.async_subscribe()
+        self.assertEqual(
+            (await self.transport.async_exchange(self.protocol(WAKE_REQUEST))).data,
+            WAKE_RESPONSE,
+        )
         await self.transport.async_close()
 
     async def test_privacy_of_errors_and_logs(self):
