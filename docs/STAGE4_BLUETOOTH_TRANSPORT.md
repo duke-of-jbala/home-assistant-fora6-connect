@@ -1,6 +1,6 @@
 # Stage 4 — reusable Home Assistant Bluetooth transport
 
-**State:** Implementation complete for the authorized Stage 4 scope; physical regression has not been run. The existing manual actions were refactored without changing their result keys or command order. No production discovery, synchronization, entity, persistence, pairing, RACP, or additional command was added.
+**State: COMPLETE for the authorized Stage 4 scope, including user-run physical regression validation.** The user reports that both existing bounded manual actions succeeded on the real GD82 with the meter ON after installation of the hardened transport. Their result schemas and command order remain unchanged. No production discovery, synchronization, entity, persistence, pairing, RACP, or additional command was added.
 
 ## Boundary and API
 
@@ -34,8 +34,15 @@ The address is held only in the live transport instance. Raw notification bytes 
 
 `protocol_probe.py` now delegates device resolution, connection, GATT validation, subscription, exchange, and cleanup to this transport. It still chooses the existing bounded sequences: identity uses wake and project query; the one-slot record probe adds User1 metadata and raw-index-zero part requests. The service names, input contract, output keys, timeout values, and privacy-safe status behavior remain the same. Existing probe tests continue to assert exact write order, one write per command, and result fields.
 
-Dedicated hardware-free transport tests cover resolution, connection slots/failures, service and property validation, subscription, successful and malformed exchanges, poisoned-session rejection, late notifications, owned-client cleanup on cancellation and timeout, privacy, concurrent exchanges, and bounded cleanup. No physical meter result is claimed by Stage 4 implementation or its hardening pass.
+Dedicated hardware-free transport tests cover resolution, connection slots/failures, service and property validation, subscription, successful and malformed exchanges, poisoned-session rejection, late notifications, owned-client cleanup on cancellation and timeout, privacy, concurrent exchanges, and bounded cleanup.
 
-**Controlled regression after review:** with the GD82 ON, the user may run the already-proven `fora6_connect.probe_protocol_identity` once, and optionally the previously proven one-slot `fora6_connect.probe_protocol_record` once. Compare only privacy-safe result flags and cleanup outcomes with the Stage 2E/2F baseline. Do not add commands, record loops, or decoded real-result exposure. The selected adapter/proxy remains unresolved until Stage 9.
+## User-run physical regression closure
 
-**Proposed Stage 5 gate:** after Stage 4 review and any separately approved controlled transport regression, separately authorize measurement/entity modeling using only supported record semantics. Units, QC meaning/policy, unknown analytes, and production sync remain separate decisions; Stage 5 is not started here.
+The user installed the hardened transport and ran both existing development actions with the real GD82 ON. The supplied privacy-safe summaries reported all listed operations successful, no error stage/code, and no cleanup errors.
+
+- **Identity:** connectable device resolution, HA Bluetooth connection, custom characteristic discovery, notification subscription, `0x22` wake and `0x24` project exchanges all succeeded. Project ID was `16771` (`0x4183`), matching expectation. Notification stop and disconnect were clean; `identity_confirmed` was true.
+- **Bounded record:** the same identity path succeeded, followed by User1 `0x2B` metadata and User1/raw-index-zero `0x25` and `0x26`; metadata and both command-matched parts were valid, the slot was available, and the pair was complete. Notification stop and disconnect were clean; `record_retrieval_confirmed` was true. The action identified no analyte and decoded no measurement or scaling result.
+
+These user-run regressions validate the reusable Stage 4 transport and confirm the development-probe refactor did not regress its previously proven bounded behavior. They do not establish production synchronization, polling, history iteration, configuration/discovery, entities, persistence, measurement exposure, pairing, RACP, `0x2F`, `0x33`, address identity/stability, or a particular HA adapter/proxy path. Auto-mode discovery and unresolved protocol semantics remain open. The successful test date was not included in the supplied result. No address, raw record bytes, health value, timestamp, or private identifier is recorded here.
+
+**Proposed Stage 5 entry gate:** separately authorize and review the Stage 5 measurement/entity scope, including which evidence-backed analytes can be exposed and how unresolved units/category policy will be handled. Keep unknown analytes and production synchronization out of scope unless a later gate establishes them. Stage 5 has not started.

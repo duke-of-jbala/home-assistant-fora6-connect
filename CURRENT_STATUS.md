@@ -1,31 +1,31 @@
 # Current Status — FORA 6 Connect
 
-**Stage 4 reusable Bluetooth transport is implemented and its post-review session/cancellation hardening is verified with mocks; controlled physical regression remains pending.** Stages 0, 1, 3, and 2A–2G are complete for their authorized scopes. Unresolved protocol semantics remain open/deferred. No production discovery, synchronization, entity, or decoded real-result action exists.
+**Stage 4 — reusable Home Assistant Bluetooth transport is COMPLETE for its authorized scope, including successful user-run physical regression validation of both existing development actions.** Stages 0, 1, 3, and 2A–2G are complete for their authorized scopes. Unresolved protocol semantics remain open/deferred. No production discovery, synchronization, entity, or decoded real-result action exists.
 
 ## Stage 4 implementation
 
-[The Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes `Fora6BluetoothTransport`: Home Assistant connectable-device resolution, the proven two-attempt connection pattern, custom Write/Notify characteristic validation, bounded single-response exchanges, privacy-safe failures, and cancellation-aware cleanup. A failed exchange after a write attempt now invalidates that session, so a delayed response cannot satisfy a later same-command request. Connector cancellation is explicitly owned: a client returned during cancellation or timeout is disconnected before propagation; a client returned only after the bounded wait is disconnected by a completion callback. `protocol_probe.py` still chooses the same identity and one-slot request sequences. Existing action result fields and timeouts are preserved. `gatt_probe.py` and `notification_observer.py` remain their prior development diagnostics.
+[The Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes `Fora6BluetoothTransport`: Home Assistant connectable-device resolution, the two-attempt connection pattern, custom Write/Notify characteristic validation, bounded single-response exchanges, privacy-safe failures, and cancellation-aware cleanup. A failed exchange after a write attempt invalidates that session, so a delayed response cannot satisfy a later same-command request. Connector cancellation is explicitly owned and obtained clients are disconnected. The user reported that both `probe_protocol_identity` and `probe_protocol_record` succeeded on the real GD82 with the meter ON using the hardened transport; both stopped notifications and disconnected cleanly. The record action exposed no decoded measurement. `protocol_probe.py` retains the same sequences and result fields. `gatt_probe.py` and `notification_observer.py` remain prior development diagnostics.
 
-Mock tests cover connection and GATT failures, timeout boundaries, invalid notifications, poisoned-session rejection, write-once behavior, privacy, concurrent exchanges, and cancellation cleanup. The refactor has **not** been run against a physical meter. No adapter or ESPHome proxy path is claimed. `protocol.py` and `models.py` remain Home Assistant/Bleak independent; they and all later-stage modules are unchanged.
+The physical regressions confirm the identity path `0x22 → 0x24` with project `0x4183`, and the bounded record path `0x22 → 0x24 → User1 0x2B → User1/index-zero 0x25 → User1/index-zero 0x26`. They validate the reusable transport and the probe refactor, not production synchronization or measurement exposure. The selected HA adapter/proxy, Auto-mode discovery, address identity/stability, unresolved protocol semantics, and production synchronization behavior remain open. `protocol.py` and `models.py` remain Home Assistant/Bleak independent.
 
 ## Exact next gate
 
-Review Stage 4, then separately authorize a controlled user-run `fora6_connect.probe_protocol_identity` regression with the GD82 ON. The optional already-proven one-slot `fora6_connect.probe_protocol_record` may be authorized in that same controlled review. Compare privacy-safe status and cleanup flags with Stage 2E/2F. Do not add commands, decoded result exposure, or record loops. Stage 5 measurement/entity modeling needs separate authorization after the transport review and any chosen regression.
+Stage 4 is closed. Stage 5 has not started. Its entry gate is separate user authorization after reviewing and defining the Stage 5 measurement/entity scope, including which evidence-backed analytes and semantics can be exposed. No unresolved protocol field may be guessed, and no production synchronization is implied by Stage 4 closure.
 
-## Repository state at hardening pre-commit review
+## Repository state at Stage 4 closure pre-commit review
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed checkpoint:** `b457289eec66f603130b24d2401449c276f8e4f7` — `feat: add reusable Home Assistant Bluetooth transport`.
-- **Starting tree:** clean (`git status --short` empty before hardening edits).
-- **Changes after checkpoint:** yes; transport session/cancellation handling, transport tests, and Markdown are changed at this pre-commit point. The task commit SHA and post-commit status are reported separately.
-- **Files changed:** `custom_components/fora6_connect/bluetooth.py`, `tests/test_bluetooth_transport.py`, `docs/STAGE4_BLUETOOTH_TRANSPORT.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, and `CHANGELOG.md`.
+- **Last completed checkpoint:** `50bccaaf04a54c6ec50b11c636e2ad8bca4abdde` — `fix: harden Bluetooth session failure handling`.
+- **Starting tree:** clean (`git status --short` empty before this documentation closure).
+- **Changes after checkpoint:** yes; documentation/status files only are changed at this pre-commit point. The task commit SHA and post-commit status are reported separately.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, and `docs/STAGE4_BLUETOOTH_TRANSPORT.md`.
+- **Physical evidence provenance:** user-supplied privacy-safe result summaries; meter ON; the run date was not supplied. No address, raw frame, value, timestamp, or private identifier is recorded.
 - **Live actions by Codex:** none. No physical test, deployment, push, tag, or release.
 
 ## Checks actually run
 
-- `python3 -m unittest discover -s tests -q`: 163 passed, including 44 transport tests; existing identity and record probe regressions passed.
+- `python3 -m unittest discover -s tests -q`: 163 tests passed.
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
-- Manifest, translation, and strings JSON plus services YAML parsing: passed.
-- `git diff --check` and `git diff --cached --check`: passed with the seven changed files staged. The complete staged diff was inspected.
-- Privacy/artifact scan of added lines and tracked paths found no private path, address, captured frame, APK/capture/keystore artifact, or private health data. Neither transport nor probe logs raw bytes or addresses.
-- `bluetooth.py` contains no FORA command ID, logging call, or hard-coded adapter/interface selection. AST review confirmed `protocol.py` and `models.py` remain HA/Bleak independent. Action/service/protocol/model files have no diff from the checkpoint; existing probe regressions verify the same exact writes and result fields.
+- Integration JSON and YAML parsing: passed.
+- `git diff --check` and `git diff --cached --check`: passed; the complete staged documentation diff was inspected.
+- Privacy/artifact scan found no private filesystem path, address, raw frame, health value, timestamp, private identifier, capture, APK/XAPK, or keystore added or tracked. The changed paths are Markdown documentation only.
