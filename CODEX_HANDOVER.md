@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 12 Phase A — prepared for final release review, pre-commit
+
+Starting state was clean `main` at `9cb9a22c46c9c1842eb7916c6edcb02be322a3be` (`docs: close Stage 11 HACS validation`) on 2026-09-27 (Europe/London), with `origin/main` matching. The user authorized Phase A release preparation only. [The Stage 12 record](docs/STAGE12_V1_RELEASE_PREPARATION.md) defines manifest `1.0.0`, a future annotated `v1.0.0` tag and stable latest GitHub release, no custom HACS asset, exact release commands, rollback policy, and known limits. [The release body](docs/RELEASE_NOTES_V1.0.0.md) is prepared but unpublished. The changelog has a concise 1.0.0 section and preserves stage history separately. No runtime Python or test behavior changed; no tag or release exists.
+
+Files changed are listed in `CURRENT_STATUS.md`; this is a modified pre-commit tree observation. Local **375/375** tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, and isolated component copy passed. GitHub metadata/license and HACS release rules were reviewed. Finish the staged privacy/artifact/diff audits, commit/push normally, then confirm HACS and hassfest on the pushed SHA and report the actual commit, remote, and final clean tree. Do not treat local tests as real HACS update evidence; Stage 11's real install/proxy result remains the physical basis.
+
+**Exact next gate:** after Phase A passes, ask for explicit authorization to create/push `v1.0.0` and publish the prepared stable GitHub release, or accept a narrow correction/hold decision. Do not execute Phase B in this task. Stage 8H and post-v1 features remain unstarted.
+
 ## Stage 11 release candidate — physically validated closure, pre-commit
 
 The clean, pushed starting checkpoint for this closure was `bab4bed9e7d2159a237f2c462f7c379ea1f2f599` (`docs: prepare Stage 11 HACS validation`) on `main`, 2026-09-27 (Europe/London). `origin/main` matched. [Official HACS and hassfest jobs](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355458767) passed on that exact SHA. The user then downloaded the custom Integration through HACS over the earlier manual copy, restarted Home Assistant, and reloaded the existing FORA entry. The same entry, one GD82 device, and one uric-acid entity remained. The sensor initially appeared unavailable; the manual action selected the existing entry. No relevant startup/reload error was observed.

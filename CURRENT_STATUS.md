@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 12 Phase A — v1.0.0 release preparation, pre-commit
+
+- **Branch/date and starting checkpoint:** clean `main`, 2026-09-27 (Europe/London), `9cb9a22c46c9c1842eb7916c6edcb02be322a3be` — `docs: close Stage 11 HACS validation`; `origin/main` matched before this task.
+- **Scope:** manifest prepared at `1.0.0`; concise release notes, changelog summary, HACS/tag/release procedure, rollback plan, README and roadmap wording prepared. No runtime Python, action, protocol, Bluetooth, sensor, or test behavior changed. No tag, release, or asset was created.
+- **Changed files after checkpoint:** `custom_components/fora6_connect/manifest.json`, `README.md`, `CHANGELOG.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, new `docs/RELEASE_NOTES_V1.0.0.md`, and new `docs/STAGE12_V1_RELEASE_PREPARATION.md`. The working tree is modified at this pre-commit observation; verify the eventual commit, remote, CI, and post-push status separately.
+- **Checks actually run on the modified tree:** full `unittest` suite **375/375** passed; compileall and tabnanny passed; four JSON, two YAML, one TOML parsed; isolated 27-module release component copy, manifest/resources/brand and relative imports passed. Manifest key order remained unchanged from the hassfest-passing baseline; GitHub metadata, MIT license, HACS release guidance, and runtime dependency/logging/automation/history paths were reviewed. Whole-tree privacy and artifact scans found no real identifier, health data, private path, credential, or prohibited artifact introduced; synthetic/sentinel fixture addresses and a software-version false positive were reviewed. Final staged diff check and official validators on the pushed preparation commit remain to be verified.
+- **Release decision:** proposed annotated tag `v1.0.0`, stable latest GitHub release titled `FORA 6 Connect v1.0.0`, and [prepared release body](docs/RELEASE_NOTES_V1.0.0.md). HACS needs no custom ZIP for this layout and uses a published release tag as remote version. Stage 11's versioned-update gap remains a post-release verification item, not evidence of an update already observed.
+
+**Exact next gate:** complete Phase A checks and push the preparation commit; then request explicit user authorization for Phase B tag and GitHub release creation, or a narrow correction/hold decision. Do not create the tag or release under this prompt.
+
 ## Stage 11 release candidate — real HACS validation closure, pre-commit
 
 - **Branch/date and prior checkpoint:** `main`, 2026-09-27 (Europe/London), `bab4bed9e7d2159a237f2c462f7c379ea1f2f599` — `docs: prepare Stage 11 HACS validation`. The preparation commit was pushed normally, `origin/main` matched it, and `git status --short` was empty before this closure task changed Markdown.

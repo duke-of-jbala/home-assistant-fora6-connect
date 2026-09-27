@@ -6,6 +6,28 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+No changes since the prepared 1.0.0 release content.
+
+## [1.0.0]
+
+First stable release of the Home Assistant custom integration for FORA 6 Connect GD82.
+
+### Added
+- Automatic Bluetooth discovery and guarded config flow, with one GD82/ForaCare device and one native mg/dL uric-acid sensor.
+- Explicit manual `fora6_connect.refresh_current_uric_acid` action for stored raw slot counts two or four. It selects valid General uric-acid primaries; count four uses the strictly later meter-local minute and rejects equal-minute ties.
+- Local Home Assistant Bluetooth and ESPHome Bluetooth Proxy transport. Real manual count-four refreshes were validated through an M5Stack Atom Lite proxy, including after HACS installation.
+- HACS custom Integration packaging, installation guidance, English UI strings, original neutral branding, and HACS/hassfest validation workflow.
+
+### Behavior and limits
+- A failed refresh retains the last valid in-process reading; a restart or reload begins unavailable until the next manual refresh. No duplicate device or entity was observed in the tested install and refresh path.
+- No automatic background refresh, general history import, counts six and above, broader analyte entity, persistent deduplication/resume, or printed-serial retrieval is included.
+- Private measurements, meter-local times, and device identifiers are excluded from public logs and documentation. The private manual action response may contain the selected value and meter-local time.
+
+## Development record before 1.0.0
+
+The entries below preserve stage-by-stage evidence and implementation history.
+The concise 1.0.0 summary above is the release changelog.
+
 ### Packaging
 - Stage 11 real HACS custom-repository installation preserved the existing FORA entry, one GD82 device, and one uric-acid entity after Home Assistant restart/reload. A post-install count-four manual refresh updated the existing sensor through an Atom Lite proxy identified as the active Bluetooth connection Source. No relevant log/action/cleanup error or duplicate was observed. HACS did not offer a safe re-download option, so release-update behavior remains untested; no tag or release was created.
 - Stage 11 release-candidate preparation reran HACS and hassfest on the Stage 10 checkpoint, rechecked the isolated integration package and 375 synthetic tests, and documented a non-destructive handoff from a manual component copy to HACS. The real installation and proxy refresh were pending at that preparation checkpoint; no version, tag, release, or runtime behavior changed.

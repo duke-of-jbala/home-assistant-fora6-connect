@@ -1,6 +1,6 @@
 # Architecture
 
-**Stage 10 package boundary:** HACS installs the single self-contained `custom_components/fora6_connect/` directory; root `hacs.json`, README, and CI metadata describe distribution only. The manifest uses development version `0.1.0`. Hassfest prompted manifest key sorting and an explicit config-entry-only schema; the manual refresh, Bluetooth, identity, protocol, coordinator, and sensor behavior is unchanged. See [the packaging audit](STAGE10_HACS_PACKAGING_READINESS.md).
+**Release preparation boundary:** HACS installs the single self-contained `custom_components/fora6_connect/` directory; root `hacs.json`, README, and CI metadata describe distribution only. The manifest is prepared at `1.0.0` for [Stage 12 Phase A](STAGE12_V1_RELEASE_PREPARATION.md); no tag or release exists yet. Stage 10's hassfest corrections and Stage 11's real HACS installation are retained evidence. The manual refresh, Bluetooth, identity, protocol, coordinator, and sensor behavior is unchanged.
 
 **Stage 9 physical route closure:** Home Assistant Bluetooth → Connections identified the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy as Source of the active FORA connection during the successful count-four manual refresh; the row disappeared after completion. This directly corroborates proxy traversal for that run. The existing HA-selected transport remains unchanged; no scanner pinning or production instrumentation was added. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
 
@@ -59,7 +59,7 @@ The manually invoked development-only `gatt_probe.py` validated Home Assistant c
 
 ## Documentation and packaging
 
-The custom integration uses `translations/en.json` for runtime localization. `strings.json` is included only to match the requested repository structure; Home Assistant's custom integration guidance does not use it as a runtime translation source. The current custom-integration manifest version is `0.1.0` for default-branch HACS validation; no release or tag exists. Stage 10 validated the repository package, while [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md) awaits a real HACS UI handoff.
+The custom integration uses `translations/en.json` for runtime localization. `strings.json` is included only to match the requested repository structure; Home Assistant's custom integration guidance does not use it as a runtime translation source. The current custom-integration manifest is prepared at `1.0.0`; no release or tag exists. Stage 10 validated the repository package, and [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md) physically validated the real HACS handoff and proxy refresh.
 
 ## Stage 6B entry and entity boundary
 

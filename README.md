@@ -17,7 +17,8 @@ route proof applies to the tested Atom Lite session.
 The supported stored-record snapshot has exactly two or four raw slots.
 Other counts fail safely and leave the previous in-process sensor value intact.
 This integration currently exposes uric acid only, in mg/dL. It does not poll,
-import history, or synchronize automatically.
+import history, or synchronize automatically. Raw slot counts six and above
+are unsupported; the printed proprietary serial is not retrieved.
 
 ## Install with HACS
 
@@ -33,9 +34,9 @@ import history, or synchronize automatically.
 
 HACS installs the integration under
 `<Home Assistant configuration directory>/custom_components/fora6_connect/`.
-Until a GitHub release is published, HACS uses this repository's default
-branch. Installing through HACS does not add the Home Assistant config entry
-by itself.
+HACS uses a published GitHub release when available and otherwise downloads
+the default branch. Installing through HACS does not add the Home Assistant
+config entry by itself.
 
 ### Manual installation
 

@@ -1,5 +1,14 @@
 # Architecture decisions
 
+## Stage 12 Phase A — stable version and normal HACS release source
+
+**Status:** Prepared, awaiting final approval. Use manifest `1.0.0` and a
+future annotated `v1.0.0` Git tag with a published stable GitHub release.
+HACS uses the release tag as its remote version; no custom ZIP or special
+`hacs.json` release switch is needed for this single component layout. Keep
+the exact [release note body](RELEASE_NOTES_V1.0.0.md) and [execution plan](STAGE12_V1_RELEASE_PREPARATION.md)
+in Git for review. Neither tag nor release is created in Phase A.
+
 ## Stage 11 — validate default-branch HACS install before RC publication
 
 **Status:** Accepted for the current controlled validation. Keep manifest
