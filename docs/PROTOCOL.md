@@ -316,3 +316,7 @@ The user-run real GD82 result confirmed index zero as identified uric acid/Gener
 ## Stage 7E bounded physical result
 
 The successful user-run count-four probe validated the fixed User1 index plan `3 → 0 → 1 → 2 → 3`. Even indexes 0/2 classified General-valid, odd indexes 1/3 QC-invalid, candidate-pair meter-local times compared equal, and repeated index-three frames/classification matched. This is a single-state observation; it does not establish general ordering, capacity, wrap, index identity, or deduplication. The earlier post-measurement subscription failure occurred before any application command.
+
+### Stage 7F current-state design limit
+
+[Stage 7F](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) does not add a command. It recommends only the physically tested User1 count-two and count-four fixed plans for a potential explicit manual current-state refresh. No highest-index or wire-newest interpretation is adopted. A numeric sensor update would require one eligible General uric-acid primary after validating the complete supported-count snapshot; two eligible primaries are ambiguous. Historical traversal, wrap, dedup, and resume remain unresolved.

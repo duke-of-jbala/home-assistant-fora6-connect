@@ -14,6 +14,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 
 ### Added
+- Stage 7F offline review defines a conditional manual current-sensor refresh design for only physically tested counts two and four when exactly one valid General uric-acid primary exists. General chronology, multi-primary selection, historical import, dedup, resume, and automatic sync remain deferred; no runtime behavior changed.
 - Recorded successful user-run Stage 7E four-slot validation: count four, fixed `3 → 0 → 1 → 2 → 3` sequence, candidate within-pair time equality, expected even-General/odd-QC classifications, repeated index-three equality, and clean cleanup. The first post-measurement subscription failure sent no application command. General chronology, wrap, deduplication, and resume remain unresolved.
 - Stage 7E adds a development-only exact-count-four probe for fixed User1 indexes `3 → 0 → 1 → 2 → 3`. It returns structural and equality booleans only, with no production sync, measurement state, or physical test by Codex.
 - Stage 7D offline review of both TD4183 app versions and their local import database path. The app converts raw count to logical count and discards the wire newest-index field in this handler; general chronology, wrap, stable record identity, and safe deduplication remain unresolved. No runtime or physical operation changed.

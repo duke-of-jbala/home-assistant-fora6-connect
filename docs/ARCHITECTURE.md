@@ -80,3 +80,7 @@ The user-run Stage 7C result confirmed the expected index-zero and index-one cla
 ## Stage 7E physical evidence
 
 Stage 7E’s fixed count-four action was physically validated in one GD82 state. Raw indexes 0/2 classified General-valid and 1/3 QC-invalid; candidate pairs 0/1 and 2/3 had equal meter-local times; repeated index 3 was byte- and semantic-equal in-session. An initial post-measurement Bluetooth-flashing state allowed connection but not notification subscription; no application command was sent until a later successful run after manual power-on. No coordinator/entity/history state changed. General chronology, wrap, and dedup remain unresolved.
+
+## Stage 7F minimum current-state boundary
+
+[Stage 7F](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) proposes a manual, fixed-count snapshot to feed the existing uric-acid sensor only when one eligible General primary exists. A future coordinator would own BLE I/O, identity confirmation, fixed index plans, semantic filtering, single-flight locking, and failure retention; the SensorEntity remains transport-free. Count four with two eligible primaries is ambiguous. Historical ingestion, persistent dedup, resume, automatic triggers, and production code remain absent.

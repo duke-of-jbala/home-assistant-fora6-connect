@@ -140,3 +140,7 @@ The user-run physical Stage 7C result confirmed the expected index-zero uric-aci
 ## Stage 7E physical validation
 
 Stage 7E completed its fixed count-four probe on the real GD82 in one state. If invoked in the immediate post-measurement Bluetooth-flashing state, the observed attempt connected but failed notification subscription before any FORA command; manual power-on restored the successful protocol path. The successful run used only indexes `3 → 0 → 1 → 2 → 3`. This observation does not establish why subscription differs by state.
+
+## Stage 7F offline sync design
+
+[Stage 7F](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) reviewed the bounded two- and four-slot physical results against the tracked app analysis. It changed documentation only. The proposed first trigger is explicit manual refresh while the meter is stably ON, with fixed count-two/count-four plans and one eligible General uric-acid primary. The post-measurement flashing state failed notification subscription before any application command, so automatic post-measurement sync is deferred. Stage 7G implementation and any physical use require separate authorization.

@@ -113,3 +113,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 ## Stage 7D — defer general history synchronization
 
 **Status:** Stage 7D offline review complete. [The evidence review](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) finds that the TD4183 handler discards the parsed wire newest-index field, the general import loop is not reliably recoverable, and the app's time/type/value database comparison is not a collision-safe meter record identity. No raw-index cursor, content fingerprint, or production history path is authorized. The proposed next gate is a separately authorized, read-only Stage 7E fixed four-slot observation if that meter state occurs naturally.
+
+## Stage 7F — separate current sensor state from historical import
+
+**Status:** offline design review complete. [The evidence review](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) conditionally supports a manually triggered current-state refresh for only raw counts two/four and only when exactly one valid General uric-acid primary is present. It does not choose by highest index or maximum naive meter-local time. A single current state does not require a durable per-record dedup key; importing historical observations still does. Stage 7G requires separate authorization for implementation, and production historical synchronization remains gated.

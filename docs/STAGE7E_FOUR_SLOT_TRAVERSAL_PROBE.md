@@ -27,3 +27,5 @@ The four-slot result materially strengthens, for this GD82 state, the hypothesis
 Still unresolved are general traversal order, exact relation between logical group timestamps, capacity, circular-buffer/wrap/overwrite behavior, deletion/reset behavior, durable raw-index identity, collision-safe deduplication, resume, and production-safe arbitrary-size traversal. No new measurement should be taken for a future evidence gate.
 
 **Exact next proposed gate:** separately authorize Stage 7F as an offline reassessment of logical grouping, chronology, and a minimal production-sync design using this result. Stage 7F is not begun here.
+
+**Stage 7F follow-up:** [The offline reassessment](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) uses this four-slot result only for a conditional manual current-state design. If both even primaries qualify as valid General uric acid, no latest value can be selected from this evidence; a separate chronology gate is needed.
