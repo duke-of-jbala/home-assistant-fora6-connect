@@ -1,5 +1,17 @@
 # Current Status — FORA 6 Connect
 
+## Stage 11 release candidate — real HACS validation closure, pre-commit
+
+- **Branch/date and prior checkpoint:** `main`, 2026-09-27 (Europe/London), `bab4bed9e7d2159a237f2c462f7c379ea1f2f599` — `docs: prepare Stage 11 HACS validation`. The preparation commit was pushed normally, `origin/main` matched it, and `git status --short` was empty before this closure task changed Markdown.
+- **User-supplied real HACS result:** HACS downloaded the custom Integration over the prior manual component copy. Home Assistant restarted and the FORA entry reloaded successfully. The same config entry, one GD82 device, and one uric-acid entity remained; the sensor began unavailable, the existing entry was selectable in the manual action, and no relevant startup/reload log error was observed.
+- **User-supplied real physical result:** one post-HACS count-four manual refresh updated the existing sensor. The action reported `sensor_updated: true`, null `error_stage`/`error_code`, and empty `cleanup_errors`. No duplicate device/entity or relevant refresh log error was observed. During the active FORA connection, Home Assistant Bluetooth Connections named the Atom Lite ESPHome proxy as Source; the row disappeared after completion. Private health value/time/address are not recorded.
+- **Unvalidated distribution behavior:** HACS did not offer a safe re-download option, so neither same-branch replacement nor release-based update notification was tested. Uninstall/reinstall was deferred to an isolated Home Assistant instance. No RC tag/release was created.
+- **Stage status:** **complete for applicable real HACS custom-repository and manual-refresh validation**. No mandatory packaging or integration blocker was found in the tested route. This is not population-wide proxy or meter validation.
+- **Changes after checkpoint:** yes; `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/DECISIONS.md`, and `docs/STAGE11_RELEASE_CANDIDATE_VALIDATION.md` are updated for this closure. Only Markdown changed; the tree was modified at this pre-commit observation.
+- **Checks actually run for closure:** full `unittest` suite **375/375** passed; compileall, tabnanny, four JSON/two YAML/one TOML parses, and isolated 27-module package copy passed. The pushed preparation commit's [HACS and hassfest run 36355458767](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355458767) passed. Both diff whitespace checks, staged diff review, eight-file changed-Markdown privacy scan, tracked-artifact scan, and no-runtime-diff audit passed.
+
+**Exact next proposed gate:** separately authorize Stage 12 v1.0.0 release preparation/publication, including final version and notes review plus explicit authorization before any tag or release. Stage 8H remains optional and unstarted.
+
 ## Stage 11 release candidate — repository checks, pending real HACS validation
 
 - **Branch/date and starting checkpoint:** clean `main`, 2026-09-27 (Europe/London), `a7a1d37c805af6e5567efefaf837e88a6bdbfc9b` — `docs: close Stage 10 HACS readiness`; `origin/main` matched before this task.

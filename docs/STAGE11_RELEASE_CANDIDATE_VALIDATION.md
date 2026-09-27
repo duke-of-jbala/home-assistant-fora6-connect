@@ -1,18 +1,20 @@
 # Stage 11 — release candidate validation
 
-**Status: pending real HACS and Home Assistant validation.** Repository and
-synthetic checks alone cannot establish that HACS installed the integration in
-the user's Home Assistant, that the existing registry objects survived the
-handoff, or that a subsequent BLE connection used the ESPHome proxy.
+**Status: complete for the applicable real HACS custom-repository and GD82
+manual-refresh gate.** The user observed a successful HACS download over the
+previous manual component installation, successful Home Assistant restart and
+integration reload, preserved configured objects, and a real manual refresh
+with direct connection-specific ESPHome proxy Source evidence. HACS did not
+offer a safe re-download option; versioned update behavior remains untested.
 
 ## Baseline and evidence classes
 
 The clean `main` checkpoint entering this gate was
 `a7a1d37c805af6e5567efefaf837e88a6bdbfc9b` (`docs: close Stage 10 HACS readiness`);
 `origin/main` matched. The user reports that HACS is installed but the working
-FORA component was copied manually. No Stage 11 HACS UI installation, restart,
-reload, update, uninstallation, or physical meter operation has yet been
-reported.
+FORA component was copied manually before the controlled HACS test. The later
+user-supplied real observations are recorded below without health fields or
+device identifiers.
 
 | Evidence | Result | Limit |
 | --- | --- | --- |
@@ -20,7 +22,8 @@ reported.
 | Synthetic | 375 unit tests pass; isolated package copy resolves 27 Python modules and bundled resources. | Does not prove a physical BLE path. |
 | Official validators | Fresh [HACS and hassfest run](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355057262) passed on the exact baseline SHA. | Validates the repository, not the user's installation. |
 | Earlier physical evidence | Stage 7H manual count-four refresh and Stage 9 direct Bluetooth Connections Source observation succeeded through the Lounge Atom Lite proxy. | Predates the HACS-managed installation. |
-| Stage 11 physical evidence | Pending. | Required before closure. |
+| Stage 11 HACS/Home Assistant | User reported HACS download success, same FORA config entry, one GD82 device, one uric-acid entity, unavailable-before-refresh state after restart, working action selector, successful entry reload, and no relevant startup/reload log errors. | User observation; no config-entry or device identifier is published. |
+| Stage 11 physical BLE | User reported a successful count-four manual refresh, existing sensor update, null action error stage/code, empty cleanup errors, no duplicate device/entity, and no relevant HA log errors. Bluetooth Connections named the Atom Lite ESPHome proxy as the active FORA connection Source, and the row disappeared after completion. | Direct connection-specific evidence for this HACS-installed run only. |
 
 Local static checks also passed: compileall, tabnanny, four JSON/two YAML/one
 TOML parses, both whitespace diff checks, changed-Markdown privacy scan,
@@ -56,7 +59,10 @@ it must download this repository again. Both methods use Home Assistant's
 `custom_components/fora6_connect/` location. The user's existing config entry
 and device/entity registrations are Home Assistant configuration state, not
 files within that component folder.
-The following is a user-run procedure, not a result already observed:
+The following is the controlled procedure and retained validation recipe. The
+user reported the successful download, restart, reload, and refresh checks;
+backup details and exact registry IDs were kept private and are not asserted
+here:
 
 1. Record privately the current FORA config-entry count and identity, device
    count and association, and uric-acid entity ID. Make a normal Home Assistant
@@ -89,9 +95,9 @@ The following is a user-run procedure, not a result already observed:
    proof. Confirm the row disappears after disconnect. Keep the response's
    health value, meter-local time, and address private.
 6. In HACS, re-download the same default branch once if the UI offers this
-   safely. Restart, verify the same entry/device/entity and action, and review
-   logs again. This tests HACS-managed replacement/reload, not versioned
-   update detection. Do not create a tag or release to manufacture an update.
+   safely. In this tested HACS UI, no safe re-download option was offered, so
+   no replacement/update test was performed. Do not create a tag or release
+   to manufacture an update.
 7. Do not uninstall the working component merely for completeness. Removal
    risks the user's configured installation and adds little beyond the
    re-download/restart test. A later isolated Home Assistant instance can
@@ -103,15 +109,27 @@ Keep the config entry/device/entity; investigate the exact error before any
 other change. The backup/rollback has not been physically exercised in this
 gate.
 
-## Review and pass criteria
+## Real result, limitations, and pass decision
 
-The real run must establish HACS ownership/download, successful restart and
-one reload if supported, stable config entry/device/entity IDs, initial
-unavailable state, correct action UI, manual refresh, and direct proxy Source
-evidence. Review sanitized HA logs for import, schema, deprecated API,
-Bluetooth, cleanup, duplicate-ID, and private-data logging errors. Separate
-any upstream HACS/HA/ESPHome warning from an integration defect. Do not
-publish raw logs, screenshots, addresses, values, or timestamps.
+The real run established HACS download, successful restart and entry reload,
+the same config entry, one device/entity, initial unavailable state, a working
+existing-entry action selector, a successful supported count-four manual
+refresh, the existing sensor update, and direct proxy Source evidence. The
+user observed no relevant startup, reload, or refresh log error. The
+connection row's disappearance after the action is consistent with expected
+disconnect; the action also reported empty cleanup errors. The user did not
+report a duplicate device or entity. Exact registry IDs, private selected
+health fields, and screenshots were not collected into Git.
+
+The test did **not** establish HACS release-based update notification or
+same-branch package replacement, because no safe re-download option was
+offered. It did not test uninstall/reinstall, a new config entry on a clean
+Home Assistant instance, every Bluetooth scanner/proxy, count two after HACS
+installation, or counts above four. These limits are documented rather than
+treated as a mandatory blocker: the default-branch HACS installation and
+the already validated manual product path worked, while a future published
+release can be independently checked under separate authorization. No RC or
+v1 release is created here.
 
 The current compatibility assumption is Home Assistant with supported
 Bluetooth APIs and an active-connection-capable local adapter or ESPHome
@@ -136,10 +154,12 @@ import, persistent deduplication/resume, recorder backfill, count-six-plus
 support, or other analyte entity. The printed proprietary serial remains
 unresolved. This text is not published release notes.
 
-## Closure gate
+## Closure and next gate
 
-Stage 11 remains **pending real HACS/manual validation** until the user
-reports the installation, restart/reload, object counts/associations, action,
-manual refresh, proxy Source, and sanitized log observations above. A
-versioned HACS release-update test is not claimed. No Stage 8H or Stage 12
-work follows automatically.
+Stage 11 is **complete for its applicable release-candidate validation
+scope**. No mandatory integration or packaging blocker remains in the tested
+HACS custom-repository route. A versioned HACS release-update test is not
+claimed. The exact next proposed gate is separately authorized Stage 12
+v1.0.0 release preparation/publication, including a release version, final
+release-note review, and explicit approval before tag or release creation.
+Stage 8H is optional and has not started.

@@ -12,6 +12,12 @@ notification. A future explicitly authorized release candidate should use a
 single prerelease version across manifest, tag, and published release after
 validator acceptance. No RC tag/release is created here. See [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md).
 
+**Closure update:** The real HACS download, restart/reload, preserved
+entry/device/entity, and manual count-four refresh through the named Atom Lite
+proxy succeeded. HACS offered no safe re-download option, so versioned update
+behavior remains untested. Stage 11 is complete for the applicable custom
+repository validation scope; no tag or release was created.
+
 ## Stage 10 — default-branch HACS distribution before releases
 
 **Status:** Accepted for the pre-RC packaging gate. Use one `custom_components/fora6_connect/` package, root `hacs.json`, original local brand icon, and a `0.1.0` development manifest version. HACS custom repositories can use the default branch without a GitHub release; release-based update selection begins only after an explicitly authorized release. Stage 11 should use matching manifest/tag/release SemVer for a candidate such as `1.0.0-rc.1`. CI validates HACS and hassfest; a separate controlled HACS UI install/update remains Stage 11. See [Stage 10](STAGE10_HACS_PACKAGING_READINESS.md).

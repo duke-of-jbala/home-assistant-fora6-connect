@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 11 release candidate — physically validated closure, pre-commit
+
+The clean, pushed starting checkpoint for this closure was `bab4bed9e7d2159a237f2c462f7c379ea1f2f599` (`docs: prepare Stage 11 HACS validation`) on `main`, 2026-09-27 (Europe/London). `origin/main` matched. [Official HACS and hassfest jobs](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355458767) passed on that exact SHA. The user then downloaded the custom Integration through HACS over the earlier manual copy, restarted Home Assistant, and reloaded the existing FORA entry. The same entry, one GD82 device, and one uric-acid entity remained. The sensor initially appeared unavailable; the manual action selected the existing entry. No relevant startup/reload error was observed.
+
+The user ran one real post-HACS count-four manual refresh. It updated the existing sensor with no action or cleanup error and no duplicate device/entity or relevant log error. Home Assistant Bluetooth Connections identified the Atom Lite ESPHome proxy as the active FORA connection Source; the row disappeared after the action. This is direct evidence for the tested HACS-installed proxy transaction. No real measurement value, timestamp, address, screenshot, or raw log is committed. HACS offered no safe re-download option, so update detection/replacement is untested; uninstall/reinstall is deferred. Stage 11 is complete for the applicable RC validation scope, with no RC tag/release or v1 publication.
+
+This closure changes only the Markdown files listed in `CURRENT_STATUS.md`; the tree is modified at this pre-commit observation. Full **375/375** tests, compileall, tabnanny, resource parsing, and isolated copy passed again. Report the actual closure commit, remote verification, and final tree status after commit/push.
+
+**Exact next proposed gate:** separately authorize Stage 12 v1.0.0 release preparation/publication and approve the final version/notes before any tag or GitHub release. Stage 8H is optional and unstarted.
+
 ## Stage 11 release candidate — pending physical HACS install
 
 Starting state was clean public `main` at `a7a1d37c805af6e5567efefaf837e88a6bdbfc9b` (`docs: close Stage 10 HACS readiness`) on 2026-09-27 (Europe/London); `origin/main` matched. The user confirmed HACS is installed but the active FORA component was manually copied. A fresh [official HACS/hassfest run](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355057262) passed on the baseline. Local **375/375** tests, compileall, tabnanny, resource parsing, and isolated package copy passed. Stage 9's physical proxy result is prior evidence, not proof of a HACS-installed run.
