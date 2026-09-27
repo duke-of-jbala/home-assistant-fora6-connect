@@ -21,7 +21,9 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 
 - `bluetooth.py`: reusable Stage 4 HA Bluetooth session for connection, custom characteristic validation, notification exchange, bounded waits, and cleanup. It delegates frame validation to `protocol.py` and chooses no FORA command or health interpretation.
 - `protocol.py`: pure-Python frame validation and evidence-backed offline TD4183 record-part parsing, testable with synthetic bytes alone. No HA, ESPHome, adapter, or physical meter requirement. Meter-local time remains separate from ingestion time; unknown timezone, units, and flags are not invented.
-- `models.py`: pure-Python Stage 3 combined TD4183 record over the two validated protocol parts. It preserves meter-local time, unknown/opaque fields, and QC category without introducing sync time, units, or Home Assistant entities. Future product measurement structures remain Stage 5 work.
+- `models.py`: pure-Python Stage 3 combined TD4183 record over the two validated protocol parts. It preserves meter-local time, unknown/opaque fields, and QC category without introducing sync time, units, or Home Assistant entities.
+- `measurement.py`: pure-Python Stage 5 product measurement mapping. It applies `/10` only to valid identified uric acid, retains category/transmitted/meter-local time, and leaves unit absent because tracked evidence does not establish one.
+- `sensor.py`: inert Stage 5 entity-state mapping and stable-identity interface. It starts no platform or I/O; numeric Home Assistant sensor exposure is deferred until unit evidence and Stage 6 identity/config-entry setup exist.
 - `coordinator.py`: future retrieval and synchronization state.
 - `sensor.py`: future entities associated with one HA device per physical meter.
 - `config_flow.py`: future setup and discovery after device identity can be established beyond the documented UUID pair.
