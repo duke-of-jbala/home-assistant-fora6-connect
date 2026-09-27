@@ -25,3 +25,10 @@ venv/
 *.har
 captures/
 private/
+
+# Proprietary Android research packages and local signing material
+*.apk
+*.xapk
+*.apks
+*.keystore
+*.jks

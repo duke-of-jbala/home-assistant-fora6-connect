@@ -7,7 +7,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
-- Stage 2B static iFORA HM evidence record for mirror packages 1.7.6/1.7.9: matching published hashes, valid shared signing certificate, TD4183-linked multifunction handler, custom `1523/1524` path, provisional command framing, and uric-acid code path. Official signing provenance and real GD82 command/response remain unconfirmed; no app or meter operation was run.
+- Stage 2C privacy-safe live-capture evidence record: a patched, locally re-signed iFORA HM research copy imported the real GD82's existing uric-acid record through custom `1523/1524`; captured wake/project responses confirm project `0x4183`, the eight-byte summed envelope, and uric-acid raw-value `/10` scaling without recording the private value or timestamp.
+- Stage 2D HA-independent immutable frame/checksum helpers, fixed captured wake/project-query constructors, project-ID parser, and contextual uric-acid scaling helper, with sanitized/synthetic tests. No Home Assistant BLE write path or record parser was added.
+- Git ignore rules for APK/XAPK/split archives and local signing keystores; capture ignore rules already covered btsnoop and pcap files.
+- Stage 2B static iFORA HM evidence record for mirror packages 1.7.6/1.7.9: matching published hashes, valid shared signing certificate, TD4183-linked multifunction handler, custom `1523/1524` path, provisional command framing, and uric-acid code path. Official signing provenance and real GD82 command/response were unconfirmed **at that checkpoint**; no app or meter operation was run in Stage 2B.
 - Stage 2A public source register and proposed iFORA HM static-analysis plan. Manufacturer FAQ and GD82 manual confirm GATT metadata and official app association; no application command bytes were verified or transmitted.
 - Initial Home Assistant FORA 6 Connect integration project structure.
 - Initial architecture and development documentation.

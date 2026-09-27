@@ -1,41 +1,40 @@
 # Current Status — FORA 6 Connect
 
-**Stage 0: complete. Stage 1: complete (1A, 1B, 1C). Stage 2: in progress.** Stage 2A public-source review and the separately authorized Stage 2B iFORA HM static analysis have been performed. Stage 2B installed or executed no app, contacted no real meter, and performed no pairing, RACP, characteristic I/O, record retrieval, or new measurement. No independent first live write is authorized.
+**Stage 0: complete. Stage 1: complete (1A, 1B, 1C). Stage 2: in progress. Stage 2A public review, Stage 2B static analysis, and Stage 2C controlled app capture are complete. Stage 2D offline protocol implementation is complete at this pre-commit review.** No production Home Assistant command/write path, pairing, RACP, polling, measurement sync, or entities are implemented.
 
-## Established physical-device evidence
+## Evidence retained and Stage 2C result
 
-- Stage 1A confirmed the real local name, connectable advertisement, and controlled Home Assistant Advertisement Monitor visibility in Active mode. Fresh Auto-mode behavior and address identity remain deferred to Stage 6.
-- Stage 1B resolved a connectable BLEDevice through Home Assistant, connected, enumerated five GATT services including standard Glucose and custom `1523`/`1524`, and disconnected cleanly. The selected scanner/proxy is unknown and deferred to Stage 9.
-- Stage 1C found failed standard `2A18`/`2A34` subscriptions, successful custom `1524` subscription, and zero notifications over 30 seconds while the user navigated the only stored uric-acid result. The cause of standard subscription failures and whether a custom request is needed remain unknown. **Only uric acid has been measured on this physical meter.** Pairing has not been attempted.
+Stage 1B validated Home Assistant-side connection, five-service GATT inventory, and clean disconnect. Stage 1C found failed unpaired standard Glucose subscriptions and successful passive custom `1524` subscription with zero notifications during navigation of the only existing uric-acid record. Those bounded observations remain true. Only **uric acid** has been physically measured on this meter. Fresh Auto-mode discovery and address identity remain Stage 6 questions; the exact Home Assistant scanner/proxy selected remains Stage 9 work.
 
-Manufacturer-data meaning remains unknown. Stage 2B did not resolve the deferred production-discovery questions or establish physical application packet semantics.
+The [Stage 2C privacy-safe capture summary](docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) was supplied by the user from a private HCI capture. A **patched, locally re-signed iFORA HM 1.7.6 research copy** ran on Android 8.1/API 27 and imported the real GD82's existing uric-acid record; the original APK had minimum SDK 30, and the research copy changed it to 27. It was not an untouched officially signed runtime specimen. The original APK SHA-256 is `dd154de094fc28de86c5a153aada1393816159e5c6ba852235938813c449449c`. No raw capture, APK, signing material, measurement value, private timestamp, or device address is in Git.
 
-## Stage 2 evidence and limits
+The live session confirmed custom service `1523`/characteristic `1524` request/notification traffic with CCCD enabled first; eight-byte frames with an 8-bit sum; request marker `A3`, response marker `A5`, and echoed command ID; `0x22` wake and `0x24` project-query exchanges; physical project ID `0x4183` linking GD82 to the Stage 2B `TD4183` branch; and indexed `0x25`/`0x26` participation in the uric-acid import. Uric-acid display scaling as raw value divided by ten is live-confirmed **only for that analyte on this path**. No bonding, SMP exchange, or encryption transition was observed during the successful proprietary import. This does not settle standard Glucose/RACP security or the cause of earlier standard subscription failures.
 
-The [Stage 2A register](docs/STAGE2_PROTOCOL_ACQUISITION.md) records the ForaCare FAQ/manual, official iFORA HM package identity, inaccessible ForaCare Box share, and public-source limits. The [Stage 2B static-analysis register](docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md) records two **mirror-distributed** iFORA HM specimens: 1.7.6 APK and 1.7.9 XAPK. Their locally computed hashes match mirror-published values; each inspected APK has a valid signature, and both versions share one certificate. No independent official Google Play/ForaCare signing fingerprint was available. Package authenticity therefore remains qualified.
+## Stage 2D implementation boundary
 
-The reviewed app path uses custom `1523/1524`, constructs eight-byte summed command frames, and maps project code `TD4183` to a multifunction handler with uric-acid handling. Linking the real GD82 to that project-code branch is a **strong inference** from the official manual identifier, not a measured project-code response. A provisional device/project-code query is documented with call-path provenance in the static-analysis register. Its standalone behavior, required preceding wake-up, write mode, security, actual GD82 response, and physical uric-acid record format remain unknown. It is **not** a ready first live request. Standard Glucose/RACP behavior is separate and unresolved.
+`custom_components/fora6_connect/protocol.py` is Home Assistant and Bluetooth independent. It validates the observed frame length, prefix, markers, checksum, and command echo; offers an immutable frame representation whose `repr` omits payload bytes; constructs only the captured fixed wake and project-query requests in memory; parses the project ID from a validated `0x24` response; and scales an already identified TD4183 uric-acid raw integer by ten. It neither locates an analyte field nor decodes `0x25`/`0x26` record bytes or timestamps. Their public field layout, timezone, status, and other-analyte scaling remain unresolved. No integration code calls the request constructors or sends a FORA write.
 
 ## Exact next gate
 
-**Separate authorization for a controlled official-app traffic capture to corroborate the physical GD82 command/response path (Stage 2C evidence acquisition).** An independently authenticated official Play package could also strengthen static provenance before that gate. Capture planning must keep raw traffic private and must separately define any meter interaction; this Stage 2B work does not authorize it. Do not send an independent command, pair, or retrieve records from the real meter.
+**Separate authorization for a controlled Stage 2E Home Assistant transport prototype**, limited initially to custom `1524` subscription, the captured `0x22` wake request and response validation, the captured `0x24` project query and `0x4183` response validation, and clean disconnect. Do not start that live prototype under Stage 2D authorization. Record retrieval, production sync, pairing, and RACP remain outside this gate.
 
 ## Repository state at pre-commit review
 
-- **Date/branch/checkout:** 2026-09-26 (Europe/London), `main`, `<local checkout>`.
-- **Last completed checkpoint:** `a1dbd18d2e06f77ca32a46d003f1faf5b6aca66a` — `docs: begin Stage 2 protocol acquisition`.
-- **Starting tree:** clean (`git status --short` empty); `git log -3 --oneline` and full HEAD checked before editing.
-- **Changes after checkpoint:** yes, documentation only; the tree is dirty at this pre-commit review. Post-commit SHA/status must be verified and reported separately.
-- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md`, `docs/DEVELOPMENT.md`, `docs/CAPTURE_GUIDE.md`, `docs/ARCHITECTURE.md`.
-- **Remote/live actions:** no push, tag, release, app installation/execution, or BLE interaction.
+- **Date/branch/checkout:** 2026-09-27 (Europe/London), `main`, this repository's active checkout.
+- **Last completed checkpoint:** `8d4105f7180bd8e378b3dd07190094b551bb1ec3` — `docs: analyze iFORA HM protocol evidence`.
+- **Starting tree:** clean (`git status --short` empty); last three commits and full HEAD verified before editing.
+- **Changes after checkpoint:** yes, the working tree is dirty at this pre-commit review. Verify/report the post-commit SHA and status separately.
+- **Files changed:** `AGENTS.md`, `.gitignore`, `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `custom_components/fora6_connect/protocol.py`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md`, `docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md`, and `tests/test_protocol.py`.
+- **Remote/live actions in this task:** no push, tag, release, deployment, BLE connection, pairing, write, record retrieval, or new measurement.
 
 ## Checks actually run
 
-- `python3 -m unittest discover -s tests -v` — pass, 44 tests.
-- `python3 -m compileall -q custom_components tests` — pass.
-- `python3 -m tabnanny custom_components tests` — pass.
-- `git diff --check` — pass after the status/handover update; final rerun before commit.
+- `python3 -m unittest discover -s tests -p test_protocol.py -v` — passed, 9 tests before the later privacy-repr test was added.
+- `python3 -m unittest discover -s tests -v` — passed, 52 tests after final code formatting.
+- `python3 -m compileall -q custom_components tests` — passed after final code formatting.
+- `python3 -m tabnanny custom_components tests` — passed after final code formatting.
+- `git diff --check` — passed before this final status update; staged diff check follows.
 - Ruff unavailable (`command -v ruff` returned no path), so not run.
-- Privacy/proprietary artifact audit: all 12 changed/new paths are Markdown; no APK/XAPK/split, DEX, native library, decompiled source, Bluetooth MAC-shaped value, or secret assignment was found. No private health data or raw capture was added. Proprietary artifacts remain under `<private temporary workspace>`, outside Git. Final staged review remains before commit.
+- Privacy/proprietary audit: all 18 changed/new files were checked; no private absolute path, MAC-shaped value, capture/APK/keystore/native binary, or raw health value was found. The two request constructors are referenced only in the offline protocol module and tests, not by a Home Assistant transport. Existing capture and APK files were never placed in this checkout. Final staged-file check follows.
 
-Updated 2026-09-26 (Europe/London), pre-commit.
+Updated 2026-09-27 (Europe/London), pre-commit.

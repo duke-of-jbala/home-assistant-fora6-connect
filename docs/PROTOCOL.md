@@ -1,6 +1,6 @@
 # Protocol evidence register
 
-This page records evidence before any FORA application protocol implementation. The [ForaCare FAQ Rev 5.5](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) and [GD82 manual](https://switzerland.foracare.ch/wp-content/uploads/2021/10/FORA-6-Connect-GD82-4183D_meter-manual_311-4183400-070.pdf) were independently reviewed for Stage 2A; the [source register](STAGE2_PROTOCOL_ACQUISITION.md) separates their claims from the user-supplied real-device observations below. No private identifiers, health data, or raw captures are stored here.
+This page separates historical discovery and static findings from the later [Stage 2C live protocol evidence](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) and Stage 2D offline implementation. The [ForaCare FAQ Rev 5.5](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) and [GD82 manual](https://switzerland.foracare.ch/wp-content/uploads/2021/10/FORA-6-Connect-GD82-4183D_meter-manual_311-4183400-070.pdf) were independently reviewed for Stage 2A. No private identifiers, health data, or raw captures are stored here.
 
 ## Confirmed for this project brief
 
@@ -131,12 +131,12 @@ The meter was new and had only one real measurement so far, for **uric acid**. I
 
 **Stage 1C passive observation and the full Stage 1 evidence review are complete.** The remaining discovery questions have explicit Stage 6/9 deferrals below. Stage 2A public research is authorized; pairing and live protocol operations are not. No private address, raw payload, measurement value, or personal timestamp is recorded here.
 
-## Working hypotheses
+## Working hypotheses after Stage 1
 
-- The meter may expose historical measurements over the documented write/notify characteristic. This is a product goal, not a verified protocol fact.
+- At the Stage 1 gate, it was only a hypothesis that historical measurements traveled over the custom Write/Notify characteristic. Stage 2C subsequently confirmed a successful uric-acid import over that path; see the later evidence section below.
 - The previous Lounge scan timing may have contributed to missed advertisements, but the override removal and firmware reflash were combined, so causation remains unproven.
 
-## Unknown
+## Unknown at Stage 2B — historical snapshot
 
 - The Bluetooth SIG Glucose Profile specifies bonding and LE Security Mode 1, Security Level 2 or 3 for its standard Glucose path. What remains unknown is whether missing bonding/encryption caused the observed GD82 `2A18`/`2A34` failures, whether the GD82 enforces that security in the tested Home Assistant/ESPHome path, whether later RACP operations require pairing, and whether FORA custom `1524` application operations require pairing. The bonded iPhone observation supports investigation but does not establish causation; pairing is not authorized.
 - Fresh Auto-mode advertisement behavior and Bluetooth address stability/randomization/identity behavior: Stage 6 production discovery and duplicate-device handling.
@@ -205,4 +205,28 @@ The app may retrieve GD82 uric-acid history through custom `1524`. This is not y
 
 Actual GD82 first command/response, write mode, security state, project code, physical frame validation, uric-acid units, and whether standard RACP is used in any GD82 state remain unknown. The preceding wake-up frame is not established as read/query-only. No independent first write meets the gate. A controlled official-app capture or independently authenticated official package is needed before considering a live request.
 
-Stage 0 and Stage 1 are **complete**; Stage 2A public review and Stage 2B mirror-package static analysis have been performed, and Stage 2 remains **in progress**. **Exact next gate: separately authorize a controlled official-app traffic capture (Stage 2C evidence acquisition), or provide an authenticated official Play package for further static corroboration.** No independent first live write, pairing, RACP operation, or record retrieval is authorized by this review.
+At the Stage 2B checkpoint, Stage 0 and Stage 1 were complete and Stage 2 remained in progress. The next gate then was a separately authorized controlled app capture. The later Stage 2C result below supersedes the Stage 2B unknowns where explicitly indicated; the earlier evidence classes are retained as historical provenance.
+
+## Stage 2C live capture and Stage 2D offline implementation — reviewed 2026-09-27
+
+### LIVE-CONFIRMED
+
+The user supplied a sanitized summary of a private HCI capture from the physical FORA 6 Connect GD82. The runtime iFORA HM 1.7.6 app was a **patched, locally re-signed research copy**: its original minimum SDK 30 was changed to 27 to run on Android 8.1/API 27. The original APK hash is recorded in [the dedicated evidence record](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md). The runtime specimen was not the untouched officially signed APK. Its successful import used custom `1523/1524`, enabled the CCCD, transmitted requests, and received notifications. No bonding, SMP pairing, or encryption transition was observed in that successful proprietary import session; this does not generalize to standard Glucose/RACP security.
+
+Observed request/response frames are eight bytes: byte 0 `0x51`, byte 1 command ID echoed in the response, bytes 2–5 command-specific, byte 6 request marker `0xA3` or response marker `0xA5`, and byte 7 `sum(bytes[0:7]) mod 256`. The observed `0x22` wake exchange was `51 22 00 00 00 00 A3 16` → `51 22 00 00 FF FF A5 16`; the observed `0x24` project exchange was `51 24 00 00 00 00 A3 18` → `51 24 83 41 04 00 A5 E2`. Little-endian response bytes 2–3 yield project ID `0x4183`, experimentally linking the physical GD82 to the Stage 2B `TD4183` branch. No other bytes in those responses are assigned field meanings here.
+
+The successful uric-acid import used an indexed `0x25` plus `0x26` record retrieval sequence. `0x25` carried packed time-related fields; `0x26` carried the measurement/analyte payload. The displayed uric-acid result equaled the parsed raw numeric value divided by ten, confirming that scaling **only for uric acid on this GD82/TD4183 path**. The private numeric value and timestamp are not recorded. Only uric acid has been physically tested on this meter.
+
+### STATIC-ANALYSIS-SUPPORTED
+
+The Stage 2B iFORA HM code path constructed the same wake/project queries and eight-byte sum, mapped `TD4183` to a multifunction handler, and included uric-acid processing. Stage 2C's physical project response and import sequence now corroborate that path. The original mirror-distributed APK signature still lacks an independent official Play/ForaCare trust anchor; the live runtime was explicitly patched and re-signed.
+
+### INFERRED
+
+The `0x25` and `0x26` responses likely comprise two parts of an indexed record in this workflow. Their detailed field positions, cross-analyte dispatch, and timestamp semantics are not established by the sanitized summary. The presence of custom uric-acid traffic does not establish which path a glucose result uses.
+
+### UNRESOLVED
+
+The exact semantics of observed identifiers `0x27`, `0x28`, `0x2B`, `0x2F`, and `0x50` beyond the bounded roles in the [Stage 2C table](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md); `0x25` date/time bit layout and timezone; `0x26` analyte/raw-value byte positions; all other analyte scaling, error/status/control-solution flags, retries, write type, and meter-state variation. Fresh Auto-mode discovery and address identity remain Stage 6 work, and the exact Home Assistant scanner/proxy remains Stage 9 work. Standard Glucose/RACP security and the cause of prior unpaired standard subscription failures remain unresolved.
+
+Stage 2D implements only an **offline** immutable frame, validation/checksum helpers, fixed wake and project-query constructors, `0x4183` project-ID parsing, and a contextual uric-acid scaling helper. It does not parse `0x25`/`0x26` record fields, send BLE traffic, or add a production write path. **Exact next gate: separate authorization of a controlled Stage 2E Home Assistant transport prototype limited to `1524` subscription, observed `0x22` wake, observed `0x24` project query, response validation, and clean disconnect.** Do not implement that transport under Stage 2D authorization.

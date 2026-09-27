@@ -1,6 +1,6 @@
 # FORA 6 Connect repository instructions
 
-- Work only in this repository's active checkout at `<local checkout>`. Do not access, inspect, modify, or depend on unrelated repositories, including `<unrelated local checkout>`.
+- Work only in this repository's active checkout. Do not access, inspect, modify, or depend on unrelated repositories.
 - Develop in the stages in `FORA6_MASTER_ROADMAP.md`; `ROADMAP.md` is only a pointer. Stop at each stage gate until the user authorizes the next stage.
 - Never invent FORA BLE commands, packet formats, checksums, record layouts, analyte codes, timestamps, flags, or responses. Record the documentary or captured evidence and its provenance before implementing protocol behavior.
 - Keep `custom_components/fora6_connect/protocol.py` independent of Home Assistant, ESPHome, and Bluetooth hardware. Require sanitized, evidence-derived regression fixtures and decoding tests for protocol changes.
