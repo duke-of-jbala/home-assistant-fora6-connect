@@ -92,6 +92,10 @@ def _load_setup(probe_module):
     identity.async_probe_protocol_record = AsyncMock(
         return_value={"record_retrieval_confirmed": True}
     )
+    serial = types.ModuleType("_fora6_setup_test.serial_probe")
+    serial.async_probe_serial_identity = AsyncMock(
+        return_value={"serial_read_successful": True}
+    )
     spec = importlib.util.spec_from_file_location(
         "_fora6_setup_test",
         INTEGRATION / "__init__.py",
@@ -109,10 +113,12 @@ def _load_setup(probe_module):
             "_fora6_setup_test.gatt_probe": gatt,
             "_fora6_setup_test.notification_observer": observer,
             "_fora6_setup_test.protocol_probe": identity,
+            "_fora6_setup_test.serial_probe": serial,
         },
     ):
         spec.loader.exec_module(module)
     module._test_identity = identity
+    module._test_serial = serial
     return module, gatt, observer, exceptions
 
 

@@ -9,11 +9,13 @@ from .const import DOMAIN
 from .gatt_probe import ProbeError, async_probe_gatt
 from .notification_observer import ObservationError, async_observe_notifications
 from .protocol_probe import async_probe_protocol_identity, async_probe_protocol_record
+from .serial_probe import async_probe_serial_identity
 
 SERVICE_PROBE_GATT = "probe_gatt"
 SERVICE_OBSERVE_NOTIFICATIONS = "observe_notifications"
 SERVICE_PROBE_PROTOCOL_IDENTITY = "probe_protocol_identity"
 SERVICE_PROBE_PROTOCOL_RECORD = "probe_protocol_record"
+SERVICE_PROBE_SERIAL_IDENTITY = "probe_serial_identity"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -126,6 +128,32 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_PROBE_PROTOCOL_RECORD,
         async_handle_probe_protocol_record,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_serial_identity(call: ServiceCall) -> dict:
+        """Read only Device Information 0x2A25 and return safe status."""
+        if probe_lock.locked():
+            raise ServiceValidationError(
+                "A FORA development action is already running."
+            )
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_serial_identity(hass, address.strip())
+        except Exception:
+            raise ServiceValidationError(
+                "FORA serial identity probe failed."
+            ) from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_SERIAL_IDENTITY,
+        async_handle_probe_serial_identity,
         supports_response=SupportsResponse.ONLY,
     )
     return True

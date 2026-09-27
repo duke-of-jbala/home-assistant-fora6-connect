@@ -66,3 +66,20 @@ probe_protocol_record:
       required: true
       selector:
         text: {}
+probe_serial_identity:
+  name: Probe serial identity (development only)
+  description: >-
+    Development-only Stage 6A1. Connect through Home Assistant Bluetooth,
+    read standard Device Information Serial Number String 0x2A25 exactly
+    once, and disconnect. Returns structural status only; never returns,
+    logs, or persists the serial or address. No FORA command, write,
+    notification subscription, pairing, or automatic repeat read.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the known meter address privately from Advertisement Monitor.
+        Used only in memory as a connection locator. Do not share it publicly.
+      required: true
+      selector:
+        text: {}
