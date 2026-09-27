@@ -1,6 +1,6 @@
 # Stage 7A — offline history traversal and deduplication review
 
-**Decision:** Stage 7A is complete as an offline evidence review. General multi-record traversal and a collision-safe record identity are not established. No production synchronization, indexed request builder, history loop, persistence, or physical test was added. Stage 7 stops here pending a separately authorized bounded Stage 7B probe.
+**Decision:** Stage 7A is complete as an offline evidence review. General multi-record traversal and a collision-safe record identity are not established. Stage 7B later implemented and physically validated only the fixed count-two `1 → 0 → 1` branch; it did not add production synchronization, a history loop, persistence, or a general traversal rule. Broader Stage 7 work remains gated.
 
 ## Sources and provenance
 
@@ -31,7 +31,7 @@ No general order is safe to deploy. The app's logical indices start at zero, but
 
 No durable record identifier is present in the proven `0x25`/`0x26` schema. Raw index might be reused or shifted when storage wraps. Meter-local minute precision can collide. Two distinct measurements can also share analyte, category, raw value, transmitted flag, and meter-local minute; a content fingerprint of those fields would then collapse them. Adding serial to such a key scopes it to a meter but does not remove within-meter collisions. Including raw index might distinguish a pair temporarily but could change its identity after wrap. Consequently, a content fingerprint is only a **candidate**, not an established deduplication key. No fingerprint, cursor, health history, raw frame, or sync timestamp is persisted by Stage 7A; resume semantics are **UNRESOLVED**. Future work must state the collision policy explicitly before storing or suppressing observations.
 
-## Safe follow-up: separately authorized Stage 7B
+## Bounded follow-up: Stage 7B
 
 Propose one development-only, manually invoked, privacy-safe probe against the tested GD82 with the meter ON. It would use the existing Home Assistant transport, session poisoning, one write per exchange, and deterministic cleanup. The exact proposed application sequence is:
 
@@ -42,6 +42,6 @@ Propose one development-only, manually invoked, privacy-safe probe against the t
 5. User1 raw index **one** again: one `0x25`, then one `0x26`.
 6. Stop notifications and disconnect. At most three record pairs; no record loop, command retry, `0x2F`, `0x33`, pairing, RACP, or production state update.
 
-The probe would return only frame/command validity, index acceptance, app-mapped analyte/category/invalid-sentinel classifications, whether index-one repeated identically, and whether companion meter-local fields match **as booleans**, without raw bytes, values, dates, serial, address, or hashes. The repeated index-one read checks the app-captured pattern but does not prove general traversal. If the count gate fails, a new evidence review is required before changing the probe's bounds. A later separately authorized gate must decide how to test larger histories, wrap, latest ordering, and deduplication before production sync.
+The probe returns structural validity and repeated-frame equality only, without raw bytes, values, dates, serial, address, or hashes. Its user-run GD82 result confirmed the count-two `1 → 0 → 1` branch and within-session repeated index-one equality. This does not prove general traversal. If the count gate fails in another state, a new evidence review is required before changing bounds. A later separately authorized gate must decide how to test larger histories, wrap, latest ordering, and deduplication before production sync.
 
-**Stage 7B follow-up:** [the bounded development action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) now implements this exact count-two, `1 → 0 → 1` plan with synthetic tests only. **Exact next gate:** controlled user-run physical validation and separate review of the sanitized result. Stage 7 production synchronization remains blocked by general traversal, latest ordering, and deduplication uncertainty.
+**Stage 7B follow-up:** [the bounded development action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) implemented this exact count-two, `1 → 0 → 1` plan and the user-run GD82 result succeeded: all pairs validated, repeated index-one parts matched, and cleanup was clean. **Stage 7B is complete for its authorized bounded physical scope. Exact next proposed gate:** separately authorize Stage 7C bounded semantic pair confirmation. General traversal, latest ordering, and deduplication uncertainty still block production synchronization.

@@ -1,6 +1,6 @@
 # Stage 7B — bounded TD4183 traversal probe
 
-**Scope:** a manually invoked, development-only Home Assistant action, `fora6_connect.probe_history_window`. Implementation and synthetic tests do not constitute a physical result. No coordinator retrieval, entity update, polling, history store, deduplication, cursor, or production synchronization is added.
+**Scope/status:** a manually invoked, development-only Home Assistant action, `fora6_connect.probe_history_window`. **Stage 7B is complete for its authorized bounded physical scope** following the user-run GD82 validation recorded below. No coordinator retrieval, entity update, polling, history store, deduplication, cursor, or production synchronization is added.
 
 ## Evidence and exact bound
 
@@ -34,4 +34,10 @@ Deploy the committed integration and restart Home Assistant. Turn the GD82 **ON*
 - **Repeated index one equal:** the two index-one response frames were byte-identical within this bounded session. It does not prove long-term stability, latest ordering, capacity, wrap, or a deduplication key.
 - **Repeated index one different:** at least one validated index-one part changed within the session. The booleans do not reveal why; inspect the protocol hypothesis privately before any broader probe.
 
-Even a fully successful result proves only that this fixed two-slot branch is accepted in the tested meter state and that its repeat comparison has the reported outcome. It does **not** justify a production history loop, sensor update, record identity, deduplication, resume cursor, general oldest/newest order, or wider meter-state claims. The next gate must review the sanitized physical result and separately authorize any broader traversal or production synchronization design.
+## User-run physical result and interpretation
+
+The user deployed the Stage 7B build and ran the action once against the real GD82 with the meter ON. Device resolution, connection, characteristic discovery, subscription, wake response, project response, project match, and identity confirmation all succeeded. One metadata response was valid and reported the expected raw count of two. Traversal ran at indexes `1 → 0 → 1`; both parts of all three pairs validated. The first and second index-one `0x25` frames matched, the first and second index-one `0x26` frames matched, and the pair equality result was true. Notification stop and disconnect succeeded; no error or cleanup error was reported. No private health value, timestamp, raw response, serial, address, or payload digest was disclosed.
+
+This physically confirms the fixed two-slot branch is usable in this tested meter state, every selected pair validates, and index one is byte-for-byte stable within that session. It corroborates the retained private app sequence. It does **not** establish general oldest/newest order, arbitrary count traversal, circular-buffer behavior, wrap, capacity, empty-slot behavior, stable raw-index identity, collision-safe deduplication, production synchronization, or resume behavior.
+
+**Exact next proposed gate:** Stage 7C — bounded semantic pair confirmation. Using existing evidence-backed parsers, determine whether index 0 classifies as uric acid / General / valid and index 1 as hematocrit / QC / invalid sentinel; compare repeated index-one classifications. A Stage 7C result must expose classifications and equality/status booleans only, never numeric measurements, timestamps, raw frames, or hashes. Stage 7C requires separate authorization and is not implemented here.

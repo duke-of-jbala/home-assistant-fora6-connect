@@ -11,6 +11,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 
 ### Added
+- Recorded successful user-run Stage 7B physical validation: raw count two, all bounded `1 → 0 → 1` pairs valid, repeated index-one parts equal, and clean cleanup. General traversal, deduplication, and production synchronization remain unproven/unauthorized; proposed next review is Stage 7C semantic pair confirmation.
 - Stage 7B development-only `probe_history_window` action: require raw slot count exactly two after GD82 identity, then request only User1 indexes `1 → 0 → 1` as three `0x25`/`0x26` pairs. It returns structural and repeated-pair equality flags without health data; synthetic validation only, with no production sync or entity update.
 - The HA device page now receives the exact validated meter serial and its current Bluetooth connection metadata; the serial remains the canonical device identity, with no meter IP or Bluetooth/synchronization behavior change.
 - Added original temporary placeholder icon and landscape logo artwork for the integration; no official manufacturer artwork or wordmark is used.
