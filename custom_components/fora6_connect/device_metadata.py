@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN, PLACEHOLDER_SERIAL
+from .mac_identity import canonical_bluetooth_mac, is_mac_identity
 
 
 def async_reconcile_device_metadata(hass: HomeAssistant, entry, address: str) -> set[tuple[str, str]] | None:
@@ -26,9 +27,12 @@ def async_reconcile_device_metadata(hass: HomeAssistant, entry, address: str) ->
         for connection in old_connections
         if connection[0] != dr.CONNECTION_BLUETOOTH
     }
-    new_connections.add((dr.CONNECTION_BLUETOOTH, address))
+    connection_address = canonical_bluetooth_mac(address) or address
+    new_connections.add((dr.CONNECTION_BLUETOOTH, connection_address))
     displayed_serial = (
-        None if entry.unique_id == PLACEHOLDER_SERIAL else entry.unique_id
+        None
+        if entry.unique_id == PLACEHOLDER_SERIAL or is_mac_identity(entry.unique_id)
+        else entry.unique_id
     )
     if device.serial_number != displayed_serial or old_connections != new_connections:
         registry.async_update_device(

@@ -1,5 +1,7 @@
 # Stage 6B2 — bounded System ID identity review
 
+**Physical closure:** the user-run action found `0x2A23` present, readable, read successfully and format-plausible, but `system_id_value_usable: false`, with clean disconnect and no error. `set_reference` returned `unusable_system_id` without storing a reference; `compare` returned `no_reference`. This System ID is unsuitable as canonical identity for this meter. Its private value is not published. [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md) evaluates the factory BT MAC fallback.
+
 ## Purpose and evidence
 
 Stage 6B1's user-run Home Assistant regression preserved the existing device and unavailable uric-acid entity, removed the false “Serial Number” display, suppressed repeat Add cards, and retained Bluetooth connection metadata. The user privately confirmed that the HA Bluetooth locator matches the meter's printed BT MAC. The actual MAC and printed serial remain outside Git. GATT `0x2A25` supplies a generic text placeholder for this meter, so the existing ConfigEntry's meter-specific identity remains unresolved.

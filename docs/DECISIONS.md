@@ -1,5 +1,7 @@
 # Architecture decisions
 
+**Stage 6B3 identity decision:** the observed factory BT MAC is the best available fallback for this GD82, formatted as lowercase colon-separated octets. It is a private internal ConfigEntry/DeviceInfo identifier and Bluetooth connection, not a serial display value. An in-place registry update preserves the existing device/entity; no different-MAC merge is inferred. See [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md).
+
 **Stage 6B2 evidence decision:** standard System ID `0x2A23` is a candidate, not yet the canonical identity. Eight-octet shape and all-zero/all-`0xFF` rejection are structural/local checks only. The exact raw bytes remain process-local for repeat comparison. No identity migration follows without a user-run stability result and separate policy gate. See [Stage 6B2](STAGE6B2_SYSTEM_ID_REVIEW.md).
 
 **Stage 6B1 identity correction:** a known Bluetooth locator suppresses rediscovery, but remains transport metadata rather than logical identity. The current GD82 entry's unique ID was privately found to be the generic literal “Serial Number,” so it does not establish device-specific identity; do not silently migrate it to the BT MAC. Preserve the existing entry and hide the false serial field pending a separately authorized identity review. See [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md).

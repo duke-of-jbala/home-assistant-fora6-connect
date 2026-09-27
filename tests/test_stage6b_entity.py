@@ -126,6 +126,18 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(entity._attr_device_info["identifiers"], {("fora6_connect", "Serial Number")})
         self.assertFalse(entity.available)
 
+    async def test_factory_mac_identity_is_not_displayed_as_serial(self):
+        self.entry.unique_id = "aa:bb:cc:dd:ee:01"
+        self.entry.runtime_data.address = "AA:BB:CC:DD:EE:01"
+        entity = self.module.Fora6UricAcidSensor(self.entry, self.state)
+        self.assertEqual(entity._attr_device_info["identifiers"],
+                         {("fora6_connect", "aa:bb:cc:dd:ee:01")})
+        self.assertEqual(entity._attr_device_info["connections"],
+                         {("bluetooth", "aa:bb:cc:dd:ee:01")})
+        self.assertIsNone(entity._attr_device_info["serial_number"])
+        self.assertEqual(entity._attr_unique_id, "SYNTHETIC-ENTRY-A_uric_acid")
+        self.assertFalse(entity.available)
+
     async def test_serial_and_locator_are_not_logged_or_exposed_as_state(self):
         with patch.object(logging.Logger, "_log") as logged:
             entity = self.module.Fora6UricAcidSensor(self.entry, self.state)

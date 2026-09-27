@@ -44,3 +44,44 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
     async def test_unload_forwards_sensor_only(self):
         self.assertTrue(await self.integration.async_unload_entry(self.hass, self.entry))
         self.hass.config_entries.async_unload_platforms.assert_awaited_once_with(self.entry, ["sensor"])
+
+    async def test_placeholder_migrates_before_sensor_forward(self):
+        self.entry.unique_id = "Serial Number"
+        self.entry.data["address"] = "AA:BB:CC:DD:EE:01"
+        metadata = types.ModuleType(self.integration.__package__ + ".device_metadata")
+        metadata.async_reconcile_device_metadata = Mock()
+        migration = types.ModuleType(self.integration.__package__ + ".identity_migration")
+        migration.IdentityMigrationError = type("IdentityMigrationError", (Exception,), {})
+
+        def migrate(_hass, entry):
+            entry.unique_id = "aa:bb:cc:dd:ee:01"
+            return True
+
+        migration.migrate_placeholder_identity = Mock(side_effect=migrate)
+
+        async def forwarded(entry, platforms):
+            self.assertEqual(entry.unique_id, "aa:bb:cc:dd:ee:01")
+            self.assertEqual(platforms, ["sensor"])
+
+        self.hass.config_entries.async_forward_entry_setups.side_effect = forwarded
+        with patch.dict(sys.modules, {
+            self.integration.__name__: self.integration,
+            metadata.__name__: metadata,
+            migration.__name__: migration,
+        }):
+            self.assertTrue(await self.integration.async_setup_entry(self.hass, self.entry))
+        migration.migrate_placeholder_identity.assert_called_once_with(self.hass, self.entry)
+        self.hass.config_entries.async_forward_entry_setups.assert_awaited_once()
+
+    async def test_unsafe_placeholder_migration_stops_before_forward(self):
+        self.entry.unique_id = "Serial Number"
+        migration = types.ModuleType(self.integration.__package__ + ".identity_migration")
+        migration.IdentityMigrationError = type("IdentityMigrationError", (Exception,), {})
+        migration.migrate_placeholder_identity = Mock(side_effect=migration.IdentityMigrationError())
+        with patch.dict(sys.modules, {
+            self.integration.__name__: self.integration,
+            migration.__name__: migration,
+        }):
+            with self.assertRaisesRegex(RuntimeError, "migration could not be completed safely"):
+                await self.integration.async_setup_entry(self.hass, self.entry)
+        self.hass.config_entries.async_forward_entry_setups.assert_not_awaited()

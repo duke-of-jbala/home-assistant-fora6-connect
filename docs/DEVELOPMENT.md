@@ -1,5 +1,7 @@
 # Development
 
+**Stage 6B3:** [The factory MAC migration plan](STAGE6B3_FACTORY_MAC_IDENTITY.md) specifies offline-tested setup migration and the controlled user-run HA reload check. It requires no device removal, BLE operation, Stage 7 sync, or disclosure of the private MAC.
+
 **Stage 6B2:** [The bounded System ID plan](STAGE6B2_SYSTEM_ID_REVIEW.md) specifies the manual `probe_system_id` and `probe_system_id_stability` actions, expected privacy-safe outputs, and user-run ON/repeat/OFF-ON procedure. Only `0x180A`/`0x2A23` is read; no FORA write, pairing, automatic discovery/sync, or production identity change is added.
 
 **Stage 6B1:** [The metadata/rediscovery follow-up](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) adds a known-locator Config Flow guard, rejects a generic GATT serial placeholder for new setups, and refreshes the existing registry metadata on reload without BLE I/O. A controlled HA reload/rediscovery regression is the next gate; a separate private identity review is needed before migrating the placeholder-backed entry. No production sync is present.

@@ -62,11 +62,10 @@ class MeterRuntime:
 
 
 def meter_device_identifier(stage6_stable_identifier: str) -> tuple[str, str]:
-    """Return the shared HA identifier using an externally confirmed serial.
+    """Return the shared HA identifier from the guarded ConfigEntry identity.
 
-    This helper never derives identity from a Bluetooth address, local name,
-    UUID, or manufacturer data. The caller supplies exact confirmed serial
-    text after the guarded setup flow.
+    This helper does not derive identity. Stage 6B3 can supply a validated
+    factory Bluetooth MAC when standard DIS identity is a placeholder.
     """
     if (
         not isinstance(stage6_stable_identifier, str)

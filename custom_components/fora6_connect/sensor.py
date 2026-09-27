@@ -11,6 +11,7 @@ from homeassistant.helpers.device_registry import CONNECTION_BLUETOOTH, DeviceIn
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import NAME, PLACEHOLDER_SERIAL
+from .mac_identity import canonical_bluetooth_mac, is_mac_identity
 from .sensor_state import MeasurementState, meter_device_identifier
 
 
@@ -24,18 +25,24 @@ class Fora6UricAcidSensor(SensorEntity):
 
     def __init__(self, entry: ConfigEntry, state: MeasurementState) -> None:
         self._state = state
-        # The confirmed serial identifies the device and is shown in its HA page.
+        # Registry association uses the ConfigEntry identity; the entity ID
+        # itself stays tied to the unchanging entry ID across migration.
         self._attr_unique_id = f"{entry.entry_id}_uric_acid"
+        connection_address = (
+            canonical_bluetooth_mac(entry.runtime_data.address)
+            or entry.runtime_data.address
+        )
         self._attr_device_info = DeviceInfo(
             identifiers={meter_device_identifier(entry.unique_id)},
-            connections={(CONNECTION_BLUETOOTH, entry.runtime_data.address)},
+            connections={(CONNECTION_BLUETOOTH, connection_address)},
             name=NAME,
             manufacturer="ForaCare",
             model="GD82",
-            # An older entry may contain the literal GATT placeholder. Do not
-            # present that text as a verified physical serial number.
+            # Neither the generic GATT label nor the factory MAC is a serial.
             serial_number=(
-                None if entry.unique_id == PLACEHOLDER_SERIAL else entry.unique_id
+                None
+                if entry.unique_id == PLACEHOLDER_SERIAL or is_mac_identity(entry.unique_id)
+                else entry.unique_id
             ),
         )
 

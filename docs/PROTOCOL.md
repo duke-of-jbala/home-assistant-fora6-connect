@@ -1,5 +1,7 @@
 # Protocol evidence register
 
+**Stage 6B3 identity boundary:** user-run Stage 6B2 found `0x2A23` readable and structurally plausible but unusable, so no stability reference was set. `0x2A25` is the generic literal “Serial Number” on this meter. The printed BT MAC privately matched HA's address across repeated power cycles; [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md) uses it as a fallback identity. No FORA command or record semantic changed.
+
 **Stage 6B2:** [The System ID evidence record](STAGE6B2_SYSTEM_ID_REVIEW.md) cites Bluetooth SIG Device Information semantics: optional read-only `0x2A23`, eight-octet `uint40` plus `uint24` structure, intended per-instance uniqueness. The real GD82's characteristic was inventoried as readable but has not yet been read; structure and stability remain physically unconfirmed. No proprietary FORA protocol command was added.
 
 **Stage 6B1 identity correction:** the user privately confirmed the HA Bluetooth locator matches the printed factory BT MAC. The configured unique ID is literally “Serial Number,” which passed earlier structural/stability checks but is not evidence of a meter-specific identifier. Printed/GATT serial equality is unresolved. [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) adds no FORA command or parser behavior.

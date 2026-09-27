@@ -1,4 +1,4 @@
-"""User-confirmed Bluetooth setup with exact private serial identity."""
+"""User-confirmed Bluetooth setup with evidence-bounded GD82 identity."""
 
 from __future__ import annotations
 
@@ -12,13 +12,14 @@ from homeassistant.components import bluetooth
 from .const import DOMAIN, NAME, PLACEHOLDER_SERIAL
 from .discovery import is_fora_candidate
 from .device_metadata import async_reconcile_device_metadata, async_restore_device_connections
+from .mac_identity import canonical_bluetooth_mac, is_mac_identity
 from .setup_identity import SetupIdentityError, async_confirm_meter_identity
 
 LOCATOR_KEY = "address"
 
 
 class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """A passive candidate must pass bounded project and serial checks."""
+    """A passive candidate must pass bounded project and DIS checks."""
 
     VERSION = 1
 
@@ -39,8 +40,11 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="identity_failed")
         # The persisted locator is a discovery suppression hint, not identity.
         # Never start a new confirmation flow for an already known address.
+        candidate_mac = canonical_bluetooth_mac(discovery_info.address)
+        if candidate_mac is None:
+            return self.async_abort(reason="identity_failed")
         if any(
-            entry.data.get(LOCATOR_KEY) == discovery_info.address
+            canonical_bluetooth_mac(entry.data.get(LOCATOR_KEY)) == candidate_mac
             for entry in self._async_current_entries()
         ):
             return self.async_abort(reason="already_configured")
@@ -53,8 +57,11 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._candidate_address is None:
             return self.async_abort(reason="identity_failed")
         # An entry may have claimed this locator while the review form was open.
+        candidate_mac = canonical_bluetooth_mac(self._candidate_address)
+        if candidate_mac is None:
+            return self.async_abort(reason="identity_failed")
         if any(
-            entry.data.get(LOCATOR_KEY) == self._candidate_address
+            canonical_bluetooth_mac(entry.data.get(LOCATOR_KEY)) == candidate_mac
             for entry in self._async_current_entries()
         ):
             return self.async_abort(reason="already_configured")
@@ -70,24 +77,35 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="identity_failed")
         if (
             not isinstance(serial, str)
-            or serial == PLACEHOLDER_SERIAL
             or not serial.strip("\x00 \t\r\n")
             or not all(char.isprintable() for char in serial.strip("\x00 \t\r\n"))
         ):
             return self.async_abort(reason="serial_unavailable")
-        self._confirmed_serial = serial
+        # The physically observed 0x2A25 placeholder is not an identity.
+        # For that GD82 path, the confirmed factory BLE MAC is the fallback.
+        identity = candidate_mac if serial == PLACEHOLDER_SERIAL else serial
+        self._confirmed_serial = identity
         # HA arbitrates concurrent flows for the same domain-scoped ID.
-        await self.async_set_unique_id(serial)
+        await self.async_set_unique_id(identity)
         for entry in self._async_current_entries():
-            if entry.data.get(LOCATOR_KEY) == self._candidate_address and entry.unique_id != serial:
+            if (
+                canonical_bluetooth_mac(entry.data.get(LOCATOR_KEY)) == candidate_mac
+                and entry.unique_id != identity
+            ):
                 return self.async_abort(reason="identity_conflict")
         existing = next(
-            (entry for entry in self._async_current_entries() if entry.unique_id == serial),
+            (
+                entry for entry in self._async_current_entries()
+                if entry.unique_id == identity
+                or (is_mac_identity(identity) and canonical_bluetooth_mac(entry.unique_id) == identity)
+            ),
             None,
         )
         if existing is not None:
-            if existing.data.get(LOCATOR_KEY) == self._candidate_address:
+            if canonical_bluetooth_mac(existing.data.get(LOCATOR_KEY)) == candidate_mac:
                 return self.async_abort(reason="already_configured")
+            if is_mac_identity(identity):
+                return self.async_abort(reason="identity_conflict")
             return await self.async_step_update_locator()
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title=NAME, data={LOCATOR_KEY: self._candidate_address})

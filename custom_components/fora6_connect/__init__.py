@@ -5,7 +5,7 @@ import asyncio
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 
-from .const import DOMAIN
+from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .gatt_probe import ProbeError, async_probe_gatt
 from .history_probe import async_probe_history_window
 from .history_semantics_probe import async_probe_history_semantics
@@ -316,6 +316,13 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
     address = entry.data.get("address")
     if not isinstance(address, str) or not address:
         return False
+    if entry.unique_id == PLACEHOLDER_SERIAL:
+        from .identity_migration import migrate_placeholder_identity
+
+        try:
+            migrate_placeholder_identity(hass, entry)
+        except Exception:
+            raise RuntimeError("FORA identity migration could not be completed safely") from None
     entry.runtime_data = MeterRuntime(address=address)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     # Refresh retained registry metadata for existing entries without a BLE read.

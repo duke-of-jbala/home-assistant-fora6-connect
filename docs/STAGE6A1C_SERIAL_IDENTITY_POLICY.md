@@ -1,5 +1,7 @@
 # Stage 6A1c — serial uniqueness and production identity policy
 
+**Later Stage 6B3 evidence:** `0x2A25` is a generic placeholder and `0x2A23` was physically read but classified unusable on this GD82. [The factory MAC fallback](STAGE6B3_FACTORY_MAC_IDENTITY.md) replaces the earlier policy for this meter; the historical standard review below remains evidence context, not a claim that its GATT serial is specific.
+
 **Later Stage 6B1 correction:** repeated stability and UTF-8 usability did not prove meter specificity. The user privately found the configured unique ID is the generic literal “Serial Number.” The current HA Bluetooth locator matches the printed BT MAC, but printed/GATT serial equality remains unproven. See [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md).
 
 **State:** Evidence and policy review complete. The user-run Stage 6A1b
