@@ -1,6 +1,6 @@
 # Stage 7C — bounded semantic pair confirmation
 
-**Status:** development-only implementation with synthetic validation. No Stage 7C physical result has been run or claimed. The [Stage 7B physical probe](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) established that the tested GD82 accepted the fixed two-slot branch, but its action disclosed no record classifications.
+**Status:** Stage 7C is complete for its authorized bounded semantic-confirmation scope. The user-run physical result below matched the expected classifications. The [Stage 7B physical probe](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) had already established that the tested GD82 accepted the fixed two-slot branch, while disclosing no record classifications.
 
 ## Purpose and fixed operation
 
@@ -31,10 +31,10 @@ Only connection, identity, count-gate, pair-completion, classification, equality
 
 The action does not update `sensor_state.py`, the uric-acid entity, or `coordinator.py`; it does not persist health records, fingerprints, or cursors. The existing uric-acid entity remains unavailable until separately authorized production synchronization supplies a valid measurement. There is no general history traversal or production synchronization in Stage 7C.
 
-## Controlled physical procedure after review
+## User-run physical result and interpretation
 
-The user may deploy this commit, restart Home Assistant, turn the GD82 **ON**, and run `fora6_connect.probe_history_semantics` once with the private runtime address. Share only the privacy-safe action result. Do not share raw frames, health measurements, meter timestamps, serials, addresses, or logs containing them. Codex does not run the physical test.
+The user deployed the Stage 7C build and ran `fora6_connect.probe_history_semantics` once against the real GD82 with the meter ON. Identity and project confirmation succeeded; metadata was valid with raw count two; the fixed indexes `1 → 0 → 1` completed. Index zero classified as identified uric acid / General / valid / not QC. Both index-one occurrences classified as identified hematocrit / QC / invalid sentinel / QC. Repeated index-one analyte, category, and validity classifications matched. Notification stop and disconnect were clean; no error or cleanup error was reported. No health value, scaled value, timestamp, raw frame, serial, address, or digest was disclosed.
 
-If `expected_semantic_pattern_confirmed` is true with valid pairs and clean cleanup, the tested session confirms the expected index-zero and index-one classifications for this meter state. If a valid pair yields a false expected-pattern flag, the classification differs from the private captured import; the booleans identify only which expected property differed and do not establish why. If count differs from two or a transport/protocol error occurs, no later indexed requests are allowed. The outcome does not establish oldest/newest ordering, wrap, capacity, empty slots, stable record identity, deduplication, resume semantics, or a production sync policy.
+The true expected-pattern summary confirms these classifications in the tested two-slot meter state. A future semantic mismatch would identify only the differing expected field and not its cause. A count mismatch or transport/protocol error stops before later indexed requests. This outcome does not establish general arbitrary-size traversal, oldest/newest ordering, circular-buffer or wrap behavior, capacity, empty slots, stable raw-index identity, collision-safe deduplication, persistence/resume, automatic sync, behavior after record rotation, or other analyte scaling/units.
 
-**Exact next gate:** review the sanitized user-run Stage 7C result. Any further physical probe, broader traversal design, or production synchronization requires a separate authorization and evidence review.
+**Exact next project task:** focused Stage 6B rediscovery/locator-identity follow-up. The user observed a discovery card reappearing for an already configured meter. Privately reconcile printed serial/BT MAC with GATT serial and HA runtime locator, and review duplicate suppression and safe locator update behavior. Keep `0x2A25` serial canonical and Bluetooth address mutable; do not publish actual identifiers. Do not begin Stage 7D or production sync automatically.

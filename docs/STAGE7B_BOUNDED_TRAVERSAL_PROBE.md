@@ -42,4 +42,6 @@ This physically confirms the fixed two-slot branch is usable in this tested mete
 
 **Exact next proposed gate:** Stage 7C — bounded semantic pair confirmation. Using existing evidence-backed parsers, determine whether index 0 classifies as uric acid / General / valid and index 1 as hematocrit / QC / invalid sentinel; compare repeated index-one classifications. A Stage 7C result must expose classifications and equality/status booleans only, never numeric measurements, timestamps, raw frames, or hashes. Stage 7C requires separate authorization and is not implemented here.
 
-**Stage 7C follow-up:** [the separately authorized semantic action](STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) is implemented with synthetic validation. The Stage 7B action and its physical result remain unchanged. The next gate is controlled user-run Stage 7C validation and separate review of the sanitized result.
+**Stage 7C follow-up:** [the separately authorized semantic action](STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) was implemented with synthetic validation and then physically validated. Its result matched the expected classifications and repeat comparison with clean cleanup. Stage 7B's action and result remain unchanged.
+
+**Stage 7C physical result:** the separate action confirmed the expected classifications for index zero (uric acid/General/valid/not-QC) and index one (hematocrit/QC/invalid-sentinel/QC); repeated index-one semantic fields matched and cleanup was clean. Stage 7C is complete for its bounded scope. General history behavior remains unresolved.

@@ -11,7 +11,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 
 ### Added
-- Stage 7C development-only semantic probe: reuse the count-two `1 → 0 → 1` branch to classify parsed pairs and compare repeated index-one semantics in memory. Return status booleans only; synthetic validation pending physical review, with no entity update or production sync.
+- Recorded successful user-run Stage 7C semantic confirmation on the real GD82: index zero was uric acid/General/valid and not QC; both index-one reads were hematocrit/QC/invalid sentinel, with matching repeated semantics and clean cleanup. General traversal and production sync remain unresolved/unauthorized.
+- Stage 7C development-only semantic probe: reuse the count-two `1 → 0 → 1` branch to classify parsed pairs and compare repeated index-one semantics in memory. Return status booleans only; no entity update or production sync.
 - Recorded successful user-run Stage 7B physical validation: raw count two, all bounded `1 → 0 → 1` pairs valid, repeated index-one parts equal, and clean cleanup. General traversal, deduplication, and production synchronization remain unproven/unauthorized; proposed next review is Stage 7C semantic pair confirmation.
 - Stage 7B development-only `probe_history_window` action: require raw slot count exactly two after GD82 identity, then request only User1 indexes `1 → 0 → 1` as three `0x25`/`0x26` pairs. It returns structural and repeated-pair equality flags without health data; synthetic validation only, with no production sync or entity update.
 - The HA device page now receives the exact validated meter serial and its current Bluetooth connection metadata; the serial remains the canonical device identity, with no meter IP or Bluetooth/synchronization behavior change.
