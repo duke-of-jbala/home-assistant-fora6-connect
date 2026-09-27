@@ -1,5 +1,7 @@
 # Development
 
+**Stage 6B3 physical validation:** the user restarted HA and confirmed the existing entry, single device, single unavailable uric-acid entity, Bluetooth connection, and GD82/ForaCare metadata were preserved; no bogus serial or discovery Add card appeared. A privacy-safe storage check found the ConfigEntry unique ID now uses canonical lowercase colon MAC format. No actual value was shared or recorded. The in-place migration is complete for this meter.
+
 **Stage 6B3:** [The factory MAC migration plan](STAGE6B3_FACTORY_MAC_IDENTITY.md) specifies offline-tested setup migration and the controlled user-run HA reload check. It requires no device removal, BLE operation, Stage 7 sync, or disclosure of the private MAC.
 
 **Stage 6B2:** [The bounded System ID plan](STAGE6B2_SYSTEM_ID_REVIEW.md) specifies the manual `probe_system_id` and `probe_system_id_stability` actions, expected privacy-safe outputs, and user-run ON/repeat/OFF-ON procedure. Only `0x180A`/`0x2A23` is read; no FORA write, pairing, automatic discovery/sync, or production identity change is added.

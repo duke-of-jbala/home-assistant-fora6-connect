@@ -1,5 +1,11 @@
 # Stage 6B3 — factory Bluetooth MAC identity and in-place migration
 
+## User-run Home Assistant migration result
+
+After installing this build and restarting Home Assistant, the user observed that the existing integration entry remained; exactly one FORA device and one uric-acid entity remained; the entity was still Unavailable; and its device association was preserved. The bogus serial field was absent, Bluetooth connection metadata remained, the device still appeared as GD82 by ForaCare, and no discovery Add card appeared. A privacy-safe inspection of the ConfigEntry storage showed `ConfigEntry.unique_id` now has canonical six-octet lowercase colon-separated MAC form instead of the generic placeholder. The actual MAC was not included in the inspection output or repository.
+
+This confirms successful in-place migration for the configured GD82: one entry, one device, one entity, no duplicate, and retained connection metadata. **Stage 6B3 is complete for its authorized migration scope.** It does not show that every GD82 has a fixed globally unique address. Address behavior after reset or firmware update, population-wide uniqueness, proprietary printed/app serial relationship, manufacturer-data semantics, and the exact HA scanner/proxy path remain unresolved. No further identity migration is required for this tested meter before continuing project work.
+
 ## Evidence and decision
 
 The real GD82's GATT `0x2A25` text is the generic placeholder “Serial Number”, so repeat stability did not make it meter-specific. In the user-run Stage 6B2 read, standard System ID `0x2A23` was present, readable, and eight bytes, but the probe classified its value unusable. `set_reference` refused it and `compare` correctly reported `no_reference`. The private value is not published. The meter's factory label has both a serial and a BT MAC. The user privately matched the printed BT MAC to Home Assistant's observed Bluetooth address, and the observed address stayed the same across several meter OFF/ON cycles. This is evidence for **this meter under tested conditions**, not a population-wide or firmware-reset guarantee.
@@ -26,4 +32,4 @@ Synthetic tests model one entry, one device and one entity, with failures for in
 
 After review, the user can install this build and restart/reload Home Assistant. Check that the existing config entry remains, one FORA device and one uric-acid entity remain, the entity ID/area/customizations are preserved, the false serial field is absent, Bluetooth connection is present, and OFF/ON does not cause an Add card. The entity should remain unavailable: Stage 7 production synchronization is still absent. If migration refuses an unexpected registry layout, stop and report the privacy-safe error; do not delete/re-add the device. No physical test is run by Codex.
 
-The exact next gate is that controlled user-run HA migration regression. Only after its result may identity policy be marked physically validated. Stage 7D, history sync, and any proprietary printed-serial comparison remain separately gated.
+The next proposed project gate is a separately authorized Stage 7D offline review of general traversal and deduplication evidence gaps. That review must not be treated as production synchronization authorization. The uric-acid entity remains unavailable until a later authorized synchronization implementation.

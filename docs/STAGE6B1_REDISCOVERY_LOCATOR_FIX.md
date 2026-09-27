@@ -1,5 +1,7 @@
 # Stage 6B1 — device metadata and rediscovery follow-up
 
+**Stage 6B3 physical outcome:** later user-run HA validation confirms the same entry/device/entity survived identity migration to canonical factory BT MAC form, Bluetooth connection remained, bogus serial stayed absent, and no discovery card appeared. The single-meter limitation is recorded in [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md).
+
 **Later Stage 6B3 policy:** [the factory MAC migration](STAGE6B3_FACTORY_MAC_IDENTITY.md) supersedes the earlier placeholder-entry deferral after the user-run System ID result was unusable. Its in-place setup path awaits real HA validation; no actual identifier is published.
 
 **Later physical regression:** the user installed Stage 6B1 and observed that the existing device and uric-acid entity remained, the false serial label disappeared, the Add card stayed suppressed, and Bluetooth connection metadata remained. The HA locator privately matched the printed BT MAC. No actual identifier is tracked. [Stage 6B2](STAGE6B2_SYSTEM_ID_REVIEW.md) now investigates `0x2A23` without migrating this entry.

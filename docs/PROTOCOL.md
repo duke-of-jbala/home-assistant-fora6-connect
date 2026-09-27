@@ -1,5 +1,7 @@
 # Protocol evidence register
 
+**Stage 6B3 closure:** physical HA validation confirms the placeholder-to-factory-MAC identity migration succeeded for this configured GD82. The System ID remains unusable and `0x2A25` remains a generic placeholder; no protocol command or record behavior changed. See [the identity record](STAGE6B3_FACTORY_MAC_IDENTITY.md).
+
 **Stage 6B3 identity boundary:** user-run Stage 6B2 found `0x2A23` readable and structurally plausible but unusable, so no stability reference was set. `0x2A25` is the generic literal “Serial Number” on this meter. The printed BT MAC privately matched HA's address across repeated power cycles; [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md) uses it as a fallback identity. No FORA command or record semantic changed.
 
 **Stage 6B2:** [The System ID evidence record](STAGE6B2_SYSTEM_ID_REVIEW.md) cites Bluetooth SIG Device Information semantics: optional read-only `0x2A23`, eight-octet `uint40` plus `uint24` structure, intended per-instance uniqueness. The real GD82's characteristic was inventoried as readable but has not yet been read; structure and stability remain physically unconfirmed. No proprietary FORA protocol command was added.

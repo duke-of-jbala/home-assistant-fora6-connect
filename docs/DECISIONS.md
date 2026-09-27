@@ -1,5 +1,7 @@
 # Architecture decisions
 
+**Stage 6B3 physical decision:** the user-run HA migration confirms the factory BT MAC fallback preserved the configured object graph for this GD82. Keep the exact fallback policy scoped to this meter's observed identity; do not generalize fixed-address or uniqueness claims to all GD82s. Reset/update behavior is open. Stage 7 remains separately gated.
+
 **Stage 6B3 identity decision:** the observed factory BT MAC is the best available fallback for this GD82, formatted as lowercase colon-separated octets. It is a private internal ConfigEntry/DeviceInfo identifier and Bluetooth connection, not a serial display value. An in-place registry update preserves the existing device/entity; no different-MAC merge is inferred. See [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md).
 
 **Stage 6B2 evidence decision:** standard System ID `0x2A23` is a candidate, not yet the canonical identity. Eight-octet shape and all-zero/all-`0xFF` rejection are structural/local checks only. The exact raw bytes remain process-local for repeat comparison. No identity migration follows without a user-run stability result and separate policy gate. See [Stage 6B2](STAGE6B2_SYSTEM_ID_REVIEW.md).

@@ -1,5 +1,7 @@
 # Stage 6B — guarded Config Flow and persistent device identity
 
+**Stage 6B3 physical closure:** after the user restarted HA with the migration build, the same entry, one device, and one uric-acid entity remained; its association and Bluetooth connection were preserved; the serial field was absent; and rediscovery stayed suppressed. A privacy-safe storage inspection confirmed canonical MAC form in the ConfigEntry unique ID without revealing the value. The user-validated migration is complete for this meter; see [Stage 6B3](STAGE6B3_FACTORY_MAC_IDENTITY.md).
+
 **Stage 6B3 correction:** [factory MAC fallback and in-place migration](STAGE6B3_FACTORY_MAC_IDENTITY.md) supersede the generic `0x2A25` placeholder identity for the tested GD82. The earlier serial-based design remains historical context for meters with genuinely specific serials. The migration awaits user-run HA validation.
 
 **Stage 6B2 note:** the later [System ID review](STAGE6B2_SYSTEM_ID_REVIEW.md) adds read-only evidence actions only. The existing placeholder-backed entry remains intact; no canonical identity migration has occurred.

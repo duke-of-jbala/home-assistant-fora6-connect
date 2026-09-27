@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 6B3 physical closure:** the user confirmed the existing ConfigEntry unique ID now has canonical Bluetooth MAC form after restart. The same entry, device, entity, connection metadata, and GD82/ForaCare metadata remained; the entity is still unavailable and no Add card appeared. This validates the in-place migration on one meter. See [the closure record](STAGE6B3_FACTORY_MAC_IDENTITY.md); broad address stability remains unresolved.
+
 **Stage 6B3:** [Factory MAC identity](STAGE6B3_FACTORY_MAC_IDENTITY.md) is a guarded fallback for the tested GD82 after the generic `0x2A25` text and unusable `0x2A23` result. Existing placeholder entry/device identifiers are migrated in place before the inert sensor loads; the entity unique ID remains based on the unchanged entry ID. No sync or BLE read occurs at setup.
 
 **Stage 6B2:** [The System ID review](STAGE6B2_SYSTEM_ID_REVIEW.md) adds read-only development actions at the Device Information boundary. Private raw `0x2A23` bytes may exist in one process-local comparison holder, but never enter ConfigEntry, DeviceInfo, sensor state, diagnostics, or protocol history. Existing production identity and Stage 7 paths remain unchanged.
