@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P — physical advertisement observation with partial OFF evidence
+
+Started from clean `main` on 2026-09-28 (Europe/London) at `c858338481031e9c0090705666af664b72e5260d` (`docs: review automatic refresh trigger architecture`), with `origin/main` matching and `v1.0.0` still peeling to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The installed HA Advertisement Monitor first showed a basic row; clicking it exposed details. In the user-run fully OFF state, `Updated` age increased on a cached last-seen row, with public name, one manufacturer entry, standard Glucose among service UUIDs, no service data, and retained prior proxy source. Connectability was not shown; raw advertisement bytes were not shared. The [Stage 13A-P document](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) records this OFF row and leaves the other five pending. Earlier normal-ON/light and post-measurement subscription evidence is not passed off as advertisement data. No observer or automatic callback has been added.
+
+This task changes the five Markdown files listed in `CURRENT_STATUS.md`. The tree is modified at this pre-commit observation. Baseline/ref checks and official HA UI/API guidance review were run. Full **375/375** tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and changed-Markdown privacy/artifact audit passed. Staged privacy/diff review and post-push HACS/hassfest remain to be verified if a documentation checkpoint is committed.
+
+**Exact next gate:** sanitized user-run detail-view normal-ON/history/off/repeated-ON timing and shape comparison, plus a naturally occurring post-measurement state when available; consider a development-only observer only for material gaps left by the UI. Do not begin Stage 13B or Stage 8H.
+
 ## Stage 13A — post-v1 auto-trigger review, pre-commit
 
 Started from clean `main` on 2026-09-28 (Europe/London) at `dd26b65ab467381db58ba7a525c6b8eabca8e00a` (`chore: prepare FORA 6 Connect v1.0.0`), with `origin/main` matching and local/remote `v1.0.0` peeling to that released commit. The release remains unchanged. [The Stage 13A record](docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md) audits current HA Bluetooth callbacks and ESPHome proxy guidance against the configured-entry manual coordinator, compares trigger candidates, and defines a privacy-safe physical state-observation gate. The observed post-measurement notification-subscription failure means advertisement visibility is not a readiness guarantee. Current-state refresh remains manual-only.

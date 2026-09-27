@@ -1,5 +1,14 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P — advertisement-state physical observation, partial evidence
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `c858338481031e9c0090705666af664b72e5260d` — `docs: review automatic refresh trigger architecture`; `origin/main` matched. Local and remote `v1.0.0` still resolve to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **Method and new physical UI finding:** the HA advertisement overview showed a basic row, but clicking it exposed details. With the meter OFF, the retained row's `Updated` age increased without a live update; the public name, one manufacturer-data entry, a service UUID set including standard Glucose, no service data, and a retained prior proxy source were reported. Connectability was not shown, and raw advertisement bytes were not shared. [The Stage 13A-P record](docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md) records this OFF evidence while the other five states remain pending. No observer is justified yet; continue with the detail view. The prior light/subscription observations remain separate.
+- **Changes after checkpoint:** yes; `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and new `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`. The tree is modified at this pre-commit observation. Only Markdown changes. No observer, callback, connection attempt, automatic sync, or v1 release ref changes.
+- **Checks actually run on the modified tree:** baseline SHA/branch, clean starting tree, matching remote main, and unchanged released tag verified; current HA Bluetooth UI/API guidance and prior private-data boundary reviewed. Full `unittest` suite **375/375** passed; compileall and tabnanny passed; four JSON, two YAML, one TOML parsed; `git diff --check` and unchanged runtime/test/CI diff audit passed. Five changed Markdown files passed identifier, credential, private-path, health-time, logging/automatic-sync/history, and tracked-artifact audits. Staged check and pushed HACS/hassfest remain to be verified after staging/push.
+
+**Exact next gate:** receive user-run detail-view observations for normal ON, history mode, power-off, and repeated OFF/ON; keep post-measurement pending until a naturally appropriate session. Reassess any observer only for gaps left by that UI evidence. Stage 13B remains unauthorized.
+
 ## Stage 13A — post-v1 automatic-trigger architecture, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `dd26b65ab467381db58ba7a525c6b8eabca8e00a` — `chore: prepare FORA 6 Connect v1.0.0`; `origin/main` matched. Local and remote `v1.0.0` peel to that commit; the stable GitHub release exists. No released ref is changed.
