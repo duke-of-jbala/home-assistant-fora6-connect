@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 10 package and release readiness — pre-commit
+
+Starting checkpoint: clean `main` at `f27035b011b2c8d85a94467f96a73b98b2c9b89f` (`docs: close Stage 9 Atom Lite proxy validation`) on 2026-09-27 (Europe/London), with the expected origin. This task has changed the files listed in `CURRENT_STATUS.md`; the working tree is modified at this pre-commit observation. Verify and report the eventual commit SHA, remote main, GitHub validation jobs, and clean post-push state separately.
+
+Current HACS documentation accepts the repository's single integration package, root `hacs.json`, required manifest keys, original local icon, and default-branch custom-repository installation before a release. Authenticated GitHub metadata inspection found a public active main, description, topics, issues, and MIT license. Stage 10 replaces the bootstrap manifest version with `0.1.0`, adds pinned HACS/hassfest CI, corrects stale Stage 2F action wording, and gives users install/update/removal and privacy guidance. No validated runtime behavior changes. The [Stage 10 record](docs/STAGE10_HACS_PACKAGING_READINESS.md) explains versioning, evidence limits, and Stage 11 criteria.
+
+The established synthetic suite passed **374/374**. Compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged whitespace check, changed-file privacy scan, artifact scan, and no-Python-diff audit passed. An isolated component copy validated 27 Python modules and the bundled manifest, translations, service descriptions, and brand icon. HACS/hassfest workflow results must be checked on the pushed commit; no real HACS UI install is claimed. Review and check the staged diff before committing.
+
+**Exact next proposed gate after Stage 10 validators pass:** separately authorize Stage 11 release-candidate validation with a controlled HACS custom-repository install/update. Stage 8H is optional and unstarted.
+
 ## Stage 9 Atom Lite proxy validation — physical closure, pre-commit
 
 Starting checkpoint: clean public `main` at `26f464f69091b944d9e75a4c854c6eafd63c0329` (`docs: define Atom Lite proxy validation`) on 2026-09-27 (Europe/London), with the expected origin. The user supplied direct connection-source evidence: HA Bluetooth → Connections showed active `FORA 6 CONNECT` with Source explicitly `(Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy` during `fora6_connect.refresh_current_uric_acid`; the row disappeared shortly after completion. The sanitized action succeeded at count four, updated the existing sensor, found two eligible primaries, and reported no ambiguity/error/cleanup errors. No duplicate device/entity was observed. Private measurement value/time/address are not recorded.

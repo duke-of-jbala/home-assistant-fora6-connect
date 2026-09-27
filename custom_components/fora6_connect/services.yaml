@@ -51,9 +51,8 @@ probe_protocol_identity:
 probe_protocol_record:
   name: Probe first stored record (development only)
   description: >-
-    Physical Stage 2F testing is paused pending review of corrected selector
-    evidence. Stage 2F controlled diagnostic. Confirm GD82 identity with captured wake
-    and project queries, then query User1 record slots and only raw
+    Development-only Stage 2F diagnostic. Confirm GD82 identity with captured
+    wake and project queries, then query User1 record slots and only raw
     index zero through custom 1524. Returns status only, never health data.
     No clock setting, pairing, or production synchronization.
   fields:

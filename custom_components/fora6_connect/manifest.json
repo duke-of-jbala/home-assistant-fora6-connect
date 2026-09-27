@@ -1,7 +1,7 @@
 {
   "domain": "fora6_connect",
   "name": "FORA 6 Connect",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "documentation": "https://github.com/duke-of-jbala/home-assistant-fora6-connect",
   "issue_tracker": "https://github.com/duke-of-jbala/home-assistant-fora6-connect/issues",
   "codeowners": ["@duke-of-jbala"],

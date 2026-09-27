@@ -1,5 +1,7 @@
 # Development
 
+**Stage 10 package audit:** [the HACS readiness record](STAGE10_HACS_PACKAGING_READINESS.md) separates official repository requirements, local isolated-copy/unit checks, and GitHub HACS/hassfest validation. The default branch uses manifest version `0.1.0` until a separately authorized release candidate. The README now gives HACS custom-repository and manual installation, update, removal, and private issue-report guidance. This gate changes packaging, action text, and documentation only; no runtime behavior or physical meter operation is added.
+
 **Stage 9 physical closure:** the user-run HA Bluetooth Connections view showed the active FORA connection sourced from the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy during a successful count-four manual refresh. The transient row disappeared after the action. This is direct physical route evidence for that tested path; no scanner instrumentation or runtime change was needed. Private result fields remain excluded from Git. See [the Stage 9 record](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md). The next proposed gate is separately authorized Stage 10 HACS packaging/readiness; Stage 8H remains optional and unstarted.
 
 **Stage 8 offline/synthetic review:** [the hardening record](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md) covers repeat refresh, later failure retention, reload, two-entry isolation, product UX, and Stage 8H/9 readiness. One bounded error-reporting fix preserves the first refresh failure when cleanup also fails. No physical operation was run and no new trigger or command was added. The exact next proposed gate is separately authorized Stage 9 explicit proxy-path validation; Stage 8H bounded manual history exposure remains optional and separately gated.
@@ -117,7 +119,7 @@ The Stage 1C action remains available for controlled development diagnostics. Th
 
 The Stage 6B manifest now enables a narrow connectable name/`0x1808` candidate matcher; the Config Flow checks exact normalized name plus `0x180A` and performs user-confirmed active model/serial identification. Entry setup forwards one inert sensor platform. `translations/en.json` provides runtime flow/action text; `strings.json` mirrors the flow translation source for development. The `bluetooth_adapters` and `bluetooth` dependencies remain, without direct adapter selection.
 
-The `0.0.0` manifest version is a development placeholder needed for a custom integration, not a release number. HACS packaging and brand assets are deferred to Stage 10.
+The bootstrap `0.0.0` manifest version was replaced by Stage 10's `0.1.0` development version. The existing local brand assets are original neutral artwork; official ForaCare assets are not used. Stage 10 documents the first release-candidate version policy separately.
 
 References checked during bootstrap: [Home Assistant integration manifests](https://developers.home-assistant.io/docs/creating_integration_manifest/), [custom integration localization](https://developers.home-assistant.io/docs/internationalization/custom_integration/), [Bluetooth guidance](https://developers.home-assistant.io/docs/bluetooth/), and [HACS integration requirements](https://www.hacs.xyz/docs/publish/integration/). Recheck them at the relevant later stages because APIs and publication requirements can change.
 

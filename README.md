@@ -1,29 +1,98 @@
-# Home Assistant – FORA 6 Connect
+# FORA 6 Connect for Home Assistant
 
-An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
+Home Assistant custom integration for the FORA 6 Connect (GD82) meter over
+Bluetooth. It creates one uric-acid sensor. The current measurement is fetched
+only when you run the manual refresh action. A real GD82 refresh has been
+validated through an M5Stack Atom Lite ESPHome Bluetooth Proxy. Home Assistant
+can also select a connectable local Bluetooth adapter; the Stage 9 physical
+route proof applies to the tested Atom Lite session.
 
-**Status:** Stages 0–6B3, 7A–7H, and Stage 8 are complete for their authorized scopes. The user physically validated the manual-only current-state uric-acid refresh on the real GD82. The existing device and single entity remained, and the entity became available after refresh. Stage 8 reviewed and synthetically hardened this path. Counts other than two/four, historical import, automatic sync, and broader count handling are not implemented. Address identity behavior across GD82 units, factory resets, and firmware updates remains unresolved.
+## Requirements
 
-Only uric acid currently has evidence-backed numeric scaling and a display unit (mg/dL). Other analytes are not exposed as numeric entities. To refresh the uric-acid entity, turn the meter on normally, leave its history arrows untouched, then run `fora6_connect.refresh_current_uric_acid` for the configured entry. This manual path was validated on one real GD82. On the tested GD82, standard Device Information identifiers were unusable as meter-specific identity; the factory-printed Bluetooth MAC matched the Home Assistant address and is the guarded fallback identity. Private captures and health results are excluded from public fixtures and documentation.
+- Home Assistant with Bluetooth enabled.
+- A FORA 6 Connect GD82 within range of a connectable local Bluetooth adapter
+  or an ESPHome Bluetooth Proxy that supports active connections.
+- HACS for the HACS installation route below.
 
-The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect. The [Stage 6B3 identity record](docs/STAGE6B3_FACTORY_MAC_IDENTITY.md) explains the factory MAC fallback and its validation on this meter.
+The supported stored-record snapshot has exactly two or four raw slots.
+Other counts fail safely and leave the previous in-process sensor value intact.
+This integration currently exposes uric acid only, in mg/dL. It does not poll,
+import history, or synchronize automatically.
 
-## Project plan
+## Install with HACS
 
-[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and physical regression closure. The [Stage 5 model](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md), [Stage 5A unit evidence](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md), and [Stage 6A identity policy](docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md) document the product and discovery boundaries. The [Stage 7A review](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) records the history evidence and blockers; the [Stage 7B probe](docs/STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) and [Stage 7C semantic confirmation](docs/STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) record their bounded physical results. The [Stage 7D offline review](docs/STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) found no proven general order, wrap rule, or collision-safe deduplication key. The [Stage 7E probe](docs/STAGE7E_FOUR_SLOT_TRAVERSAL_PROBE.md) confirmed one fixed four-slot state. The [Stage 7F review](docs/STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) defined a conditional sensor-refresh path; Stage 7G later supplied bounded timestamp-order evidence. Stage 7H implements the narrow manual current-state path. General traversal, historical import, and durable deduplication remain unimplemented.
+1. In HACS, open the menu (three dots) and choose **Custom repositories**.
+2. Enter `https://github.com/duke-of-jbala/home-assistant-fora6-connect`,
+   choose **Integration**, and add it.
+3. Open **FORA 6 Connect** in HACS and download it.
+4. Restart Home Assistant to load the custom integration.
+5. Turn the meter on normally. In **Settings → Devices & services**, use the
+   discovered FORA 6 Connect card and confirm setup. If the card is not shown,
+   keep the meter on and check Home Assistant's Bluetooth discovery and
+   connectable adapter/proxy availability.
 
-## Development
+HACS installs the integration under
+`<Home Assistant configuration directory>/custom_components/fora6_connect/`.
+Until a GitHub release is published, HACS uses this repository's default
+branch. Installing through HACS does not add the Home Assistant config entry
+by itself.
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for local checks. Future discovery work should follow [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) and keep private health data out of the public repository.
+### Manual installation
 
-The repository follows the Home Assistant custom integration layout and includes HACS metadata. HACS support and production device operation are later-stage goals; development actions are manually invoked for controlled testing only.
+Copy the entire `custom_components/fora6_connect/` directory into
+`<Home Assistant configuration directory>/custom_components/fora6_connect/`,
+restart Home Assistant, and complete the same Bluetooth discovery setup.
+Keep the directory contents together, including the manifest, translations,
+action descriptions, and brand assets.
 
-This is a development integration, not a validated installation or release. The current [branding](docs/BRANDING.md) is original temporary placeholder artwork, not official ForaCare branding.
+## Refresh the uric-acid sensor
 
-## License
+1. Turn the GD82 on normally.
+2. Do not browse stored records with the meter's arrow buttons.
+3. Run `fora6_connect.refresh_current_uric_acid` in Home Assistant, selecting
+   the configured FORA 6 Connect entry. No Bluetooth address entry is needed.
 
-MIT; see [LICENSE](LICENSE).
+The action response contains the selected private health value and meter-local
+measurement time. Keep that response private. Before the first successful
+refresh, the sensor is unavailable. A later failed refresh retains the last
+valid value in process memory; reload or restart begins unavailable again
+until another manual refresh.
 
-The [Stage 7G/G1 probe](docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md) compares two fixed primary slots when raw count is four. Its private development response may include valid uric-acid mg/dL values and timezone-unknown meter-local times for direct comparison with the meter display. It does not update the sensor; the response contains health data and should remain private.
+Only the current sensor state is updated. No historical observations are
+imported, and no other analyte has a numeric entity. Equal-minute candidates
+at a four-slot count are treated as ambiguous and do not update the sensor.
+The meter-local timezone is unknown. The tested GD82 uses its factory
+Bluetooth MAC as the guarded canonical identity. Its standard GATT serial
+and System ID were unusable; retrieval of the printed serial is unresolved.
 
-The real bounded comparison found raw primary 0 later than raw primary 2 in one snapshot. [Stage 7G2](docs/URIC_ACID_UNIT_CONVERSION.md) also reviews the app's mmol/L display formatting. [Stage 7H](docs/STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md) records the successful manual current-state refresh validation. [Stage 8](docs/STAGE8_CURRENT_STATE_HARDENING_REVIEW.md) reviews repeat refresh, failure retention, reload, UX, and future-gate readiness. Reload/restart deliberately returns the sensor to unavailable until another manual refresh. [Stage 9](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) records direct Home Assistant connection-source evidence that the tested refresh traversed the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy. Stage 9 is complete for that run only. The next proposed gate is Stage 10 HACS packaging/readiness; Stage 8H bounded history exposure remains optional. There is no historical import or automatic sync.
+## Update or remove
+
+For updates, install the offered version in HACS and restart Home Assistant
+to load the changed Python integration. Manual installations require replacing
+the full component directory and restarting. The existing config entry and
+entity are intended to remain in place during an update; verify them after
+the restart.
+
+To stop using the integration, remove its config entry from **Settings →
+Devices & services**. If installed through HACS, then remove the repository
+through HACS and restart Home Assistant. For a manual installation, remove the
+component directory after removing the config entry, then restart. Review any
+Home Assistant recorder data separately under Home Assistant's own retention
+and deletion controls.
+
+## Support and development
+
+Report issues at [GitHub Issues](https://github.com/duke-of-jbala/home-assistant-fora6-connect/issues).
+Include your Home Assistant and integration versions, Bluetooth connection
+path (local adapter or proxy), the action's non-sensitive error stage/code,
+and steps to reproduce. Redact Bluetooth addresses, health values,
+measurement times, tokens, IP addresses, and unredacted logs/screenshots.
+
+The [Stage 10 packaging review](docs/STAGE10_HACS_PACKAGING_READINESS.md)
+records installation and release evidence. The
+[master roadmap](FORA6_MASTER_ROADMAP.md) tracks separately authorized work.
+The [protocol evidence register](docs/PROTOCOL.md) explains the bounded
+command and measurement model. Local [brand assets](docs/BRANDING.md) are
+original placeholders, not official ForaCare artwork or endorsement.
+
+MIT licensed; see [LICENSE](LICENSE).

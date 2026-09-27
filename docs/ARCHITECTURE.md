@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 10 package boundary:** HACS installs the single self-contained `custom_components/fora6_connect/` directory; root `hacs.json`, README, and CI metadata describe distribution only. The manifest uses development version `0.1.0`. No Bluetooth, identity, protocol, coordinator, or sensor behavior changed. See [the packaging audit](STAGE10_HACS_PACKAGING_READINESS.md).
+
 **Stage 9 physical route closure:** Home Assistant Bluetooth → Connections identified the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy as Source of the active FORA connection during the successful count-four manual refresh; the row disappeared after completion. This directly corroborates proxy traversal for that run. The existing HA-selected transport remains unchanged; no scanner pinning or production instrumentation was added. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
 
 **Stage 8 hardening:** the per-entry manual coordinator retains an earlier refresh failure when cleanup also fails and reports cleanup errors separately. Repeat calls replace the current process-local value in the same state holder and entity; reload creates a fresh unavailable state. No restore, new attribute, diagnostic entity, automatic trigger, or history import is added. Separate entries retain separate locks and state. See [the Stage 8 review](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md).

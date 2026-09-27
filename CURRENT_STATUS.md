@@ -1,5 +1,17 @@
 # Current Status — FORA 6 Connect
 
+## Stage 10 HACS packaging — pre-commit observation
+
+- **Branch/date:** `main`, 2026-09-27 (Europe/London).
+- **Starting checkpoint:** `f27035b011b2c8d85a94467f96a73b98b2c9b89f` — `docs: close Stage 9 Atom Lite proxy validation`. Starting `git status --short` was empty and origin was the expected public repository.
+- **Changes after checkpoint:** yes. The current working tree is modified for this task; the final commit, GitHub workflow results, remote SHA, and post-push tree state must be checked separately.
+- **Package finding:** current official HACS rules support this one-domain `custom_components/fora6_connect/` layout, root `hacs.json`, public GitHub metadata, manifest, README, and local brand icon. The old `0.0.0` bootstrap manifest version was replaced with one `0.1.0` development version. No release/tag is needed for custom-repository default-branch installation.
+- **Files changed:** `.github/workflows/validate.yml`, `custom_components/fora6_connect/manifest.json`, `custom_components/fora6_connect/services.yaml`, `custom_components/fora6_connect/translations/en.json`, `README.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and new `docs/STAGE10_HACS_PACKAGING_READINESS.md`.
+- **Checks actually run:** 374/374 synthetic unit tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML file parsed; temporary-directory component-copy simulation validated 27 Python modules, relative imports, manifest/resources, and original brand icon. Unstaged diff and changed-file privacy/identifier/credential scans passed; no prohibited artifact or Python/test diff was found. Official HACS and hassfest checks are configured for the pushed commit and are not claimed as passed before their GitHub run. Final staged diff review/check remains before commit.
+- **Runtime boundary:** only manifest version and non-behavioral action descriptions change inside the component. No protocol, Bluetooth, identity, coordinator, sensor, automatic sync, history import, or physical meter operation changed.
+
+**Exact next proposed gate after validator results pass:** separately authorize Stage 11 release-candidate validation with a controlled HACS custom-repository install/update. Stage 8H remains optional and unstarted.
+
 **Stage 9 is complete for the tested M5Stack Atom Lite proxy path.** The user observed the active `FORA 6 CONNECT` row in Home Assistant Bluetooth → Connections with Source explicitly naming the (Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy during `refresh_current_uric_acid`; the connection disappeared shortly after completion. The sanitized count-four action succeeded, updated the existing sensor, and reported no cleanup errors. No duplicate entry/device/entity appeared. Real value, timestamp, and address remain private. See [the Stage 9 closure](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
 
 ## Stage 9 proxy-path closure — pre-commit observation

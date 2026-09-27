@@ -1,5 +1,9 @@
 # Architecture decisions
 
+## Stage 10 — default-branch HACS distribution before releases
+
+**Status:** Accepted for the pre-RC packaging gate. Use one `custom_components/fora6_connect/` package, root `hacs.json`, original local brand icon, and a `0.1.0` development manifest version. HACS custom repositories can use the default branch without a GitHub release; release-based update selection begins only after an explicitly authorized release. Stage 11 should use matching manifest/tag/release SemVer for a candidate such as `1.0.0-rc.1`. CI validates HACS and hassfest; a separate controlled HACS UI install/update remains Stage 11. See [Stage 10](STAGE10_HACS_PACKAGING_READINESS.md).
+
 ## Stage 9 — require connection-specific proxy evidence
 
 **Status:** Physically validated for the tested Lounge Atom Lite session. HA Bluetooth Connections showed the active FORA connection with Source explicitly naming the (Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy during the successful manual refresh; it disappeared shortly after. This direct evidence identifies the route for that run. Keep HA-selected scanner resolution and existing connector; no pinning/instrumentation is needed. Do not generalize to other routes or setups. Private device address and health data remain outside Git. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
