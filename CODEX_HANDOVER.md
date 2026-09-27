@@ -2,26 +2,55 @@
 
 ## Stage and checkpoint
 
-Stage 5 product measurement/entity architecture is COMPLETE for its authorized evidence-bounded scope. Stage 4 is complete, including user-run physical regression validation of both existing development actions. Stages 0, 1, 3, and 2A–2G are complete for their authorized scopes. Unresolved protocol semantics remain open/deferred. Stage 6 has not started.
+Stages 0, 1, 2A–2G, 3, 4, 5, and the focused Stage 5A uric-acid unit review
+are complete for their authorized scopes. Stage 4 includes user-run real-GD82
+identity and bounded record regressions with the meter ON. Stage 6 has not
+started. Unresolved protocol semantics and production discovery/sync remain
+open.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `6768ef78d268c4472f13b8245a5dc69bbed9c1c9` — `docs: record successful Stage 4 transport regression`.
-- **Starting tree:** clean, verified with `git status --short` before Stage 5 edits.
-- **Changes after checkpoint:** yes; pure product mapping, inert sensor boundary, synthetic tests, and Stage 5 documentation are changed at this pre-commit point. Report the task commit SHA and post-commit status separately.
-- **Physical evidence provenance:** Stage 4 regression summaries are user-supplied; meter ON; run date not supplied. This Stage 5 task performed no physical test and retains no private address, raw frame, health value, timestamp, or identifier.
-- **Actions by Codex:** no live Home Assistant action or physical test. No deployment, push, tag, or release.
+- **Last completed checkpoint:** `8de037a10e723a9e2a7afdf325bee204ec9b4221` — `feat: add evidence-bounded measurement model`.
+- **Starting tree:** clean, verified with `git status --short` before Stage 5A edits.
+- **Changes after checkpoint:** yes; this pre-commit task changed the product measurement model, inert sensor mapping, synthetic tests, and Stage 5A documentation. Report the task commit SHA and post-commit tree status separately.
+- **Files changed:** `custom_components/fora6_connect/measurement.py`, `custom_components/fora6_connect/sensor.py`, `tests/test_measurement.py`, `docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md`, `docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md`, `docs/PROTOCOL.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`.
+- **Live actions:** none. Stage 5A used retained private static material in place and performed no physical test, BLE action, deployment, push, tag, or release.
 
-## Implementation and behavior
+## Evidence result
 
-`bluetooth.py` contains `Fora6BluetoothTransport(hass, runtime_address)`. It resolves a connectable `BLEDevice` through Home Assistant, uses the repository's proven two-attempt connector pattern, validates the custom Write/Notify characteristic, subscribes, performs one command-agnostic request/response exchange at a time, and closes deterministically. It bounds connection, notification, write, response, and cleanup waits; serializes exchanges per instance; fails malformed pending notifications closed; retries no application write; and exposes stable privacy-safe error codes. A failure after any application write attempt poisons the session; later exchanges return `invalid_session_state` with no write, so delayed same-command responses cannot contaminate another exchange. Pre-write rejection does not poison. The connector task is owned through cancellation or timeout, and any returned client is disconnected, including a late client returned after the bounded cancellation wait. No raw notification queue, address logging, or hard-coded adapter path exists. [The Stage 4 record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) documents the API and limits.
+[The Stage 5A evidence record](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) gives
+relative app class/resource paths, cross-version findings, and evidence
+classes. In iFORA HM 1.7.6 the TD4183 uric-acid import divides the raw value
+by ten before storage. Both app versions use mg/dL for that unconverted base
+number and apply display conversion when the `UA_UNIT` preference selects
+µmol/L or mmol/L. Their UI has three unit choices and a first-login South
+Africa rule can choose µmol/L. The actual active preference during the
+private physical import was not recorded. The traced app formatter does not
+use the `0x26` auxiliary byte for unit selection; that byte's physical
+meaning and meter-native unit modes remain unresolved. The bundled meter
+manual gives no uric-acid unit specification. No private specimen details or
+proprietary source were added to Git.
 
-`protocol_probe.py` delegates transport mechanics to this class but retains the two existing bounded command sequences, service/action names, input/result schemas, timeout settings, and privacy semantics. The user reports both real regressions succeeded with the meter ON: identity `0x22 → 0x24` and bounded record `0x22 → 0x24 → User1 0x2B → User1/index-zero 0x25 → User1/index-zero 0x26`. Both stopped notifications and disconnected cleanly. The record action returned only semantic status and no analyte, measurement, or scaling result. This closes Stage 4 transport validation; the selected HA adapter/proxy remains unknown. `gatt_probe.py` and `notification_observer.py` were not refactored. `protocol.py` and `models.py` remain HA/Bleak independent.
+## Implementation boundary
 
-`measurement.py` adds a frozen pure-Python `Fora6Measurement` mapped from a validated `TD4183Record`. Only valid identified uric acid receives a raw/10 `Decimal`; the model enforces `unit=None` because the tracked Stage 2C/2G evidence does not state the display unit. Other analytes and unknown selectors have no numeric value. `sensor.py` contains a replacement state holder, a unit/category-gated value mapper, and a `(DOMAIN, Stage6StableId)` device-identifier interface. It defines no `SensorEntity`, platform setup, config entry, DeviceInfo registration, polling, or Bluetooth I/O. Invalid sentinel input replaces the latest state and maps to no numeric value. [The Stage 5 record](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md) documents these boundaries.
+`Fora6Measurement` now carries the evidenced mg/dL base unit only for valid
+identified uric acid. Its raw `/10` `Decimal` remains unchanged; no locale
+selection or app-style conversion is implemented. Unsupported/unknown
+analytes and `0xFFFF` remain without a numeric value or unit. The inert
+`sensor.py` mapper admits only General-category valid uric acid and returns
+`None` for QC, AC, PC, invalid, or unsupported inputs. Replacement of the
+latest state clears a prior numeric state when the new record is unusable.
+Meter-local time remains naive and separate from any ingestion time.
 
-## Exact next gate and checks
+The integration still registers no `SensorEntity`, device, or config entry.
+Stage 6 owns stable meter identity and setup; later synchronization owns BLE
+record feeding. `bluetooth.py`, `protocol_probe.py`, `protocol.py`,
+`models.py`, service/action schemas, fixtures, and command sequences are
+unchanged. The development record action still returns no decoded result.
 
-**Next gate:** Stage 5 is complete for the bounded product/entity architecture. Separately authorize Stage 6 device discovery and identity policy, or a focused evidence follow-up establishing the uric-acid displayed unit before numeric sensor exposure. Stage 6 has not started. Unresolved semantics, exact selected adapter/proxy, Auto-mode discovery, address stability, and production synchronization remain open.
+## Checks and next gate
 
-- **Files changed at pre-commit:** `custom_components/fora6_connect/measurement.py`, `custom_components/fora6_connect/sensor.py`, `tests/test_measurement.py`, `tests/test_sensor.py`, `docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, and `docs/STAGE4_BLUETOOTH_TRANSPORT.md`.
-- **Checks actually run:** 178 unit tests passed, including 15 new product/entity tests; compileall, tabnanny, integration JSON/YAML parsing, 88-character line length, and `git diff --check` passed. Stage 4 transport/probe/action and pure wire modules are unchanged from the closure checkpoint. Audits found no guessed units, QC/other clinical meaning, sensor/BLE I/O, classes, command IDs, private data, or prohibited artifacts. `git diff --cached --check` and full staged review follow staging.
+- Final full suite: 179 tests passed, including one new Stage 5A QC state test; the targeted measurement suite passed 15 tests before that addition.
+- `compileall`, `tabnanny`, integration JSON/YAML parsing, and `git diff --check` passed. `git diff --cached --check` follows staging.
+- A checkpoint diff shows no changes to Stage 4 transport/probe, protocol/wire model, service/action schema, or integration entry point. The Stage 5A product/state code has no Bluetooth I/O or new command ID.
+- No private value, timestamp, address, identifier, raw frame, capture, app package, decompiled source, or private absolute path is introduced in tracked files.
+- **Exact next gate:** separately authorize Stage 6 discovery and identity policy before registering an mg/dL uric-acid entity or device. A separate evidence task would be needed for meter-native UA unit modes. Stage 6 has not started.

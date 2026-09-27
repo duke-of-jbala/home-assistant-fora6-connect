@@ -53,14 +53,15 @@ def fixture_record(name: str):
 
 
 class ProductMeasurementTests(unittest.TestCase):
-    def test_uric_acid_maps_with_evidenced_scaling_and_no_unit(self) -> None:
+    def test_uric_acid_maps_with_evidenced_base_unit(self) -> None:
         product = measurement.measurement_from_record(fixture_record("uric_general"))
         self.assertIs(product.analyte, protocol.TD4183Analyte.URIC_ACID)
         self.assertEqual(product.scaled_number, Decimal("123.4"))
-        self.assertIsNone(product.unit)
+        self.assertEqual(product.unit, "mg/dL")
+        self.assertEqual(sensor.measurement_native_value(product), Decimal("123.4"))
         self.assertIs(
             product.value_status,
-            measurement.MeasurementValueStatus.URIC_ACID_UNIT_UNRESOLVED,
+            measurement.MeasurementValueStatus.VALID_URIC_ACID,
         )
         self.assertFalse(hasattr(product, "raw_value"))
 
@@ -140,19 +141,20 @@ class ProductMeasurementTests(unittest.TestCase):
             ).transmitted
         )
 
-    def test_unit_cannot_be_invented(self) -> None:
+    def test_unsupported_unit_cannot_be_invented(self) -> None:
         product = measurement.measurement_from_record(fixture_record("uric_general"))
-        self.assertIsNone(product.unit)
-        with self.assertRaises(ValueError):
-            measurement.Fora6Measurement(
-                analyte=product.analyte,
-                scaled_number=product.scaled_number,
-                category=product.category,
-                transmitted=product.transmitted,
-                meter_local_time=product.meter_local_time,
-                value_status=product.value_status,
-                unit="",
-            )
+        self.assertEqual(product.unit, "mg/dL")
+        for unsupported_unit in ("", "µmol/L", "mmol/L"):
+            with self.subTest(unit=unsupported_unit), self.assertRaises(ValueError):
+                measurement.Fora6Measurement(
+                    analyte=product.analyte,
+                    scaled_number=product.scaled_number,
+                    category=product.category,
+                    transmitted=product.transmitted,
+                    meter_local_time=product.meter_local_time,
+                    value_status=product.value_status,
+                    unit=unsupported_unit,
+                )
         with self.assertRaises(FrozenInstanceError):
             product.unit = ""
 
@@ -183,13 +185,22 @@ class SensorBoundaryTests(unittest.TestCase):
         state.replace(
             measurement.measurement_from_record(fixture_record("uric_general"))
         )
-        self.assertIsNone(state.native_value)  # No evidence-backed unit.
+        self.assertEqual(state.native_value, Decimal("123.4"))
         invalid = measurement.measurement_from_record(fixture_record("uric_invalid"))
         state.replace(invalid)
         self.assertIs(state.latest, invalid)
         self.assertIsNone(state.native_value)
         state.replace(None)
         self.assertIsNone(state.latest)
+        self.assertIsNone(state.native_value)
+
+    def test_qc_input_clears_normal_numeric_state(self) -> None:
+        state = sensor.MeasurementState()
+        state.replace(
+            measurement.measurement_from_record(fixture_record("uric_general"))
+        )
+        self.assertEqual(state.native_value, Decimal("123.4"))
+        state.replace(measurement.measurement_from_record(fixture_record("uric_qc")))
         self.assertIsNone(state.native_value)
 
     def test_shared_device_identifier_uses_stage6_identity_input(self) -> None:

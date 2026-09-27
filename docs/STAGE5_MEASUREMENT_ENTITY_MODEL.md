@@ -1,6 +1,6 @@
 # Stage 5 — measurement and entity model
 
-**State:** Complete for the separately authorized evidence-bounded product and entity architecture. No numeric Home Assistant sensor is exposed: tracked evidence does not establish the uric-acid display unit. No physical test, Bluetooth action, production synchronization, or polling was performed or added.
+**Stage 5 closure state:** Complete for the separately authorized evidence-bounded product and entity architecture. At this checkpoint no numeric Home Assistant sensor was exposed because tracked evidence did not establish the uric-acid display unit. No physical test, Bluetooth action, production synchronization, or polling was performed or added. A later, separately authorized [Stage 5A review](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) established the app's mg/dL base value; see its implementation update below.
 
 ## Evidence boundary and unit conclusion
 
@@ -59,3 +59,7 @@ No device class or state class is selected. A future numeric sensor must use the
 - Later synchronization work must feed product measurements without giving entities responsibility for Bluetooth, polling, record iteration, persistence, or deduplication.
 
 **Exact next gate:** separately authorize Stage 6 device discovery and identity policy, or a focused evidence follow-up to establish the uric-acid display unit. Do not begin Stage 6 automatically. No private health data or captured frames are used in the tests.
+
+## Stage 5A follow-up — base unit established
+
+The [Stage 5A evidence review](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) traces both app versions' TD4183 uric-acid display path. The app interprets raw `/10` as its mg/dL base value, with optional app-preference conversion for µmol/L or mmol/L. The actual unit selected during the private import remains unrecorded. The product model now assigns `mg/dL` only to valid identified uric acid; other records have no numeric value or unit. The inert sensor mapper can return that base value for General-category records, while QC, AC, PC, invalid sentinel, and unsupported analytes remain excluded. No `SensorEntity` or device registration is active because Stage 6 identity/config-entry setup is still absent. **Next gate:** separately authorize Stage 6 discovery and identity policy; no Stage 6 implementation begins from this review alone.

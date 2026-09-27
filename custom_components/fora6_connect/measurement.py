@@ -12,7 +12,7 @@ from .protocol import TD4183Analyte, TD4183RecordCategory
 class MeasurementValueStatus(Enum):
     """What the available protocol evidence permits for a record value."""
 
-    URIC_ACID_UNIT_UNRESOLVED = "uric_acid_unit_unresolved"
+    VALID_URIC_ACID = "valid_uric_acid"
     INVALID_RAW_VALUE = "invalid_raw_value"
     UNSUPPORTED_ANALYTE_SCALING = "unsupported_analyte_scaling"
     UNKNOWN_ANALYTE = "unknown_analyte"
@@ -23,9 +23,8 @@ class Fora6Measurement:
     """Product-level interpretation of one parsed TD4183 record.
 
     ``scaled_number`` is populated only for a valid, positively identified
-    uric-acid record. The GD82 display unit is not established in tracked
-    evidence, so ``unit`` must remain absent and this number is not publishable
-    as a Home Assistant sensor state.
+    uric-acid record. The app's unconverted uric-acid value uses mg/dL;
+    its other display units are selected and converted in the app.
     """
 
     analyte: TD4183Analyte | None
@@ -34,24 +33,24 @@ class Fora6Measurement:
     transmitted: bool
     meter_local_time: datetime = field(repr=False)
     value_status: MeasurementValueStatus
-    unit: None = None
+    unit: str | None = None
 
     def __post_init__(self) -> None:
         if self.meter_local_time.tzinfo is not None:
             raise ValueError("Meter-local time must remain timezone-naive.")
         if self.meter_local_time.second or self.meter_local_time.microsecond:
             raise ValueError("TD4183 meter-local time has minute precision.")
-        if self.unit is not None:
-            raise ValueError("No evidence-backed GD82 measurement unit is known.")
-        if self.value_status is MeasurementValueStatus.URIC_ACID_UNIT_UNRESOLVED:
+        if self.value_status is MeasurementValueStatus.VALID_URIC_ACID:
             if self.analyte is not TD4183Analyte.URIC_ACID:
                 raise ValueError("Only identified uric acid has supported scaling.")
             if self.scaled_number is None:
                 raise ValueError(
                     "A scaled uric-acid number is required for this status."
                 )
-        elif self.scaled_number is not None:
-            raise ValueError("Unsupported or invalid records cannot carry a number.")
+            if self.unit != "mg/dL":
+                raise ValueError("The supported uric-acid base unit is mg/dL.")
+        elif self.scaled_number is not None or self.unit is not None:
+            raise ValueError("Unsupported or invalid records cannot carry a value.")
 
     @property
     def is_qc(self) -> bool:
@@ -67,15 +66,19 @@ def measurement_from_record(record: TD4183Record) -> Fora6Measurement:
     if not record.is_valid_value:
         scaled_number = None
         value_status = MeasurementValueStatus.INVALID_RAW_VALUE
+        unit = None
     elif record.analyte is None:
         scaled_number = None
         value_status = MeasurementValueStatus.UNKNOWN_ANALYTE
+        unit = None
     elif record.analyte is TD4183Analyte.URIC_ACID:
         scaled_number = record.uric_acid_scaled_value
-        value_status = MeasurementValueStatus.URIC_ACID_UNIT_UNRESOLVED
+        value_status = MeasurementValueStatus.VALID_URIC_ACID
+        unit = "mg/dL"
     else:
         scaled_number = None
         value_status = MeasurementValueStatus.UNSUPPORTED_ANALYTE_SCALING
+        unit = None
 
     return Fora6Measurement(
         analyte=record.analyte,
@@ -84,4 +87,5 @@ def measurement_from_record(record: TD4183Record) -> Fora6Measurement:
         transmitted=record.transmitted,
         meter_local_time=record.meter_local_time.as_naive_datetime(),
         value_status=value_status,
+        unit=unit,
     )

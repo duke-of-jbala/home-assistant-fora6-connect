@@ -1,9 +1,7 @@
 """Inert Home Assistant measurement mapping; no entity or BLE I/O is started.
 
-The tracked evidence establishes uric-acid scaling but not its displayed unit.
-Consequently this module currently maps every product measurement to no
-numeric sensor state. Stage 6 must supply the stable meter identity and config
-entry before an entity can register a device.
+The app's unconverted uric-acid value uses mg/dL. Stage 6 must supply the
+stable meter identity and config entry before an entity can register a device.
 """
 
 from dataclasses import dataclass
@@ -20,15 +18,14 @@ def measurement_native_value(
     """Return a safe ordinary sensor value only when value, unit and category
     policy are established.
 
-    No measurement currently qualifies: uric-acid unit evidence is missing;
-    QC and non-General categories are retained in the product model but not
-    mapped to the ordinary measurement sensor.
+    Only valid identified uric acid in the General category qualifies.
+    QC and non-General categories remain in the product model only.
     """
     if measurement is None:
         return None
-    if measurement.unit is None or measurement.scaled_number is None:
+    if measurement.unit != "mg/dL" or measurement.scaled_number is None:
         return None
-    if measurement.value_status is not MeasurementValueStatus.URIC_ACID_UNIT_UNRESOLVED:
+    if measurement.value_status is not MeasurementValueStatus.VALID_URIC_ACID:
         return None
     if measurement.category is not TD4183RecordCategory.GENERAL:
         return None
