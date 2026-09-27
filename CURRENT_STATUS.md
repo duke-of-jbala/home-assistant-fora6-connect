@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P1 — bounded development callback observer, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `84f6362d0cabca5e9e45905e6fffe75a9b69556d` — `docs: assess GD82 advertisement callback observation`; `origin/main` matched. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **New user-supplied evidence:** Chrome reproduced the stale live monitor behavior. Navigating away/back or hard-refreshing the view can show a more recent FORA observation. Backend delivery is plausible but unproven; no callback-level physical observation has yet been run.
+- **Development-only implementation:** [Stage 13A-P1](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) adds one manually invoked, configured-entry-targeted 60-second observer comparing repeated per-advertisement callback delivery with live changed-data callbacks, cache replay disabled. No GATT, FORA command, active scan request, cache clearing, production auto-sync, or sensor update. Unload/cancellation unregister callbacks. The official `async_clear_advertisement_history()` semantics are reviewed but the function is never called.
+- **Changes after checkpoint:** yes; `custom_components/fora6_connect/advertisement_observer.py`, `__init__.py`, `sensor_state.py`, `services.yaml`, `tests/test_advertisement_observer.py`, `tests/test_gatt_probe.py`, `docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md`, `docs/STAGE13A_PHYSICAL_ADVERTISEMENT_OBSERVATION.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. Tree is modified at this pre-commit observation; verify post-commit state separately.
+- **Checks actually run so far:** dedicated synthetic observer tests **10/10** and full suite **385/385** passed (released baseline 375); compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; unstaged diff check passed. Added-line privacy audit found one explicitly synthetic test address and no real health value/time, identifier, credential, private path, or artifact. Final staged check and pushed HACS/hassfest remain pending at this writing.
+
+**Exact next gate:** user-run Stage 13A-P1 callback observation of bounded normal OFF → ON episodes and sanitized evidence review; safe history mode and naturally occurring post-measurement state later. No Stage 13B auto-sync implementation.
+
 ## Stage 13A-P — post-update monitor assessment, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `1c05d62165879f32b85dfb4dbab7f7ac0bed8714` — `docs: note inconclusive Bluetooth monitor refresh`; `origin/main` matched. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

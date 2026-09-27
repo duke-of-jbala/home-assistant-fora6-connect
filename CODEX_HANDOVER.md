@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P1 — development-only callback observer, pre-commit
+
+Starting state was clean `main` at `84f6362d0cabca5e9e45905e6fffe75a9b69556d` (`docs: assess GD82 advertisement callback observation`) on 2026-09-28 (Europe/London), with `origin/main` matching; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user reproduced the Advertisement Monitor issue in Chrome and found that navigation/hard refresh can show a more recent row than the live open view. This does not prove packet delivery, Home Assistant deduplication, or a frontend defect.
+
+[Stage 13A-P1](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) adds a manually invoked, configured-entry-targeted, 60-second read-only observer. It compares HA per-advertisement callbacks with changed-data callbacks using passive matching and disabled cached replay. Results contain only bounded counts, relative times, structural shapes, and ephemeral source aliases. It makes no GATT connection, write, protocol request, active-scan request, cache mutation, sensor update, or automatic refresh. Unload and cancellation remove callbacks. `async_clear_advertisement_history()` is documented but not called. No physical observer result exists yet; production remains manual-only.
+
+Files changed are listed in `CURRENT_STATUS.md`; this is a modified pre-commit tree observation. Dedicated synthetic observer tests **10/10** and the full suite **385/385** passed (released baseline 375). Compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and added-line privacy/artifact audit passed; only an explicitly synthetic test address matched the identifier scan. Final staged check and pushed HACS/hassfest still need verification. Report the actual task commit, remote, and final tree status separately.
+
+**Exact next gate:** user-run bounded Stage 13A-P1 physical callback observation with sanitized output. Compare normal OFF → ON episodes first; history mode and post-measurement state remain separately pending. Do not begin Stage 13B auto-sync.
+
 ## Stage 13A-P — callback observer assessment, pre-commit
 
 The starting checkpoint was clean `main` at `1c05d62165879f32b85dfb4dbab7f7ac0bed8714` (`docs: note inconclusive Bluetooth monitor refresh`) on 2026-09-28 (Europe/London), with matching `origin/main`; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. After the user's Home Assistant Core 2026.9.4 update and HAOS restart, the first normal meter ON appeared in Advertisement Monitor almost immediately, but subsequent normal OFF → ON cycles did not reset `Updated`. Stable displayed name/structural fields, connectable flag, and one proxy source cannot distinguish absent packets, Bluetooth deduplication, or a stale UI. A Core/frontend regression is unproven. History and post-measurement advertisements remain unobserved.

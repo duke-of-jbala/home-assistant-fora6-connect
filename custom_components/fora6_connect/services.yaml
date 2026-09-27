@@ -131,6 +131,22 @@ refresh_current_uric_acid:
       selector:
         config_entry:
           integration: fora6_connect
+observe_advertisements:
+  name: Observe Bluetooth advertisements (development only)
+  description: >-
+    Development-only, read-only 60-second observation. Select the configured
+    FORA 6 Connect entry, then perform safe normal OFF and ON cycles. Compares
+    repeated advertisement receipt with live changed-data callbacks. Makes no
+    Bluetooth connection and does not refresh the sensor. Returns only counts,
+    relative times, and structural shapes; no address or payload.
+  fields:
+    config_entry_id:
+      name: FORA 6 Connect entry
+      description: Choose the configured meter to observe.
+      required: true
+      selector:
+        config_entry:
+          integration: fora6_connect
 probe_history_chronology:
   name: Inspect two primary records (private development action)
   description: >-

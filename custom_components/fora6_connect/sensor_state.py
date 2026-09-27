@@ -4,6 +4,7 @@ The app's unconverted uric-acid value uses mg/dL. The HA entity receives a
 confirmed meter identity separately and performs no transport work itself.
 """
 
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
@@ -75,6 +76,7 @@ class MeterRuntime:
     measurement_state: MeasurementState = field(default_factory=MeasurementState)
     refresh_coordinator: Any = field(default=None, repr=False)
     synchronized_at: datetime | None = field(default=None, repr=False)
+    advertisement_observation_stop: asyncio.Event | None = field(default=None, repr=False)
 
 
 def meter_device_identifier(stage6_stable_identifier: str) -> tuple[str, str]:

@@ -90,6 +90,10 @@ def _load_setup(probe_module):
     observer.async_observe_notifications = AsyncMock(
         return_value={"notifications_observed": 0}
     )
+    advertisement_observer = types.ModuleType("_fora6_setup_test.advertisement_observer")
+    advertisement_observer.async_observe_advertisements = AsyncMock(
+        return_value={"packet_callback_count": 0}
+    )
     identity = types.ModuleType("_fora6_setup_test.protocol_probe")
     identity.async_probe_protocol_identity = AsyncMock(
         return_value={"identity_confirmed": True}
@@ -149,6 +153,7 @@ def _load_setup(probe_module):
             "_fora6_setup_test.const": const,
             "_fora6_setup_test.gatt_probe": gatt,
             "_fora6_setup_test.notification_observer": observer,
+            "_fora6_setup_test.advertisement_observer": advertisement_observer,
             "_fora6_setup_test.protocol_probe": identity,
             "_fora6_setup_test.history_probe": history,
             "_fora6_setup_test.history_semantics_probe": semantics,

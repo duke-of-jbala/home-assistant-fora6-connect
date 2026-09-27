@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
+from .advertisement_observer import async_observe_advertisements
 from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .coordinator import Fora6CurrentRefreshCoordinator
 from .gatt_probe import ProbeError, async_probe_gatt
@@ -35,6 +36,7 @@ SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
 SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
 SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
 SERVICE_REFRESH_CURRENT_URIC_ACID = "refresh_current_uric_acid"
+SERVICE_OBSERVE_ADVERTISEMENTS = "observe_advertisements"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -381,6 +383,37 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         async_handle_refresh_current_uric_acid,
         supports_response=SupportsResponse.ONLY,
     )
+
+    async def async_handle_observe_advertisements(call: ServiceCall) -> dict:
+        """Observe only HA Bluetooth callbacks during one manual time window."""
+        entry_id = call.data.get("config_entry_id")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ServiceValidationError("Select a configured FORA 6 Connect entry.")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError("The selected FORA entry is unavailable.")
+        runtime = getattr(entry, "runtime_data", None)
+        if runtime is None or not isinstance(runtime.address, str):
+            raise ServiceValidationError("Load the selected FORA entry before observing.")
+        if runtime.advertisement_observation_stop is not None:
+            raise ServiceValidationError("A FORA advertisement observation is already running.")
+        stop_event = asyncio.Event()
+        runtime.advertisement_observation_stop = stop_event
+        try:
+            return await async_observe_advertisements(hass, runtime.address, stop_event)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            raise ServiceValidationError("FORA advertisement observation failed.") from None
+        finally:
+            runtime.advertisement_observation_stop = None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_OBSERVE_ADVERTISEMENTS,
+        async_handle_observe_advertisements,
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 
@@ -417,6 +450,9 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
     """Unload the sensor platform and disable later manual refresh calls."""
+    runtime = getattr(entry, "runtime_data", None)
+    if runtime is not None and runtime.advertisement_observation_stop is not None:
+        runtime.advertisement_observation_stop.set()
     unloaded = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
     if unloaded and getattr(entry, "runtime_data", None) is not None:
         entry.runtime_data.refresh_coordinator = None

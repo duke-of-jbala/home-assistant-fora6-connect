@@ -6,6 +6,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Added
+- Development-only, manually invoked 60-second Bluetooth callback observer for one configured FORA entry. It compares repeated advertisement receipt with live changed-data callbacks using bounded, privacy-safe structural results. No GATT connection, protocol command, sensor update, or automatic synchronization is performed.
+
 ### Documentation
 - Stage 13A reviewed Home Assistant Bluetooth trigger APIs and the current manual refresh architecture. It specifies a privacy-safe physical advertisement-state gate and bounded future auto-refresh guards. No production automatic sync or runtime behavior changed; `v1.0.0` remains the released baseline.
 

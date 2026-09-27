@@ -51,6 +51,14 @@ a stale frontend/monitor row. The recent Core update makes a regression
 possible, but **no regression is established**. Monitor liveness cannot be
 assumed for a future episode.
 
+**Cross-browser follow-up:** Chrome reproduced the same live-view behavior.
+Navigating away and back or hard-refreshing the Advertisements page can show
+a more recent FORA observation after its open row appeared stale. This
+strengthens the case for a view-refresh limitation, but still does not prove
+which callback received a particular packet. The observer decision below is
+now implemented as a separate, manually invoked Stage 13A-P1 development
+action; no physical callback result has yet been supplied.
+
 The user has at least two Atom Lite proxies. Give them private source aliases
 `Proxy A` and `Proxy B`; keep their actual addresses and deployment details
 outside Git. Do not disable a proxy merely to simplify this observation.
@@ -136,7 +144,7 @@ callback, retry, polling, or connection is added by this record.
 The repeated unchanged `Updated` time makes the UI insufficient to decide
 whether Home Assistant receives a new episode. The smallest next gate is
 **Stage 13A-P1: a separately authorized, development-only Bluetooth callback
-observer**. The [current Home Assistant Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/)
+observer**, now implemented pending its physical run. The [current Home Assistant Bluetooth API](https://developers.home-assistant.io/docs/core/bluetooth/api/)
 documents the key distinction: `async_register_callback` reports changed
 advertisement data and can replay cache unless `BluetoothCallbackReplay.DISABLED`
 is selected; `async_register_advertisement_callback` reports every delivered
@@ -151,16 +159,17 @@ filter. Explicitly start one bounded session; do not register at startup.
 Observe an OFF → normal ON → OFF → normal ON sequence, with safe history mode
 separately and post-measurement only during natural use. Report bounded
 packet and changed-callback counts, session-relative monotonic timing,
-structural field shapes, and per-session `Proxy A/B` aliases. Do not return
+structural field shapes, and per-session `Source A/B` aliases. Do not return
 addresses, source identifiers, payloads, hashes, RSSI values, health data,
 wall-clock times, or logs. Cap events and memory; cancel both subscriptions on
 normal completion, failure, cancellation, and unload. No GATT connection,
 write, FORA command, active scan request, cache clearing, production refresh,
 or persistent state. Tests should prove these boundaries and callback cleanup.
-No timing constant for a production trigger is selected. The observer is
-**not implemented in this gate**.
+No timing constant for a production trigger is selected. The observer belongs
+to the separately authorized Stage 13A-P1 gate, not the earlier UI-only gate.
 
-**Current category: PARTIAL EVIDENCE.** The exact next gate is separate
-authorization for Stage 13A-P1, then user-run sanitized callback observation.
+**Current category: PARTIAL EVIDENCE.** Stage 13A-P1's bounded callback observer
+has been separately authorized and implemented; its physical run is pending.
+See [Stage 13A-P1](STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md).
 Post-measurement advertising and history-mode behavior remain pending. Stage
 13B automatic synchronization is not authorized or implemented.
