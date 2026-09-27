@@ -1,6 +1,6 @@
 # Protocol evidence register
 
-**Stage 7H bounded use:** the manual current-state refresh reuses only validated `0x22`, `0x24`, User1 `0x2B`, and indexed `0x25`/`0x26` builders. Count two reads raw `0 → 1`; count four reads `0 → 1 → 2 → 3`; every other count stops after metadata. This adds no frame constructor or command ID. Strictly later parsed naive meter-local time selects between two eligible count-four General uric-acid primaries; index magnitude is not chronological. The parser and record model remain HA/Bleak independent. [Implementation boundary](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md). Real-device refresh validation is pending.
+**Stage 7H physical closure:** the user validated one real count-four manual refresh. The action selected raw primary zero by later parsed meter-local time and updated the existing sensor after clean cleanup. No new protocol command was added; this result does not generalize index ordering beyond that validated snapshot. The bounded command use is documented in [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
 
 **Stage 6B3 closure:** physical HA validation confirms the placeholder-to-factory-MAC identity migration succeeded for this configured GD82. The System ID remains unusable and `0x2A25` remains a generic placeholder; no protocol command or record behavior changed. See [the identity record](STAGE6B3_FACTORY_MAC_IDENTITY.md).
 

@@ -6,6 +6,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Evidence
+- Closed Stage 7H after user-run real-device count-four validation. The existing uric-acid entity became available and no duplicate entity appeared. The actual value, timestamp, screenshot, and identifiers were not added. Broader history synchronization and automatic refresh remain out of scope.
+
 ### Fixed
 - Recorded successful user-run Stage 6B3 identity migration in Home Assistant. The placeholder ConfigEntry identity became canonical factory Bluetooth MAC form while the same entry, one device, and one unavailable uric-acid entity remained; no bogus serial was shown and rediscovery stayed suppressed. This is validated for one meter only.
 - Stage 6B3 uses the observed factory Bluetooth MAC as a guarded fallback identity when the GD82's standard DIS values are unusable. The legacy placeholder entry is migrated in place using supported registry/config-entry updates; its device and entity IDs are retained. Physical HA migration validation remains pending.

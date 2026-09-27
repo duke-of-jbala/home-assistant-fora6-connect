@@ -1,5 +1,7 @@
 # Uric-acid display conversion evidence — Stage 7G2
 
+**Stage 7H follow-up:** the existing Home Assistant entity was physically validated displaying its selected mg/dL current state after manual refresh. Stage 7H does not apply the app's mmol/L display conversion; `raw / 10 = mg/dL` remains the entity's base representation. No real value or time is recorded.
+
 This is an offline review of retained private iFORA HM 1.7.6 and 1.7.9 decompilations, the earlier [Stage 5A unit record](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md), and the user's privacy-safe GD82 observation. The private source remains outside Git. No real health value, meter time, identifier, capture, or proprietary code is included here.
 
 ## App conversion and formatting

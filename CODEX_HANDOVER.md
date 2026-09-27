@@ -1,14 +1,16 @@
 # FORA 6 Connect Codex Handover
 
-## Stage 7H manual current-state refresh implementation
+## Stage 7H real-device closure — pre-commit observation
 
-Starting checkpoint: clean public `main` at `1ad97c17fe02c8e313c63ecb12c7c8d6aa1fbd2a` (`docs: close Stage 7G chronology validation`) on 2026-09-27 (Europe/London). The current task changed runtime, service metadata, tests, and Markdown files listed in `CURRENT_STATUS.md`. This is a **pre-commit observation**; the working tree currently has those changes and is not clean. Verify/report post-commit and remote state separately.
+Starting checkpoint: clean public `main` at `b5b21ceeaa933d10195febf82f333f74874cf766` (`feat: add manual uric acid refresh`) on 2026-09-27 (Europe/London). Origin is the expected public repository and no tags are present. This task changes Markdown status/evidence files only; this is a **pre-commit observation**. The working tree is currently modified, so report its post-commit/push state separately.
 
-[Stage 7H](docs/STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md) adds `fora6_connect.refresh_current_uric_acid`, using a configured-entry selector and no manually entered Bluetooth address. A per-entry coordinator requires canonical factory-MAC/locator agreement and project `0x4183`, reads only fixed two-/four-slot User1 plans, validates QC-invalid companions and eligible General uric-acid primaries, selects by strict meter-local time for two eligible four-slot primaries, and rejects equal-minute ties. The selected mg/dL value feeds the existing sensor only after clean unsubscribe/disconnect. A successful ingestion time remains distinct from naive meter-local measurement time. Prior valid state survives failures. There is no history import, persistent dedup/resume, startup, advertisement, scheduled, or periodic refresh.
+The user validated `fora6_connect.refresh_current_uric_acid` against the existing configured GD82. They powered it on normally, avoided the history arrows, and ran the action once. At raw count four, both candidate primaries were eligible and the parsed meter-local ordering selected index zero. The action succeeded and cleanup was clean. The existing GD82/ForaCare device and single uric-acid entity remained; the entity became available and showed the selected mg/dL state. No duplicate appeared. The private result's value and timestamp, screenshot, MAC, serial, and System ID are intentionally absent from the repository.
 
-Full verbose suite: **369/369 passed** (baseline 353). Compileall, tabnanny, five JSON/YAML parses, both diff whitespace checks, and runtime/command/privacy/artifact review passed at this pre-commit observation. Only synthetic test values are tracked. The physical GD82 was not operated by Codex. The action response can privately contain selected health value and meter-local minute; they are not logged or placed in public docs.
+Stage 7H is **complete for its authorized scope**: exact count-two indexes `0 → 1`; exact count-four indexes `0 → 1 → 2 → 3`; count-four selection by strictly later minute-precision meter-local time when two primaries qualify; equal-minute ties fail closed. Manual refresh only. Counts above four, history import, recorder/statistics backfill, persistent record identity/dedup/resume, automatic triggers, mixed-analyte support, and meter-state automation remain out of scope. Meter-local time has unknown timezone and the meter clock can affect apparent order; raw-index magnitude is never a chronology rule.
 
-**Exact next gate:** user-run Stage 7H validation on the existing HA entry: deploy/restart, turn the meter ON normally, avoid history arrows, run the action once, inspect the existing uric-acid entity, and report sanitized status/behavior. No historical or automatic sync follows without separate authorization.
+Full suite: **369/369 passed** (baseline 369). Compileall, tabnanny, five JSON/YAML parses, diff checks, and privacy/health/identifier/artifact/path/proprietary-source audits passed. Only Markdown changed; no physical operation was performed by Codex during this closure.
+
+**Exact next proposed gate:** Stage 8 offline/synthetic/design-first hardening and product-behavior review. Stage 9 proxy-path validation and later release gates remain pending. Do not begin them from this closure.
 
 ## Previous Stage 7G2 checkpoint
 

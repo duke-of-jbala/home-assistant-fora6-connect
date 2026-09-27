@@ -1,6 +1,6 @@
 # Stage 7G — bounded primary chronology probe and Stage 7G1 private output
 
-**Later implementation note:** The user-run Stage 7G chronology result informed the separately authorized [Stage 7H manual current-state refresh](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md). Stage 7G remains a development action; Stage 7H is synthetic-tested and awaits its own physical validation. The chronology result does not establish index ordering or circular-buffer behavior.
+**Later validation note:** The user-run Stage 7G chronology result informed Stage 7H's manual count-four selection. Stage 7H was subsequently validated on the real GD82: later meter-local time selected raw primary zero in that snapshot and the existing sensor updated. Neither result establishes a universal index order or circular-buffer behavior.
 
 Stage 7G implements a **development-only** relative-time check. Stage 7E physically confirmed that raw indexes 0 and 2 were valid General primary candidates in one four-slot GD82 state, with indexes 1 and 3 behaving as companions. The order of the two primaries remained unknown. This action has synthetic test coverage only; no physical Stage 7G result is claimed here.
 
@@ -40,4 +40,4 @@ The user also observed that normal manual power-on gave a Bluetooth-flashing usa
 
 The two distinct private mg/dL records appeared as the same two-decimal mmol/L text on the physical display. The [Stage 7G2 conversion review](URIC_ACID_UNIT_CONVERSION.md) explains the retained app's floor-formatting rule and its limit as evidence about the separate meter firmware. No production value or entity state changed.
 
-**Next gate:** separately authorize Stage 7H, a strict manual current-state uric-acid refresh for only raw counts two and four, with complete fixed-plan validation and fail-closed timestamp ties. Historical import and automatic triggering remain gated.
+**Original next gate, now complete:** Stage 7H implemented and physically validated the bounded manual current-state refresh. The current proposed gate is Stage 8 offline/synthetic/design-first refresh hardening; historical import and automatic triggering remain gated.
