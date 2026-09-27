@@ -59,6 +59,16 @@
           "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned, logged, or persisted."
         }
       }
+    },
+    "probe_history_window_four": {
+      "name": "Probe four-slot history window (development only)",
+      "description": "Stage 7E only. After exact count-four gate, read only User1 indexes 3, 0, 1, 2, 3. Returns structural and equality flags, never private measurements or identifiers. No production synchronization.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned or logged."
+        }
+      }
     }
   },
   "config": {

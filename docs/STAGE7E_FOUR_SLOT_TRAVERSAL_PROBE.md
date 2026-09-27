@@ -1,0 +1,19 @@
+# Stage 7E — bounded four-slot traversal probe
+
+**Status:** development-only implementation with synthetic tests; no physical Stage 7E result. Production synchronization remains unimplemented. The user must separately decide when to run the physical probe.
+
+## Evidence and scope
+
+[Stage 7D](STAGE7D_GENERAL_TRAVERSAL_DEDUP_REVIEW.md) found an app-derived multi-parameter mapping from logical primary `i` to raw index `2*i`, with a possible companion at `2*i+1`. Stage 7B/C physically validated only a raw-count-two state. Stage 7E tests one more fixed state without treating this mapping as a general history algorithm.
+
+The manually invoked `fora6_connect.probe_history_window_four` action takes only a private runtime Bluetooth address. It uses Home Assistant's selected Bluetooth transport without pairing. It confirms project `0x4183` through one `0x22` wake and one `0x24` query, then makes exactly one User1 (`1`) `0x2B` metadata query. **Only when the parsed raw slot count equals four** does it send one `0x25`/`0x26` pair for each literal raw index `3 → 0 → 1 → 2 → 3`. It never changes the plan for another count. Maximum: 13 application writes (two identity, one metadata, ten record requests); no command retry or sixth pair. Every response is validated; failure stops subsequent pairs. Notification and connection cleanup run on success, failure, and cancellation.
+
+The last-slot probe is compared with its second read at index three using exact validated frame bytes, privately in memory. Only part-one, part-two, whole-pair, analyte, category, validity, and combined-semantic equality flags leave the action. Each raw pair is parsed through the existing protocol and record model. The `0/1` and `2/3` structural-group flags mean only that both pairs parsed; they do not assert that a companion is always present or has a specific analyte. Meter-local time equality is compared within those two candidate groups and returned as booleans. Equality is evidence, never a pass/fail gate, because the retained app versions differ on companion-time requirements. The action deliberately gives no chronology relationship between group primaries.
+
+The result includes connection/identity/count gate and cleanup status, the fixed public index plan, pair-validity, category/validity/QC classification, grouping and equality booleans, and privacy-safe error stage/code. It never returns or logs a frame, value, scaled value, unit for a private record, timestamp, serial, System ID, Bluetooth address, manufacturer data, digest, or hash. No parsed record is retained. The action does not write to sensor state, coordinator, storage, dedup cache, or resume cursor. The uric-acid entity remains unavailable until separately authorized production synchronization.
+
+## Controlled physical gate
+
+Do not take a health measurement for this probe. If ordinary meter use naturally yields a raw count of four, the user may deploy/restart Home Assistant, turn the meter on, and run `fora6_connect.probe_history_window_four` once with the private address. The user should share only the sanitized action result. If the count is anything else, the action stops after metadata with no record read; wait for a later naturally occurring state. Codex did not run a physical operation.
+
+A count-four run with five valid pairs would establish that this **one** fixed raw-index plan works in that meter state. Equal repeated index-three frames would establish same-session repeat stability; a difference would need separate investigation and must not be hidden. Structural grouping and within-group time equality are observations, not proof of companion meaning. Neither result establishes oldest/newest chronology, capacity, circular wrap, index stability, deduplication, resume, or a production traversal algorithm. A later separately authorized evidence review must interpret the physical flags and define the next narrow gate.

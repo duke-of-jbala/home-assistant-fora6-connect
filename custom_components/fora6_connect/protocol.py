@@ -237,6 +237,36 @@ def build_second_record_part_two_request() -> ProtocolFrame:
     return _build_second_record_request(RECORD_PART_TWO_COMMAND)
 
 
+def _build_four_slot_record_request(command_id: int, index: int) -> ProtocolFrame:
+    """Build only Stage 7E's evidence-backed User1 indexes two and three."""
+    if command_id not in (RECORD_PART_ONE_COMMAND, RECORD_PART_TWO_COMMAND) or index not in (2, 3):
+        raise FrameError("Unsupported Stage 7E indexed request.")
+    first_seven = bytes(
+        (FRAME_PREFIX, command_id, index, 0, 0, USER_ONE_SELECTOR, REQUEST_MARKER)
+    )
+    return ProtocolFrame(first_seven + bytes((checksum_for(first_seven),)))
+
+
+def build_third_record_part_one_request() -> ProtocolFrame:
+    """Build the Stage 7E User1 0x25 query for raw index two."""
+    return _build_four_slot_record_request(RECORD_PART_ONE_COMMAND, 2)
+
+
+def build_third_record_part_two_request() -> ProtocolFrame:
+    """Build the Stage 7E User1 0x26 query for raw index two."""
+    return _build_four_slot_record_request(RECORD_PART_TWO_COMMAND, 2)
+
+
+def build_fourth_record_part_one_request() -> ProtocolFrame:
+    """Build the Stage 7E User1 0x25 query for raw index three."""
+    return _build_four_slot_record_request(RECORD_PART_ONE_COMMAND, 3)
+
+
+def build_fourth_record_part_two_request() -> ProtocolFrame:
+    """Build the Stage 7E User1 0x26 query for raw index three."""
+    return _build_four_slot_record_request(RECORD_PART_TWO_COMMAND, 3)
+
+
 def validate_response_echo(request: ProtocolFrame, response: ProtocolFrame) -> None:
     """Validate the request/response roles and observed command-ID echo."""
     request.require_request()

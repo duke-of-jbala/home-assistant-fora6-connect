@@ -100,6 +100,10 @@ def _load_setup(probe_module):
     semantics.async_probe_history_semantics = AsyncMock(
         return_value={"semantic_probe_performed": True}
     )
+    four_slot = types.ModuleType("_fora6_setup_test.history_window_four")
+    four_slot.async_probe_history_window_four = AsyncMock(
+        return_value={"traversal_performed": True}
+    )
     serial = types.ModuleType("_fora6_setup_test.serial_probe")
     serial.async_probe_serial_identity = AsyncMock(
         return_value={"serial_read_successful": True}
@@ -135,6 +139,7 @@ def _load_setup(probe_module):
             "_fora6_setup_test.protocol_probe": identity,
             "_fora6_setup_test.history_probe": history,
             "_fora6_setup_test.history_semantics_probe": semantics,
+            "_fora6_setup_test.history_window_four": four_slot,
             "_fora6_setup_test.serial_probe": serial,
             "_fora6_setup_test.serial_stability": stability,
             "_fora6_setup_test.system_id_probe": system_id,

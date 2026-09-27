@@ -101,6 +101,22 @@ probe_history_semantics:
       required: true
       selector:
         text: {}
+probe_history_window_four:
+  name: Probe four-slot history window (development only)
+  description: >-
+    Development-only Stage 7E. Confirm GD82 identity, query User1 raw slot
+    metadata once, and read only indexes 3, 0, 1, 2, 3 when count is exactly
+    four. Returns structure and equality flags only. No health values,
+    timestamps, identifiers, persistence, or production synchronization.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the runtime meter address privately from Advertisement Monitor.
+        Used only in memory for this manual action; never returned or logged.
+      required: true
+      selector:
+        text: {}
 probe_serial_identity:
   name: Probe serial identity (development only)
   description: >-
