@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Closed Stage 2F after the real GD82, with meter ON, returned valid User1 `0x2B` slot metadata and User1/raw-index-zero `0x25`/`0x26` frames through the bounded Home Assistant probe. The run needed no `0x33` in the tested meter state, cleaned up successfully, and exposed no analyte, value, or timestamp. Earlier wake-write and subscription failures stopped before record commands.
 - Reconciled Stage 2F record selectors against the retained successful Stage 2C wire requests and both static app builders. Corrected the development-only User1 `0x2B`/`0x25`/`0x26` index-zero requests in a follow-up commit. No Home Assistant Stage 2F record request had been physically sent; physical testing remains paused pending review.
 - Initial Stage 2F offline record-path register and development-only `probe_protocol_record` action. That implementation assumed `CurrentUser = 0` for `0x2B`, `0x25`, and `0x26`; a later pre-test evidence review found this disagreed with the successful app's User1 requests and prompted the corrective entry above. None of the initial record requests was sent from Home Assistant to the physical meter.
 - Recorded the successful real Stage 2E Home Assistant identity probe: with the GD82 ON, custom `1524` subscription, captured `0x22` and `0x24` exchanges, project `0x4183`, clean notification stop and disconnect. Stage 2F begins with an offline record-path evidence gate; no record command was added by this closure.

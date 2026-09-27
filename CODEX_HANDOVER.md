@@ -2,28 +2,23 @@
 
 ## Stage and checkpoint
 
-Stage 0, Stage 1, and Stages 2A–2E are complete. Stage 2F is in progress; **physical Stage 2F testing is paused**. The user-supplied real Stage 2E action succeeded with the GD82 **ON**: custom `1524` subscription, captured wake/project exchanges, project `0x4183`, and clean cleanup. The separate Stage 1C connection while the display appeared off is not off-state Stage 2E evidence.
+Stage 0, Stage 1, and Stages 2A–2F are complete. The user separately authorized Stage 2G offline record-schema analysis and parser implementation. Stage 2G authorizes no new BLE write or physical test.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `8801751cb5d52ff05829127ca35e1e00144cb27e` — `docs: align Stage 2F roadmap gate`. The original Stage 2F implementation is `4ae3efa7a1993140afbfe4575b35917a11192dfd`; both remain intact.
-- **Starting tree after checkpoint:** clean, verified with `git status --short` before this task.
-- **Changes after checkpoint:** yes; this corrective task changes the record selector constructors, synthetic tests, and project evidence/status documentation. Report its commit SHA and post-commit status separately.
-- **Live actions:** none performed by Codex. No deployment, push, tag, or release.
+- **Last completed checkpoint:** `7c8e25526c2520f70e89b41580fff7b64c726287` — `fix: align TD4183 record requests with live evidence`.
+- **Starting tree:** clean, verified with `git status --short` before this task.
+- **Changes after checkpoint:** yes; Stage 2F closure updates tracked Markdown only at this pre-commit point. Report the closure SHA and post-commit status separately.
+- **Live actions by Codex:** none. No deployment, push, tag, or release.
 
-## Offline evidence decision
+## Stage 2F conclusion
 
-The retained, private iFORA HM 1.7.6/1.7.9 decompilations link physical project `0x4183` to the TD4183 handler. The first Stage 2F implementation incorrectly selected `CurrentUser = 0` for the record requests; direct reinspection of the successful private Stage 2C capture showed `User1 = 1`. Both app builders encode the enum directly at request byte 2 for `0x2B` and byte 5 for indexed `0x25`/`0x26`. The import call path chooses `User1` for this project. The corrected exact frames and remaining index-order uncertainty are in `docs/STAGE2F_TD4183_RECORD_PROBE.md`. The old requests were **never sent from Home Assistant to the physical meter**.
+The final user-supplied physical action ran with the GD82 ON. Home Assistant resolved and connected to it, subscribed to custom `1524`, validated `0x22` and `0x24`, matched project `0x4183`, obtained valid User1 `0x2B` slot metadata, and obtained valid User1/index-zero `0x25` and `0x26` command-matched frames. Notification stop and disconnect succeeded. The pair establishes bounded record retrieval, not analyte/value/timestamp interpretation. The earlier wake-write and subscription failures stopped before record requests and are timing/transport observations.
 
-The same static import path calls `0x33` to set the clock. Its necessity for subsequent record reads remains unknown, so the Stage 2F action **never sends it** and fails closed if the smaller sequence does not work. `0x27`/`0x28` handle a private serial/device identifier; `0x2F` is category metadata; `0x50` finish effects are unresolved. All are omitted. Read orientation of the three included commands is supported by the inspected app path; meter-internal effects cannot be excluded with certainty.
+The successful bounded Stage 2F read did not send `0x33`. Thus `0x33` was not required **in the tested meter state**, without making a universal claim. `0x2F` was not sent from Home Assistant. No decoded health measurement was returned, and no production sync exists.
 
-## Stage 2F prototype and next gate
+## Exact next gate and checks
 
-`fora6_connect.probe_protocol_record` requires the unchanged Stage 2E wake/project/`0x4183` identity gate, then performs only User1 `0x2B`, `0x25` raw index zero, and `0x26` raw index zero, one write each with response. It validates the response frame and command, subscribes/unsubscribes custom `1524`, and disconnects. No analyte, measurement, timestamp, or private bytes are returned or persisted. No production sync, config flow, entities, polling, pairing, or RACP path was added. `protocol.py` remains Home Assistant/Bleak independent.
+**Next gate:** Stage 2G offline analysis of the retained TD4183 parser in iFORA HM 1.7.6 and 1.7.9, then implement only sufficiently evidenced pure-Python record fields with synthetic tests. Keep the development transport and privacy-safe action result unchanged. Any later `0x2F` physical query or decoded real-result exposure requires separate authorization.
 
-**Exact next gate:** review the corrected selector evidence and code, then decide separately whether physical Stage 2F validation may resume. Do not install or invoke `fora6_connect.probe_protocol_record` against the real meter in this task. Stage 2F is not physically validated or complete. No later stage is authorized.
-
-## Corrective-task checks
-
-- `python3 -m unittest discover -s tests -v`: 94 passed with corrected live-request fixtures.
-- Compileall, tabnanny, manifest/translation JSON parsing, services YAML parsing, and `git diff --check`: passed.
-- Reviewed the 19-file staged diff; `git diff --cached --check`, command-scope, and staged privacy/artifact checks passed. `protocol.py` imports only standard-library modules. The earlier 94-test result reflected internally consistent all-zero selector fixtures and did not validate agreement with live GD82 import traffic.
+- **Files changed at closure pre-commit:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, and `docs/STAGE2F_TD4183_RECORD_PROBE.md`.
+- **Checks actually run:** 94 unit tests passed; compileall, tabnanny, manifest/translation/strings JSON and services YAML parsing, `git diff --check`, and `git diff --cached --check` passed. The full 13-file Markdown diff and staged added lines were inspected. `git diff --cached -- custom_components tests` was empty. No new BLE command ID, production sync, protocol import, private value, timestamp, address, raw response, capture, binary artifact, or private absolute path was found in the closure changes.
