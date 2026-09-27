@@ -117,3 +117,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 ## Stage 7F — separate current sensor state from historical import
 
 **Status:** offline design review complete. [The evidence review](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) conditionally supports a manually triggered current-state refresh for only raw counts two/four and only when exactly one valid General uric-acid primary is present. It does not choose by highest index or maximum naive meter-local time. A single current state does not require a durable per-record dedup key; importing historical observations still does. Stage 7G requires separate authorization for implementation, and production historical synchronization remains gated.
+
+## Stage 7G update
+
+Stage 7G is a bounded evidence step ahead of Stage 7F’s proposed production refresh. At exactly four raw slots, compare only validated General uric-acid primaries 0 and 2 within one session, without exposing times or selecting a production latest record. A one-snapshot relation does not establish general index order.

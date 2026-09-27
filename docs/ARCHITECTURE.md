@@ -84,3 +84,7 @@ Stage 7E’s fixed count-four action was physically validated in one GD82 state.
 ## Stage 7F minimum current-state boundary
 
 [Stage 7F](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) proposes a manual, fixed-count snapshot to feed the existing uric-acid sensor only when one eligible General primary exists. A future coordinator would own BLE I/O, identity confirmation, fixed index plans, semantic filtering, single-flight locking, and failure retention; the SensorEntity remains transport-free. Count four with two eligible primaries is ambiguous. Historical ingestion, persistent dedup, resume, automatic triggers, and production code remain absent.
+
+## Stage 7G update
+
+Stage 7G adds a standalone development probe using the centralized Bluetooth transport and existing pure record parsers. It gates on project `0x4183`, raw count four, and two valid General uric-acid primaries at raw indexes 0 and 2. Only relative naive meter-local time order leaves the probe; no coordinator, sensor-state, persistence, or production sync path is connected.

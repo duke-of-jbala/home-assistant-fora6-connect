@@ -69,6 +69,16 @@
           "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned or logged."
         }
       }
+    },
+    "probe_history_chronology": {
+      "name": "Compare two primary record times (development only)",
+      "description": "Stage 7G only. At exactly four User1 raw slots, read only indexes 0 and 2 and return semantic gates and relative meter-local time order. No values, timestamps, identifiers, persistence, entity update, or production synchronization.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned or logged."
+        }
+      }
     }
   },
   "config": {

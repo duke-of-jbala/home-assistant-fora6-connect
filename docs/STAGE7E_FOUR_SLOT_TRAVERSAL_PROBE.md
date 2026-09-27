@@ -29,3 +29,7 @@ Still unresolved are general traversal order, exact relation between logical gro
 **Exact next proposed gate:** separately authorize Stage 7F as an offline reassessment of logical grouping, chronology, and a minimal production-sync design using this result. Stage 7F is not begun here.
 
 **Stage 7F follow-up:** [The offline reassessment](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) uses this four-slot result only for a conditional manual current-state design. If both even primaries qualify as valid General uric acid, no latest value can be selected from this evidence; a separate chronology gate is needed.
+
+## Stage 7G update
+
+Stage 7G follows this four-slot evidence with a separate, smaller two-primary relative-time probe. It reads raw indexes 0 and 2 only after an exact count-four and semantic gate; its physical result is pending. See [Stage 7G](STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md).

@@ -7,6 +7,7 @@ from homeassistant.exceptions import ServiceValidationError
 
 from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .gatt_probe import ProbeError, async_probe_gatt
+from .history_chronology_probe import async_probe_history_chronology
 from .history_probe import async_probe_history_window
 from .history_semantics_probe import async_probe_history_semantics
 from .history_window_four import async_probe_history_window_four
@@ -24,6 +25,7 @@ SERVICE_PROBE_PROTOCOL_RECORD = "probe_protocol_record"
 SERVICE_PROBE_HISTORY_WINDOW = "probe_history_window"
 SERVICE_PROBE_HISTORY_SEMANTICS = "probe_history_semantics"
 SERVICE_PROBE_HISTORY_WINDOW_FOUR = "probe_history_window_four"
+SERVICE_PROBE_HISTORY_CHRONOLOGY = "probe_history_chronology"
 SERVICE_PROBE_SERIAL_IDENTITY = "probe_serial_identity"
 SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
 SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
@@ -214,6 +216,28 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_PROBE_HISTORY_WINDOW_FOUR,
         async_handle_probe_history_window_four,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_history_chronology(call: ServiceCall) -> dict:
+        """Return only the fixed two-primary relative-time status."""
+        if probe_lock.locked():
+            raise ServiceValidationError("A FORA development action is already running.")
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_history_chronology(hass, address.strip())
+        except Exception:
+            raise ServiceValidationError("FORA chronology probe failed.") from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_HISTORY_CHRONOLOGY,
+        async_handle_probe_history_chronology,
         supports_response=SupportsResponse.ONLY,
     )
 

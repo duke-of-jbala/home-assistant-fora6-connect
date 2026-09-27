@@ -117,6 +117,22 @@ probe_history_window_four:
       required: true
       selector:
         text: {}
+probe_history_chronology:
+  name: Compare two primary record times (development only)
+  description: >-
+    Development-only Stage 7G. After confirming GD82 identity and exactly four
+    User1 raw slots, read only primary indexes 0 and 2. Return semantic gates
+    and relative meter-local time order only. No values, timestamps, identifiers,
+    persistence, entity update, or production synchronization.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the runtime meter address privately from Advertisement Monitor.
+        Used only in memory for this manual action; never returned or logged.
+      required: true
+      selector:
+        text: {}
 probe_serial_identity:
   name: Probe serial identity (development only)
   description: >-

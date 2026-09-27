@@ -86,3 +86,7 @@ Retaining a previous value is a failure policy, not evidence that it is fresh. A
 ## Exact next gate
 
 **Outcome A — a narrow manual current-state refresh is justified as a design.** Separately authorize **Stage 7G** to implement only this conditional, fixed-count current-state path: counts 2 and 4; literal validated index plans; exactly one eligible General uric-acid primary; explicit user trigger; no timestamp/index ordering, automatic trigger, historical import, persistent dedup, cursor, polling, or background task. Stage 7G must review the snapshot-consistency residual risk and failure/availability semantics before any real deployment. If the observed count-four state has two eligible uric-acid primaries, it must leave the sensor unchanged and propose a separate bounded cross-group chronology experiment rather than guessing which is newer. No Stage 7G implementation or physical operation occurs in Stage 7F.
+
+## Stage 7G update
+
+The separately authorized Stage 7G work is a bounded chronology evidence probe, not the conditional production refresh proposed in this Stage 7F design. It requires exactly four slots and compares only validated raw primaries 0 and 2 privately. Production current-state sync remains a later gate.

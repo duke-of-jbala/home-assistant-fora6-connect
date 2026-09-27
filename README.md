@@ -2,7 +2,7 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stages 0–6B3 and 7A–7F are complete for their authorized bounded/review scopes. Stage 7F supports only a conditional manual current-state refresh design; no production sync exists yet. Stage 7C confirmed the expected classifications in one real two-slot state. Stage 6B3's non-destructive identity migration has been validated by the user in Home Assistant on the configured GD82. The existing entry, device, and uric-acid entity remain; the entity is unavailable because production historical synchronization has not been implemented. Address identity behavior across GD82 units, factory resets, and firmware updates remains unresolved.
+**Status:** Stages 0–6B3 and 7A–7F are complete for their authorized bounded/review scopes. Stage 7G adds a development-only chronology probe awaiting physical validation; no production sync exists yet. Stage 6B3's non-destructive identity migration has been validated by the user in Home Assistant on the configured GD82. The existing entry, device, and uric-acid entity remain; the entity is unavailable because production synchronization has not been implemented. Address identity behavior across GD82 units, factory resets, and firmware updates remains unresolved.
 
 Only uric acid currently has evidence-backed numeric scaling and a display unit (mg/dL). Other analytes are not exposed as numeric entities. The uric-acid entity remains unavailable until a later synchronization stage supplies measurements. On the tested GD82, standard Device Information identifiers were unusable as meter-specific identity; the factory-printed Bluetooth MAC matched the Home Assistant address and is the guarded fallback identity. Private captures and health results are excluded from public fixtures and documentation.
 
@@ -23,3 +23,5 @@ This is a development integration, not a validated installation or release. The 
 ## License
 
 MIT; see [LICENSE](LICENSE).
+
+The [Stage 7G probe](docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md) compares only the relative meter-local time of two fixed primary slots when raw count is four. It returns no measurement or timestamp and does not update the unavailable entity.

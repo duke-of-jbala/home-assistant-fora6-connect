@@ -320,3 +320,7 @@ The successful user-run count-four probe validated the fixed User1 index plan `3
 ### Stage 7F current-state design limit
 
 [Stage 7F](STAGE7F_MINIMUM_PRODUCTION_SYNC_REASSESSMENT.md) does not add a command. It recommends only the physically tested User1 count-two and count-four fixed plans for a potential explicit manual current-state refresh. No highest-index or wire-newest interpretation is adopted. A numeric sensor update would require one eligible General uric-acid primary after validating the complete supported-count snapshot; two eligible primaries are ambiguous. Historical traversal, wrap, dedup, and resume remain unresolved.
+
+## Stage 7G update
+
+The Stage 7G development path uses only established `0x22`, `0x24`, User1 `0x2B`, and two fixed User1 `0x25`/`0x26` pairs (raw 0, then raw 2) when count is four. Existing parsers classify both pairs; their naive meter-local timestamps are compared privately. It adds no command or general traversal rule.
