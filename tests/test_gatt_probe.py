@@ -75,6 +75,11 @@ def _load_setup(probe_module):
     core.SupportsResponse = types.SimpleNamespace(ONLY="response_only")
     exceptions = types.ModuleType("homeassistant.exceptions")
     exceptions.ServiceValidationError = type("ServiceValidationError", (Exception,), {})
+    helpers = types.ModuleType("homeassistant.helpers")
+    config_validation = types.ModuleType("homeassistant.helpers.config_validation")
+    config_validation.config_entry_only_config_schema = Mock(
+        return_value="config_entry_only"
+    )
     const = types.ModuleType("_fora6_setup_test.const")
     exec((INTEGRATION / "const.py").read_text(encoding="utf-8"), const.__dict__)
     gatt = types.ModuleType("_fora6_setup_test.gatt_probe")
@@ -138,6 +143,8 @@ def _load_setup(probe_module):
         {
             "homeassistant.core": core,
             "homeassistant.exceptions": exceptions,
+            "homeassistant.helpers": helpers,
+            "homeassistant.helpers.config_validation": config_validation,
             "_fora6_setup_test": module,
             "_fora6_setup_test.const": const,
             "_fora6_setup_test.gatt_probe": gatt,
@@ -443,6 +450,11 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
+    def test_config_entry_only_schema_declared(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, _, _, _ = _load_setup(probe)
+        self.assertEqual(integration.CONFIG_SCHEMA, "config_entry_only")
+
     async def test_record_action_registration_and_private_runtime_address(self) -> None:
         probe, _, _ = _load_probe()
         integration, gatt, observer, exceptions = _load_setup(probe)

@@ -1,14 +1,6 @@
 {
   "domain": "fora6_connect",
   "name": "FORA 6 Connect",
-  "version": "0.1.0",
-  "documentation": "https://github.com/duke-of-jbala/home-assistant-fora6-connect",
-  "issue_tracker": "https://github.com/duke-of-jbala/home-assistant-fora6-connect/issues",
-  "codeowners": ["@duke-of-jbala"],
-  "integration_type": "device",
-  "iot_class": "local_polling",
-  "dependencies": ["bluetooth_adapters", "bluetooth"],
-  "config_flow": true,
   "bluetooth": [
     {
       "local_name": "FORA 6 CONNECT*",
@@ -16,5 +8,13 @@
       "connectable": true
     }
   ],
-  "requirements": []
+  "codeowners": ["@duke-of-jbala"],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters", "bluetooth"],
+  "documentation": "https://github.com/duke-of-jbala/home-assistant-fora6-connect",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/duke-of-jbala/home-assistant-fora6-connect/issues",
+  "requirements": [],
+  "version": "0.1.0"
 }

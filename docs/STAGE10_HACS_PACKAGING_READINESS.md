@@ -1,8 +1,9 @@
 # Stage 10 — HACS packaging and installation readiness
 
-**Scope:** Repository/package validation for the existing GD82 integration. No
-protocol, discovery, identity, coordinator, sensor, or Bluetooth behavior is
-changed. The previous real manual refresh and Lounge Atom Lite proxy results
+**Scope:** Repository/package validation for the existing GD82 integration. A
+validator-driven config-entry-only schema declaration is the sole Python change;
+it adds no manual refresh, protocol, discovery, identity, coordinator, sensor,
+or Bluetooth behavior. The previous real manual refresh and Lounge Atom Lite proxy results
 remain the physical evidence; Stage 10 checks are repository and synthetic
 checks. A clean HACS UI install/update on a separate Home Assistant instance
 has not yet been observed and belongs to Stage 11 release-candidate validation.
@@ -44,6 +45,11 @@ version. No tag or release is created at Stage 10.
   `local_polling` classification describes local pull communication; actual
   updates remain **manual only**, with no polling scheduler. No cloud,
   broader-analyte, or historical-sync support is claimed.
+- The first pushed HACS job passed. Hassfest found one manifest key-order error
+  and one missing config-schema warning. The follow-up sorts manifest keys
+  without changing values and declares the supported config-entry-only schema
+  for an integration that is set up through config entries. A synthetic setup
+  test checks the declaration; the original service behavior is unchanged.
 - `bluetooth_adapters` and `bluetooth` are Home Assistant integration
   dependencies used by the existing discovery/connection path. The Python
   `requirements` list is empty: the external BLE connector used by this
@@ -95,7 +101,7 @@ this integration does not implement recorder cleanup.
 
 ## Validation and remaining release gate
 
-The repository's full 374-test baseline, compileall, tabnanny, all JSON/YAML
+The repository's full 374-test baseline plus one schema regression test, compileall, tabnanny, all JSON/YAML
 parses, whitespace, privacy/identifier/logging/automation/history/artifact
 reviews, and a temporary-directory package-copy/relative-import simulation are the
 local gates. The new GitHub workflow runs the official HACS repository action

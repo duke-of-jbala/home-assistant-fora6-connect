@@ -4,6 +4,7 @@ import asyncio
 
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .coordinator import Fora6CurrentRefreshCoordinator
@@ -18,6 +19,8 @@ from .serial_probe import async_probe_serial_identity
 from .serial_stability import async_probe_serial_stability
 from .system_id_probe import async_probe_system_id
 from .system_id_stability import async_probe_system_id_stability
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 SERVICE_PROBE_GATT = "probe_gatt"
 SERVICE_OBSERVE_NOTIFICATIONS = "observe_notifications"

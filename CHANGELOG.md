@@ -8,6 +8,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Packaging
 - Stage 10 prepared the repository for HACS custom Integration installation: replaced the bootstrap manifest version with `0.1.0`, added official HACS/hassfest validation workflow, documented install/update/removal and version policy, and corrected stale development-action wording. No BLE or sensor behavior changed.
+- The first HACS validator passed; hassfest exposed an existing manifest key-order error and missing config-entry-only schema warning. The follow-up sorts the manifest, declares the schema, and tests that declaration.
 
 ### Evidence
 - Stage 9 physically validated the existing manual count-four refresh through the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy. Home Assistant Connections named the proxy as Source during the action; refresh succeeded, sensor updated, cleanup had no errors, and no duplicate device/entity was observed. Private health fields and address were not recorded. This confirms only the tested path/run.

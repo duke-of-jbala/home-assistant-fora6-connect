@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 10 validator follow-up — pre-commit
+
+The first Stage 10 commit `d60aa576d2ab9d19ef237329b5e9bc116de8b1f8` (`chore: prepare HACS integration packaging`) was pushed to `main` on 2026-09-27 (Europe/London) and had a clean local tree before this follow-up. The official HACS integration job passed; hassfest failed on manifest key order and warned about the missing config-entry-only schema. That is a genuine packaging validation finding.
+
+This follow-up changes the files listed in `CURRENT_STATUS.md`: sort manifest keys without value changes, declare the supported Home Assistant config-entry-only schema, add a synthetic schema check, refresh the checkout action pin, and document the finding. The targeted setup group passed **26/26** and the full suite **375/375**; compileall, tabnanny, resource parsing, manifest order, isolated copy, whitespace, and new-line privacy checks passed. The tree is currently modified at this pre-commit observation. Review the staged diff and inspect the second GitHub workflow run before calling Stage 10 complete. No meter operation, automatic synchronization, history import, or sensor-selection change is involved.
+
+**Exact next proposed gate after the official validators pass:** separately authorize Stage 11 release-candidate validation with controlled HACS installation and update. Stage 8H remains optional.
+
 ## Stage 10 package and release readiness — pre-commit
 
 Starting checkpoint: clean `main` at `f27035b011b2c8d85a94467f96a73b98b2c9b89f` (`docs: close Stage 9 Atom Lite proxy validation`) on 2026-09-27 (Europe/London), with the expected origin. This task has changed the files listed in `CURRENT_STATUS.md`; the working tree is modified at this pre-commit observation. Verify and report the eventual commit SHA, remote main, GitHub validation jobs, and clean post-push state separately.

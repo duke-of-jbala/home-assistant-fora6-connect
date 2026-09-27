@@ -1,5 +1,14 @@
 # Current Status — FORA 6 Connect
 
+## Stage 10 validator follow-up — pre-commit observation
+
+- **Branch/date and interim checkpoint:** `main`, 2026-09-27 (Europe/London), `d60aa576d2ab9d19ef237329b5e9bc116de8b1f8` — `chore: prepare HACS integration packaging`. That commit was pushed normally and origin/main matched it; its local working tree was clean before this follow-up.
+- **Observed official jobs on the interim commit:** HACS category Integration validation **passed**. Hassfest **failed** on manifest key order and warned that `async_setup` lacked a config-entry-only schema. These are actual GitHub Actions results, not inferred local results.
+- **Changes after interim checkpoint:** yes. `custom_components/fora6_connect/manifest.json` sorts keys without changing values; `custom_components/fora6_connect/__init__.py` declares `CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)`; `tests/test_gatt_probe.py` adds a synthetic schema test/stub; `.github/workflows/validate.yml` updates the checkout pin; and `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, and `docs/STAGE10_HACS_PACKAGING_READINESS.md` record the validator finding and response.
+- **Checks actually run after the fix:** targeted setup group **26/26** and full suite **375/375** passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML file parsed; manifest key order checked; isolated package copy passed for 27 Python modules; unstaged whitespace and new-line privacy scans passed; no prohibited artifact found. The preexisting synthetic MAC fixture in `tests/test_gatt_probe.py` was excluded from the new-line privacy conclusion. Staged review/check and official GitHub validators on the follow-up commit remain before Stage 10 closure. No real HACS UI install or physical BLE operation is claimed.
+
+**Exact next proposed gate after the follow-up validators pass:** separately authorize Stage 11 release-candidate validation with a controlled HACS custom-repository install/update. Stage 8H remains optional and unstarted.
+
 ## Stage 10 HACS packaging — pre-commit observation
 
 - **Branch/date:** `main`, 2026-09-27 (Europe/London).
