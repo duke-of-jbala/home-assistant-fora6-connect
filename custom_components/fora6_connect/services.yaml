@@ -145,3 +145,40 @@ probe_serial_stability:
           options:
             - set_reference
             - compare
+probe_system_id:
+  name: Probe System ID (development only)
+  description: >-
+    Development-only Stage 6B2. Read standard Device Information System ID
+    0x2A23 exactly once and return structural status only. No raw value,
+    digest, address, FORA command, write, notification, or pairing is exposed.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Use the runtime meter locator privately. It is never returned or stored.
+      required: true
+      selector:
+        text: {}
+probe_system_id_stability:
+  name: Compare System ID stability (development only)
+  description: >-
+    Development-only Stage 6B2. Read 0x2A23 once per invocation, set one
+    process-local private reference, or compare exact raw bytes with it.
+    Only equality and structural flags are returned. No persistence or writes.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Use the runtime meter locator privately. It is never returned or stored.
+      required: true
+      selector:
+        text: {}
+    operation:
+      name: Operation
+      description: Set a process-local reference or compare one read with it.
+      required: true
+      selector:
+        select:
+          options:
+            - set_reference
+            - compare

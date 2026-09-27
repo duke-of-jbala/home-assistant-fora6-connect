@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 6B2:** [The System ID review](STAGE6B2_SYSTEM_ID_REVIEW.md) adds read-only development actions at the Device Information boundary. Private raw `0x2A23` bytes may exist in one process-local comparison holder, but never enter ConfigEntry, DeviceInfo, sensor state, diagnostics, or protocol history. Existing production identity and Stage 7 paths remain unchanged.
+
 **Stage 6B1:** [The locator follow-up](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) suppresses configured-address discovery before any active exchange. A private check showed this meter's retained unique ID is a generic placeholder, so the current device-specific identity is unresolved. New flows reject that placeholder; existing entry/device/entity are preserved and the false serial display is hidden on reload. No synchronization was added.
 
 ## Intended data path

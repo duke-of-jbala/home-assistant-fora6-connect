@@ -1,24 +1,24 @@
 # Current Status — FORA 6 Connect
 
-Stages 0–6B and 7A–7C are complete for their earlier authorized scopes. Stage 6B1 is an implementation checkpoint awaiting controlled Home Assistant validation. Production synchronization, general history traversal, and Stage 7D remain absent. The uric-acid entity remains unavailable.
+Stages 0–6B and 7A–7C are complete for their earlier authorized scopes. Stage 6B1's user-run HA regression passed. Stage 6B2 has an offline-tested, manually invoked System ID evidence probe awaiting user-run physical validation. Production identity migration, general history traversal, Stage 7D, and synchronization remain absent. The uric-acid entity remains unavailable.
 
-## Stage 6B1 identity and rediscovery observation
+## Stage 6B2 implementation observation
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed/checkpoint commit before this task:** `3ae30e318e3299b0dea1dbe411d571bfc6f5f072` — `docs: record successful Stage 7C semantics`.
-- **Starting tree:** clean; `git status --short` returned no entries. Origin pointed to the public GitHub repository.
-- **Changes after checkpoint:** yes. One focused runtime identity/metadata correction, synthetic tests, and documentation are in the working tree before commit. Post-commit/push state must be verified separately.
-- **Real observations supplied by user:** a discovery card later reappeared for the already configured meter; the HA connection locator privately matched the printed BT MAC; the physical label also bears a serial, but printed/GATT serial equality is unconfirmed. The HA device page displayed “Serial Number” as serial. A subsequent private check found the existing ConfigEntry unique ID itself is exactly that generic literal. No actual serial, MAC, photo, or health datum was supplied for Git.
-- **Interpretation:** the original setup flow obtains unique ID solely from its GATT `0x2A25` read. The generic label therefore explains the device display and shows that earlier UTF-8/structural/repeat stability checks did not establish a meter-specific identifier for this configured entry. The original raw GATT read is not published. A genuinely meter-specific identity and safe migration remain a separate gate.
-- **Implementation:** known locators abort discovery before a form or active connection; the confirmation step checks again for races. New setup rejects the generic serial placeholder. Existing ConfigEntry/device/entity IDs are retained, while the false visible serial field is cleared on reload. A new locator can update an existing entry only with non-placeholder exact serial confirmation, prior conflict checks, and registry connection replacement; a failed entry update attempts registry rollback. No MAC fallback, new command, BLE read for display, or sensor update was added.
-- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `custom_components/fora6_connect/__init__.py`, `config_flow.py`, `const.py`, `device_metadata.py`, `sensor.py`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE6A1C_SERIAL_IDENTITY_POLICY.md`, `docs/STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md`, `docs/STAGE6B1_REDISCOVERY_LOCATOR_FIX.md`, `tests/test_config_flow.py`, `tests/test_device_metadata.py`, `tests/test_stage6b_entity.py`, and `tests/test_stage6b_setup.py`.
+- **Last completed/checkpoint commit before this task:** `39bfabb760fbf8f501bbadc8d34e4d8d6196710b` — `fix: suppress duplicate FORA rediscovery`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin points to the public GitHub repository.
+- **Changes after checkpoint:** yes; two development-only System ID actions, synthetic tests, and documentation are present before this task's commit. Verify/report post-commit/push state separately.
+- **User-run Stage 6B1 result:** existing device and unavailable uric-acid entity preserved, false literal serial display removed, repeat Add card suppressed, Bluetooth connection metadata retained. User privately confirmed the HA Bluetooth locator matches the meter's printed BT MAC. No actual identifier is tracked; printed/GATT serial equality is still unknown.
+- **Standard evidence:** Bluetooth SIG Device Information Service v1.2 §3.7 defines `0x2A23` as an optional read-only System ID intended for an individual product instance. SIG material gives a `uint40` manufacturer identifier plus `uint24` OUI, eight octets. This establishes format and intended meaning, not actual GD82 provisioning or stability.
+- **Implementation:** `probe_system_id` performs one bounded read-only `0x180A`/`0x2A23` acquisition and reports structural flags only. `probe_system_id_stability` holds one exact raw-byte reference at `hass.data[DOMAIN]["system_id_stability"]`, behind an asyncio lock, and reports only exact equality. The reference disappears on HA restart. Neither action writes, subscribes, pairs, issues a FORA command, persists identity, or changes ConfigEntry/DeviceInfo. No physical `0x2A23` read has been performed by Codex.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`, `custom_components/fora6_connect/__init__.py`, `services.yaml`, `system_id_probe.py`, `system_id_stability.py`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE6B1_REDISCOVERY_LOCATOR_FIX.md`, `docs/STAGE6B2_SYSTEM_ID_REVIEW.md`, `docs/STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md`, `tests/test_gatt_probe.py`, `tests/test_system_id_probe.py`, and `tests/test_system_id_stability.py`.
 
-## Checks run for this implementation checkpoint
+## Checks run
 
-- Full unit suite: **294 passed** (`python3 -m unittest discover -s tests -v`). Baseline was 285.
-- `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
+- Full unit suite: **312 passed** (`python3 -m unittest discover -s tests -v`); baseline 294.
+- Compileall and tabnanny: passed.
 - Four JSON and one YAML file parsed successfully.
-- `git diff --check`: passed at the implementation checkpoint. Stage/review and `git diff --cached --check` still need final verification before commit.
-- Tests used synthetic identifiers only. No physical meter test was run by Codex.
+- `git diff --check`: passed before staging. Final staged review and `git diff --cached --check` remain to be verified before commit.
+- Tracked-artifact inventory and command/write/notify audit of the new probe modules found no private artifact or application command. Tests use only synthetic values.
 
-**Exact next gate:** user-run HA reload/restart and meter OFF/ON rediscovery regression: verify no repeat card, one preserved device/entity, and no false serial display. Then separately authorize bounded private meter-specific identity evidence, potentially standard System ID `0x2A23` and printed-label comparison, followed by a non-destructive migration design. Do not begin Stage 7D or production sync.
+**Exact next gate:** after review, user-run `probe_system_id` once, set one private reference, compare immediately, power-cycle meter, then compare again; share sanitized results only. A separately authorized Stage 6B3 identity-policy/migration review must evaluate those results before any canonical identity change. Do not begin Stage 7D or production synchronization.

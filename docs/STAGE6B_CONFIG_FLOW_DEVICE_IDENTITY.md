@@ -1,5 +1,7 @@
 # Stage 6B — guarded Config Flow and persistent device identity
 
+**Stage 6B2 note:** the later [System ID review](STAGE6B2_SYSTEM_ID_REVIEW.md) adds read-only evidence actions only. The existing placeholder-backed entry remains intact; no canonical identity migration has occurred.
+
 **Stage 6B1 correction:** [the rediscovery and metadata follow-up](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) records a later repeat card and a private check that the existing entry's unique ID is the generic literal “Serial Number.” This limits the earlier claim of meter-specific serial identity for that entry. New flows reject the placeholder; the existing entry is preserved pending a separate identity gate.
 
 **Scope:** implementation, synthetic validation, and user-run real Home Assistant discovery/setup validation on one GD82. No production record synchronization, polling, pairing, RACP, or new FORA command was introduced.

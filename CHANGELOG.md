@@ -12,6 +12,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 
 ### Added
+- Stage 6B2 development-only, one-read System ID `0x2A23` probe and process-local exact-byte stability comparison. Only structural/equality flags are returned; no production identity migration or synchronization is added. The prior Stage 6B1 HA regression preserved the device/entity, hid the generic serial placeholder, and suppressed the repeat discovery card.
 - Recorded successful user-run Stage 7C semantic confirmation on the real GD82: index zero was uric acid/General/valid and not QC; both index-one reads were hematocrit/QC/invalid sentinel, with matching repeated semantics and clean cleanup. General traversal and production sync remain unresolved/unauthorized.
 - Stage 7C development-only semantic probe: reuse the count-two `1 → 0 → 1` branch to classify parsed pairs and compare repeated index-one semantics in memory. Return status booleans only; no entity update or production sync.
 - Recorded successful user-run Stage 7B physical validation: raw count two, all bounded `1 → 0 → 1` pairs valid, repeated index-one parts equal, and clean cleanup. General traversal, deduplication, and production synchronization remain unproven/unauthorized; proposed next review is Stage 7C semantic pair confirmation.

@@ -1,5 +1,7 @@
 # Stage 6B1 — device metadata and rediscovery follow-up
 
+**Later physical regression:** the user installed Stage 6B1 and observed that the existing device and uric-acid entity remained, the false serial label disappeared, the Add card stayed suppressed, and Bluetooth connection metadata remained. The HA locator privately matched the printed BT MAC. No actual identifier is tracked. [Stage 6B2](STAGE6B2_SYSTEM_ID_REVIEW.md) now investigates `0x2A23` without migrating this entry.
+
 ## Evidence and boundary
 
 The user saw a second FORA 6 Connect discovery card for an already configured GD82. The local HA device page displayed the literal text “Serial Number” in the serial field. During this review, the user privately checked that the **ConfigEntry unique ID itself is exactly that literal text**. The user also privately confirmed that the displayed HA Bluetooth connection address matched the physical meter's printed BT MAC. Neither identifier nor the label photo is tracked. Equality between the printed serial and GATT `0x2A25` remains unconfirmed.

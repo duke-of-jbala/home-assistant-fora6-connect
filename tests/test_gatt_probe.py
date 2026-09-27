@@ -108,6 +108,14 @@ def _load_setup(probe_module):
     stability.async_probe_serial_stability = AsyncMock(
         return_value={"reference_available": True}
     )
+    system_id = types.ModuleType("_fora6_setup_test.system_id_probe")
+    system_id.async_probe_system_id = AsyncMock(
+        return_value={"system_id_read_successful": True}
+    )
+    system_stability = types.ModuleType("_fora6_setup_test.system_id_stability")
+    system_stability.async_probe_system_id_stability = AsyncMock(
+        return_value={"reference_available": True}
+    )
     spec = importlib.util.spec_from_file_location(
         "_fora6_setup_test",
         INTEGRATION / "__init__.py",
@@ -129,12 +137,16 @@ def _load_setup(probe_module):
             "_fora6_setup_test.history_semantics_probe": semantics,
             "_fora6_setup_test.serial_probe": serial,
             "_fora6_setup_test.serial_stability": stability,
+            "_fora6_setup_test.system_id_probe": system_id,
+            "_fora6_setup_test.system_id_stability": system_stability,
         },
     ):
         spec.loader.exec_module(module)
     module._test_identity = identity
     module._test_serial = serial
     module._test_stability = stability
+    module._test_system_id = system_id
+    module._test_system_stability = system_stability
     return module, gatt, observer, exceptions
 
 

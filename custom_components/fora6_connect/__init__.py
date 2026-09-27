@@ -13,6 +13,8 @@ from .notification_observer import ObservationError, async_observe_notifications
 from .protocol_probe import async_probe_protocol_identity, async_probe_protocol_record
 from .serial_probe import async_probe_serial_identity
 from .serial_stability import async_probe_serial_stability
+from .system_id_probe import async_probe_system_id
+from .system_id_stability import async_probe_system_id_stability
 
 SERVICE_PROBE_GATT = "probe_gatt"
 SERVICE_OBSERVE_NOTIFICATIONS = "observe_notifications"
@@ -22,6 +24,8 @@ SERVICE_PROBE_HISTORY_WINDOW = "probe_history_window"
 SERVICE_PROBE_HISTORY_SEMANTICS = "probe_history_semantics"
 SERVICE_PROBE_SERIAL_IDENTITY = "probe_serial_identity"
 SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
+SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
+SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -245,6 +249,59 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_PROBE_SERIAL_STABILITY,
         async_handle_probe_serial_stability,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_system_id(call: ServiceCall) -> dict:
+        """Read only standard Device Information 0x2A23 once."""
+        if probe_lock.locked():
+            raise ServiceValidationError("A FORA development action is already running.")
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_system_id(hass, address.strip())
+        except Exception:
+            raise ServiceValidationError("FORA System ID probe failed.") from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_SYSTEM_ID,
+        async_handle_probe_system_id,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_system_id_stability(call: ServiceCall) -> dict:
+        """Compare one read with a private process-local reference."""
+        if probe_lock.locked():
+            raise ServiceValidationError("A FORA development action is already running.")
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        operation = call.data.get("operation")
+        if operation not in ("set_reference", "compare"):
+            raise ServiceValidationError(
+                "Choose set_reference or compare for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_system_id_stability(
+                    hass, address.strip(), operation
+                )
+        except Exception:
+            raise ServiceValidationError(
+                "FORA System ID stability probe failed."
+            ) from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_SYSTEM_ID_STABILITY,
+        async_handle_probe_system_id_stability,
         supports_response=SupportsResponse.ONLY,
     )
     return True
