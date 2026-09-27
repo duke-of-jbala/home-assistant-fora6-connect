@@ -254,3 +254,7 @@ The prior checkpoint above is historical. The retained private 1.7.6/1.7.9 decom
 ### Stage 3 offline combined model
 
 The Stage 2G response parsers remain the only frame-to-part boundary. [The Stage 3 model review](STAGE3_RECORD_MODEL_AND_FIXTURES.md) documents the immutable combined record over those parts and ten entirely synthetic, checksummed pair fixtures. The model preserves the original wire integer and opaque bytes, treats raw `0xFFFF` as unavailable for usable numeric/scaled value, and applies raw/10 only to identified valid uric-acid records. It adds no command, request constructor, record ID, unit, timezone, live result, or production synchronization. **Exact next gate:** separately authorize Stage 4 production Bluetooth transport.
+
+### Stage 4 transport boundary
+
+[The Stage 4 transport record](STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable Home Assistant connection/session. It accepts already validated request frames and delegates response envelope and command-echo checks to `protocol.py`. It has no command IDs or sequencing policy. `protocol_probe.py` continues to select only the previously authorized identity and one-slot commands, now through this session; its public action results remain semantic and privacy-safe. Mock tests passed, but no physical regression of the refactor is claimed. Unresolved protocol semantics remain open without affecting this transport boundary. **Exact next gate:** review Stage 4 and separately authorize controlled user-run regression of the existing actions.

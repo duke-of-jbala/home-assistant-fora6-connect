@@ -53,6 +53,12 @@ def _load_probe():
     assert protocol_spec and protocol_spec.loader
     protocol = importlib.util.module_from_spec(protocol_spec)
     modules[protocol_spec.name] = protocol
+    transport_spec = importlib.util.spec_from_file_location(
+        "_fora6_identity_test.bluetooth", INTEGRATION / "bluetooth.py"
+    )
+    assert transport_spec and transport_spec.loader
+    transport = importlib.util.module_from_spec(transport_spec)
+    modules[transport_spec.name] = transport
     identity_spec = importlib.util.spec_from_file_location(
         "_fora6_identity_test.protocol_probe", INTEGRATION / "protocol_probe.py"
     )
@@ -60,6 +66,7 @@ def _load_probe():
     identity = importlib.util.module_from_spec(identity_spec)
     with patch.dict(sys.modules, modules):
         protocol_spec.loader.exec_module(protocol)
+        transport_spec.loader.exec_module(transport)
         identity_spec.loader.exec_module(identity)
     return identity, bluetooth, connector
 

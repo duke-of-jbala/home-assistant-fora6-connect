@@ -1,33 +1,24 @@
 # FORA 6 Connect Codex Handover
 
-## Current corrective task — QC terminology
-
-The protocol record part exposes `is_qc`, which reflects only `TD4183RecordCategory.QC`. It makes no control-solution interpretation. Stage 2A–2G are complete for their authorized scopes; remaining protocol semantics are open/deferred and do not invalidate Stage 3. The focused change alters no fixture bytes, parser behavior, command IDs, BLE behavior, or action schemas.
-
-- **Branch/checkpoint:** `main`, `98c84a5f5b46bdace0e00a92d043afb3ebe3d3f8` — `feat: add offline TD4183 record model and synthetic fixtures`.
-- **Starting tree:** clean before this correction.
-- **Changed files:** `custom_components/fora6_connect/protocol.py`, `tests/test_record_schema.py`, `docs/STAGE2G_TD4183_RECORD_SCHEMA.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md`.
-- **Checks:** final suite and static/privacy checks are performed before commit; record results and post-commit status in the final response.
-
 ## Stage and checkpoint
 
-Stages 0, 1, and 3 are complete for their authorized scope. Stage 2 remains in progress; Stages 2A–2G are complete. Stage 3 added an offline combined TD4183 record model and synthetic fixtures only. No live BLE operation, action result schema, production synchronization, or entity changed.
+Stage 4 reusable Home Assistant Bluetooth transport is implemented for its authorized scope; controlled physical regression is pending separate review and user action. Stages 0, 1, 3, and 2A–2G are complete for their authorized scopes. Unresolved protocol semantics remain open/deferred. Stage 5 has not started.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `338d1b759dbc7f60a0eb305de09442856a5950c0` — `feat: add evidence-backed TD4183 record parser`.
-- **Starting tree:** clean, verified with `git status --short` before Stage 3 changes.
-- **Changes after checkpoint:** yes; offline model, fixtures/tests, and Markdown are changed at this pre-commit point. Report this task's commit SHA and post-commit status separately.
-- **Live actions by Codex:** none. No deployment, push, tag, or release.
+- **Last completed checkpoint:** `de7001c1b7b9d5ecb808ee417db3f4b9893269f9` — `fix: preserve TD4183 QC semantics`.
+- **Starting tree:** clean, verified with `git status --short` before Stage 4 edits.
+- **Changes after checkpoint:** yes; transport, probe refactor, mock tests, and Markdown are changed at this pre-commit point. Report the task commit SHA and post-commit status separately.
+- **Live actions by Codex:** none. No deployment, push, tag, release, or physical meter test.
 
-## Stage 3 implementation and limits
+## Implementation and behavior
 
-`models.py` contains frozen `TD4183Record` over typed `0x25` and `0x26` parser outputs. It retains both parts and exposes meter-local time, transmitted status, raw wire value, valid/usable status, analyte code/mapping, category/QC, auxiliary byte, overlapping app code number, and conditional uric-acid raw/10 scaling. Unknown analytes remain `None`; `0xFFFF` is never a usable or scaled measurement. The model assigns no unit, timezone, record ID, sync timestamp, AC/PC clinical meaning, or production policy. It does not import Home Assistant or Bleak.
+`bluetooth.py` contains `Fora6BluetoothTransport(hass, runtime_address)`. It resolves a connectable `BLEDevice` through Home Assistant, uses the repository's proven two-attempt connector pattern, validates the custom Write/Notify characteristic, subscribes, performs one command-agnostic request/response exchange at a time, and closes deterministically. It bounds connection, notification, write, response, and cleanup waits; serializes exchanges per instance; fails malformed pending notifications closed; retries no application write; and exposes stable privacy-safe error codes. No raw notification queue, address logging, or hard-coded adapter path exists. [The Stage 4 record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) documents the API and limits.
 
-`tests/fixtures_td4183.py` builds ten entirely synthetic, checksummed pairs; `tests/test_record_model.py` verifies their structure and combined semantics. [The Stage 3 record](docs/STAGE3_RECORD_MODEL_AND_FIXTURES.md) documents provenance and remaining unknowns. The roadmap sentence saying there was no record parser was corrected while historical changelog entries remained intact. No private decompilation, HCI capture, health value, timestamp, address, or raw real response was added.
+`protocol_probe.py` delegates transport mechanics to this class but retains the two existing bounded command sequences, service/action names, input/result schemas, timeout settings, and privacy semantics. Existing probe tests pass. `gatt_probe.py` and `notification_observer.py` were not refactored. `protocol.py` and `models.py` are unchanged and remain HA/Bleak independent. No production discovery, config flow, synchronization, entity, polling, pairing, RACP, `0x2F`, or `0x33` path was introduced.
 
 ## Exact next gate and checks
 
-**Next gate:** separately authorize Stage 4 Home Assistant Bluetooth transport and define its evidence-bound behavior. Stage 3 authorizes no new command, physical test, `0x2F`/`0x33`, record loop, decoded real-result exposure, production sync, or entity.
+**Next gate:** review Stage 4 and separately authorize a controlled user-run identity regression on the GD82 with the meter ON, optionally followed by the already-proven one-slot record action. Stage 5 measurement/entity work needs a distinct later authorization. Do not claim a physical transport regression or a selected proxy before that test.
 
-- **Files changed at pre-commit:** `custom_components/fora6_connect/models.py`, `tests/fixtures_td4183.py`, `tests/test_record_model.py`, `docs/STAGE3_RECORD_MODEL_AND_FIXTURES.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and `docs/PROTOCOL.md`.
-- **Checks actually run:** 119 unit tests passed (13 new); compileall, tabnanny, manifest/translation/strings JSON, services YAML, `git diff --check`, and `git diff --cached --check` passed. The complete 14-file staged diff was inspected. Staged privacy/artifact review found no private path, address, captured frame, capture/package artifact, proprietary source, real health value, or timestamp. None of the 21 generated synthetic frames exactly matched the retained private capture; only the count was reported. No untracked file remained after staging. AST imports confirmed `protocol.py` and `models.py` are HA/Bleak independent. The only staged integration code file is `models.py`; `protocol.py`, `protocol_probe.py`, `__init__.py`, service definitions, and translations have no diff. No BLE command ID or live action result schema changed.
+- **Files changed at pre-commit:** `custom_components/fora6_connect/bluetooth.py`, `custom_components/fora6_connect/protocol_probe.py`, `tests/test_bluetooth_transport.py`, `tests/test_protocol_probe.py`, `docs/STAGE4_BLUETOOTH_TRANSPORT.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and `docs/PROTOCOL.md`.
+- **Checks actually run:** 156 unit tests passed (37 new transport tests); existing probe regressions retained exact writes and result fields. Compileall, tabnanny, manifest/translation/strings JSON, services YAML, `git diff --check`, and `git diff --cached --check` passed. The complete 15-file staged diff was inspected. Staged privacy/artifact review found no private path, Bluetooth address, captured frame, APK/capture/keystore artifact, or health data; no untracked file remained. Neither transport nor probe logs raw bytes or addresses. `bluetooth.py` has no FORA command ID or adapter hard-coding. AST review confirmed `protocol.py` and `models.py` remain HA/Bleak independent; AST comparison found the action result dictionary unchanged from HEAD. Service registration/input schemas and later-stage modules have no diff.

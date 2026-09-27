@@ -2,13 +2,13 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stages 0, 1, and 3 are complete for their authorized scope; Stage 2 remains in progress with Stages 2A–2G complete. Stage 2F retrieved valid User1/index-zero record frames on the real GD82 with the meter ON. Stage 2G added offline evidence-backed decoding, and Stage 3 added an immutable combined record model and synthetic fixtures. The live action still exposes no analyte, value, or timestamp. Production discovery, record synchronization, and measurement entities remain unimplemented; this project is not ready for health monitoring.
+**Status:** Stages 0, 1, 3, Stage 4 implementation, and Stages 2A–2G are complete for their authorized scopes. Unresolved protocol semantics remain open. Stage 4 added a mock-tested reusable Home Assistant Bluetooth transport and refactored the existing bounded probes; its controlled physical regression is pending. The actions still expose no analyte, value, or timestamp. Production discovery, record synchronization, and measurement entities remain unimplemented; this project is not ready for health monitoring.
 
 The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect.
 
 ## Project plan
 
-[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 2G schema review](docs/STAGE2G_TD4183_RECORD_SCHEMA.md) maps parsed fields; the [Stage 3 record](docs/STAGE3_RECORD_MODEL_AND_FIXTURES.md) explains the offline model and synthetic corpus. **Exact next gate:** separately authorize Stage 4 production Bluetooth transport. Stage 3 authorizes no new physical BLE operation. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
+[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and its tests. **Exact next gate:** review Stage 4 and separately authorize the controlled user-run regression using only the already-proven development actions. Stage 5 needs separate authorization. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
 
 ## Development
 

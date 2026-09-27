@@ -7,19 +7,12 @@ action pairs, decodes measurements, or registers production discovery.
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
-from bleak_retry_connector import (
-    BleakClientWithServiceCache,
-    BleakOutOfConnectionSlotsError,
-    establish_connection,
-)
-from homeassistant.components import bluetooth
 from homeassistant.core import HomeAssistant
 
-from .const import CHARACTERISTIC_UUID, NAME, SERVICE_UUID
-from .gatt_probe import CONNECTION_TIMEOUT, DISCONNECT_TIMEOUT
+from .bluetooth import Fora6BluetoothTransport, TransportError
+from .const import CHARACTERISTIC_UUID, SERVICE_UUID
 from .protocol import (
     ProtocolFrame,
     build_project_query_request,
@@ -29,13 +22,9 @@ from .protocol import (
     build_wake_request,
     parse_project_id,
     parse_record_slot_count,
-    validate_response_echo,
 )
 
 EXPECTED_PROJECT_ID = 0x4183
-CONNECT_TOTAL_TIMEOUT = 50.0
-NOTIFY_TIMEOUT = 10.0
-WRITE_TIMEOUT = 10.0
 RESPONSE_TIMEOUT = 15.0
 
 
@@ -46,25 +35,6 @@ class _ProbeFailure(Exception):
         super().__init__(code)
         self.stage = stage
         self.code = code
-
-
-def _custom_characteristic(services: Any) -> Any:
-    """Select only the custom characteristic with Write and Notify properties."""
-    try:
-        service = next(
-            item for item in services if str(item.uuid).lower() == SERVICE_UUID
-        )
-        characteristic = next(
-            item
-            for item in service.characteristics
-            if str(item.uuid).lower() == CHARACTERISTIC_UUID
-        )
-        properties = {str(prop).lower() for prop in characteristic.properties}
-    except (AttributeError, StopIteration, TypeError):
-        raise _ProbeFailure("gatt", "custom_characteristic_missing") from None
-    if not {"write", "notify"} <= properties:
-        raise _ProbeFailure("gatt", "custom_properties_missing")
-    return characteristic
 
 
 def _empty_result(*, record_probe: bool = False) -> dict[str, Any]:
@@ -117,26 +87,9 @@ async def async_probe_protocol_identity(
 ) -> dict[str, Any]:
     """Run bounded identity, optionally followed by one raw-slot exchange."""
     result = _empty_result(record_probe=_record_probe)
-    client: Any = None
-    characteristic: Any = None
-    subscribed = False
-    pending_request: ProtocolFrame | None = None
-    pending_response: asyncio.Future[ProtocolFrame | None] | None = None
-
-    def on_notification(_sender: Any, data: bytearray) -> None:
-        """Validate an ephemeral frame without logging or returning its bytes."""
-        current_request = pending_request
-        current_future = pending_response
-        if current_request is None or current_future is None or current_future.done():
-            return
-        try:
-            frame = ProtocolFrame(bytes(data))
-            validate_response_echo(current_request, frame)
-        except Exception:
-            # Callback failures must remain private and fail the active exchange.
-            current_future.set_result(None)
-            return
-        current_future.set_result(frame)
+    transport = Fora6BluetoothTransport(
+        hass, address, response_timeout=RESPONSE_TIMEOUT
+    )
 
     async def exchange(
         request: ProtocolFrame,
@@ -145,89 +98,20 @@ async def async_probe_protocol_identity(
         write_success_key: str,
         response_valid_key: str,
     ) -> ProtocolFrame:
-        """Write once and await one matching, validated notification."""
-        nonlocal pending_request, pending_response
-        if not client.is_connected:
-            raise _ProbeFailure(stage, "peer_disconnected")
-        future: asyncio.Future[ProtocolFrame | None] = (
-            asyncio.get_running_loop().create_future()
-        )
-        pending_request = request
-        pending_response = future
+        """Map transport outcomes to the existing semantic action schema."""
         try:
-            try:
-                await asyncio.wait_for(
-                    client.write_gatt_char(
-                        characteristic, request.data, response=True
-                    ),
-                    timeout=WRITE_TIMEOUT,
-                )
-            except Exception:
-                raise _ProbeFailure(stage, "write_failed") from None
-            result[write_success_key] = True
-            try:
-                response = await asyncio.wait_for(future, timeout=RESPONSE_TIMEOUT)
-            except TimeoutError:
-                raise _ProbeFailure(stage, "response_timeout") from None
-            if response is None:
-                raise _ProbeFailure(stage, "invalid_response")
-            if not client.is_connected:
-                raise _ProbeFailure(stage, "peer_disconnected")
-            result[response_valid_key] = True
-            return response
-        finally:
-            pending_request = None
-            pending_response = None
+            response = await transport.async_exchange(request)
+        except TransportError as failure:
+            if failure.write_succeeded:
+                result[write_success_key] = True
+            raise _ProbeFailure(stage, failure.code) from None
+        result[write_success_key] = True
+        result[response_valid_key] = True
+        return response
 
     try:
-        try:
-            ble_device = bluetooth.async_ble_device_from_address(
-                hass, address, connectable=True
-            )
-        except Exception:
-            raise _ProbeFailure("resolution", "resolution_failed") from None
-        if ble_device is None:
-            raise _ProbeFailure("resolution", "no_connectable_device")
-        result["device_found"] = True
-        result["connectable_device_resolved"] = True
-
-        try:
-            client = await asyncio.wait_for(
-                establish_connection(
-                    BleakClientWithServiceCache,
-                    ble_device,
-                    NAME,
-                    max_attempts=2,
-                    use_services_cache=False,
-                    timeout=CONNECTION_TIMEOUT,
-                    pair=False,
-                ),
-                timeout=CONNECT_TOTAL_TIMEOUT,
-            )
-        except BleakOutOfConnectionSlotsError:
-            raise _ProbeFailure("connection", "no_connection_slot") from None
-        except Exception:
-            raise _ProbeFailure("connection", "connection_failed") from None
-        if not client.is_connected:
-            raise _ProbeFailure("connection", "peer_disconnected")
-        result["connection_successful"] = True
-        result["connected_via_ha_bluetooth"] = True
-
-        if client.services is None:
-            raise _ProbeFailure("gatt", "services_unavailable")
-        characteristic = _custom_characteristic(client.services)
-        result["custom_characteristic_found"] = True
-
-        try:
-            await asyncio.wait_for(
-                client.start_notify(characteristic, on_notification),
-                timeout=NOTIFY_TIMEOUT,
-            )
-        except Exception:
-            raise _ProbeFailure("subscription", "subscription_failed") from None
-        subscribed = True
-        result["notification_subscription_successful"] = True
-
+        await transport.async_connect()
+        await transport.async_subscribe()
         await exchange(
             build_wake_request(),
             stage="wake",
@@ -270,6 +154,9 @@ async def async_probe_protocol_identity(
                 response_valid_key="record_part_2_valid",
             )
             result["record_pair_complete"] = True
+    except TransportError as failure:
+        result["error_stage"] = failure.stage
+        result["error_code"] = failure.code
     except _ProbeFailure as failure:
         result["error_stage"] = failure.stage
         result["error_code"] = failure.code
@@ -277,24 +164,20 @@ async def async_probe_protocol_identity(
         result["error_stage"] = "probe"
         result["error_code"] = "unexpected_failure"
     finally:
-        pending_request = None
-        pending_response = None
-        if subscribed:
-            try:
-                await asyncio.wait_for(
-                    client.stop_notify(characteristic), timeout=NOTIFY_TIMEOUT
-                )
-                result["notification_stopped_cleanly"] = True
-            except Exception:
-                result["cleanup_errors"].append("notification_stop_failed")
-        if client is not None:
-            try:
-                await asyncio.wait_for(
-                    client.disconnect(), timeout=DISCONNECT_TIMEOUT
-                )
-                result["disconnected_cleanly"] = True
-            except Exception:
-                result["cleanup_errors"].append("disconnect_failed")
+        result["device_found"] = transport.device_resolved
+        result["connectable_device_resolved"] = transport.device_resolved
+        result["connection_successful"] = transport.connection_established
+        result["connected_via_ha_bluetooth"] = transport.connection_established
+        result["custom_characteristic_found"] = transport.characteristic_found
+        result["notification_subscription_successful"] = (
+            transport.subscription_established
+        )
+        cleanup = await transport.async_close()
+        result["notification_stopped_cleanly"] = (
+            cleanup.notification_stopped_cleanly
+        )
+        result["disconnected_cleanly"] = cleanup.disconnected_cleanly
+        result["cleanup_errors"].extend(cleanup.errors)
 
     if result["cleanup_errors"] and result["error_code"] is None:
         result["error_stage"] = "cleanup"
