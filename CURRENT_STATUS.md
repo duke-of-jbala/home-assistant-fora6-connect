@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 10 HACS packaging — validation closure, pre-commit
+
+- **Branch/date and validated checkpoint:** `main`, 2026-09-27 (Europe/London), `cc06e9666fbb305a7433509f5ec7706b911db8f1` — `fix: satisfy hassfest packaging checks`. `git status --short` returned no entries at this checkpoint, and origin/main matched it.
+- **Observed official validation:** [GitHub Actions run 36354523910](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36354523910) completed successfully on that exact SHA: HACS Integration validation **passed** and Home Assistant hassfest **passed**. The earlier hassfest failure on `d60aa57` was corrected by manifest sorting and the config-entry-only schema declaration.
+- **Stage status:** **complete for repository packaging and validation**. The standard one-integration HACS custom-repository structure, manifest, `hacs.json`, original local icon, license, public metadata, installation/update/removal guide, version policy, isolated-copy check, privacy audit, local tests, and official validators pass. A fresh HACS UI install/update is reserved for Stage 11; Stage 10 does not claim that external exercise.
+- **Changes after validated checkpoint:** yes, this documentation closure updates `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/STAGE10_HACS_PACKAGING_READINESS.md`, and `docs/DEVELOPMENT.md`. The working tree is modified at this pre-commit observation; verify/report its post-push state separately. No runtime or test source changes are made here.
+- **Local gates on the validated package:** full suite **375/375** passed; compileall, tabnanny, four JSON/two YAML/one TOML parses, manifest order, isolated copy of 27 modules, diff checks, new-line privacy scan, and artifact scan passed.
+
+**Exact next proposed gate:** separately authorize Stage 11 release-candidate validation, including controlled HACS custom-repository install/update and restart. Stage 8H remains optional and unstarted.
+
 ## Stage 10 validator follow-up — pre-commit observation
 
 - **Branch/date and interim checkpoint:** `main`, 2026-09-27 (Europe/London), `d60aa576d2ab9d19ef237329b5e9bc116de8b1f8` — `chore: prepare HACS integration packaging`. That commit was pushed normally and origin/main matched it; its local working tree was clean before this follow-up.

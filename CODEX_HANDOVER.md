@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 10 HACS packaging — validated closure, pre-commit
+
+Public `main` was clean at `cc06e9666fbb305a7433509f5ec7706b911db8f1` (`fix: satisfy hassfest packaging checks`) on 2026-09-27 (Europe/London), with origin/main matching. [GitHub Actions run 36354523910](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36354523910) completed **successfully** for this SHA: both official HACS Integration validation and Home Assistant hassfest passed. Stage 10 is complete for repository packaging and validation. The initial manifest-order failure was addressed by the later narrow follow-up. No HACS UI install/update is claimed; that controlled user-facing exercise belongs to Stage 11.
+
+The validated package uses one self-contained integration directory, root HACS metadata, original local icon, MIT license, `0.1.0` development manifest version, read-only pinned CI, and documented install/update/remove steps. The full synthetic suite passed **375/375**; compileall, tabnanny, JSON/YAML/TOML parsing, isolated copy, diff/privacy/artifact checks passed. BLE transport, record selection, sensor behavior, and Stage 9 physical evidence remain unchanged.
+
+This documentation closure changes the files listed in `CURRENT_STATUS.md`; the tree is modified at this pre-commit observation. Verify its own commit/push, GitHub workflow, remote main, and final status separately.
+
+**Exact next proposed gate:** separately authorize Stage 11 release-candidate validation with a controlled HACS custom-repository install/update and restart. Stage 8H remains optional and unstarted.
+
 ## Stage 10 validator follow-up — pre-commit
 
 The first Stage 10 commit `d60aa576d2ab9d19ef237329b5e9bc116de8b1f8` (`chore: prepare HACS integration packaging`) was pushed to `main` on 2026-09-27 (Europe/London) and had a clean local tree before this follow-up. The official HACS integration job passed; hassfest failed on manifest key order and warned about the missing config-entry-only schema. That is a genuine packaging validation finding.

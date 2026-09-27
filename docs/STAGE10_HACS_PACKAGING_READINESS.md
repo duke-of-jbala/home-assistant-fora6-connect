@@ -1,5 +1,11 @@
 # Stage 10 — HACS packaging and installation readiness
 
+**Status: complete for repository packaging and validation.** The corrected
+package at `cc06e9666fbb305a7433509f5ec7706b911db8f1` passed both
+[HACS Integration validation and Home Assistant hassfest](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36354523910).
+The controlled HACS UI install/update is the next, separately authorized
+Stage 11 exercise. No tag or release was created.
+
 **Scope:** Repository/package validation for the existing GD82 integration. A
 validator-driven config-entry-only schema declaration is the sole Python change;
 it adds no manual refresh, protocol, discovery, identity, coordinator, sensor,
@@ -108,7 +114,9 @@ local gates. The new GitHub workflow runs the official HACS repository action
 for category `integration` and Home Assistant hassfest on push, PR, and manual
 dispatch with immutable action revisions and read-only permissions. These
 external validators require GitHub Actions; local availability alone does not
-count as a pass. Record their actual push results after committing.
+count as a pass. Both official jobs passed on the corrected package commit
+above. The first packaging commit's HACS job passed while hassfest found one
+manifest error and one config-schema warning; the follow-up resolved them.
 
 The temporary-directory simulation copies only the integration directory into
 `custom_components/fora6_connect/`, checks that the manifest/resources parse,
