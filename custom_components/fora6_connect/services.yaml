@@ -84,6 +84,23 @@ probe_history_window:
       required: true
       selector:
         text: {}
+probe_history_semantics:
+  name: Probe bounded history semantics (development only)
+  description: >-
+    Development-only Stage 7C. Confirm GD82 identity, require exactly two
+    User1 raw slots, and classify only the fixed raw-index sequence 1, 0, 1.
+    Returns classification and status booleans only. No health value,
+    timestamp, payload, or production synchronization is exposed.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the runtime meter address privately from Advertisement Monitor.
+        It is used only in memory for this manual action and is never returned,
+        logged, or persisted.
+      required: true
+      selector:
+        text: {}
 probe_serial_identity:
   name: Probe serial identity (development only)
   description: >-

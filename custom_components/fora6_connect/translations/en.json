@@ -49,6 +49,16 @@
           "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned, logged, or persisted."
         }
       }
+    },
+    "probe_history_semantics": {
+      "name": "Probe bounded history semantics (development only)",
+      "description": "Stage 7C only. Confirm GD82 identity, require exactly two User1 raw slots, and classify only raw indexes 1, 0, 1. Returns classification and status booleans without health values, timestamps, or private identifiers. No production synchronization.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Copy the runtime meter address privately from Advertisement Monitor. Used only in memory for this manual action; never returned, logged, or persisted."
+        }
+      }
     }
   },
   "config": {

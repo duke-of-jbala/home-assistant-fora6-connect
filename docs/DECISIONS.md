@@ -96,4 +96,8 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 
 ## Stage 7B — fixed two-slot physical-evidence gate
 
-**Status:** Implementation and synthetic tests only; no physical result yet. [The Stage 7B action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) sends `1 → 0 → 1` only after identity and an exact raw-count-two metadata result. It compares repeated index-one frames only in memory and exposes equality booleans. This is a deliberately fixed physical-evidence probe, not authorization for history traversal, deduplication, persistence, polling, or an entity update. A sanitized user-run result must be reviewed at a separate gate.
+**Status:** Implemented and physically validated for the exact count-two branch. [The Stage 7B action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) sends `1 → 0 → 1` only after identity and an exact raw-count-two metadata result. The user-run GD82 result returned valid pairs, within-session repeated index-one frame equality, and clean cleanup. This fixed physical result does not authorize general history traversal, deduplication, persistence, polling, or an entity update.
+
+## Stage 7C — classify only the fixed pair sequence
+
+**Status:** Development-only implementation and synthetic validation; physical semantic confirmation pending. [The Stage 7C action](STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) repeats only the already validated Stage 7B command/index sequence and applies the existing pure record parser/model in memory. It returns only analyte/category/QC/sentinel classification and repeat-equality booleans. Semantic mismatch is reported without guessing its cause. No value, timestamp, raw frame, identifier, or hash is disclosed; no entity state, coordinator, persistence, deduplication, or production sync is changed. Review a separately user-run sanitized result before proposing broader work.

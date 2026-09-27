@@ -294,3 +294,7 @@ The [Stage 5A evidence record](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) traces both a
 ### Stage 7B fixed index-one request boundary
 
 [The Stage 7B development action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) adds pure index-one User1 `0x25`/`0x26` constructors from the two-version static builder and retained app request evidence. The existing index-zero constructors are unchanged. A pure `0x2B` helper reads the app-labeled newest-index field from response bytes 4–5; the action does not use it to select or order records. Only a raw count of exactly two permits the fixed `1 → 0 → 1` sequence, with no more than three pairs. Each part is frame- and parser-validated, and repeated index-one frame equality stays private. The user-run real GD82 probe passed this exact bounded branch and cleanup. This does not establish broader traversal, record identity, deduplication, production sync, or general ordering.
+
+### Stage 7C semantic confirmation boundary
+
+[Stage 7C](STAGE7C_SEMANTIC_PAIR_CONFIRMATION.md) uses the unchanged `parse_td4183_record_part_one`, `parse_td4183_record_part_two`, and `combine_td4183_record` path on the exact Stage 7B pair sequence. It compares the parsed analyte, category, and invalid-sentinel status against the private import's published classifications: index zero uric acid/General/valid; index one hematocrit/QC/invalid sentinel. The repeated index-one classification is compared in memory. No scaling, unit, timestamp, raw payload, new protocol field, command, or production interpretation is added. A physical semantic result is pending.
