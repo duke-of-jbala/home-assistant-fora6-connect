@@ -16,6 +16,7 @@ PROJECT_QUERY_COMMAND = 0x24
 RECORD_SLOT_COUNT_COMMAND = 0x2B
 RECORD_PART_ONE_COMMAND = 0x25
 RECORD_PART_TWO_COMMAND = 0x26
+USER_ONE_SELECTOR = 0x01
 
 
 class FrameError(ValueError):
@@ -108,10 +109,11 @@ def build_project_query_request() -> ProtocolFrame:
 
 
 def _build_static_record_request(command_id: int) -> ProtocolFrame:
-    """Build only the read-oriented current-user, raw-index-zero app requests.
+    """Build only the read-oriented User1, raw-index-zero app requests.
 
-    Stage 2B's retained iFORA HM 1.7.6/1.7.9 builders and the Stage 2C
-    command sequence support these exact requests. This does not decode data.
+    Both app builders encode the User1 enum value directly: byte 2 in the
+    0x2B query and byte 5 in indexed 0x25/0x26 requests. The Stage 2C wire
+    requests corroborate these exact forms. This does not decode record data.
     """
     if command_id not in (
         RECORD_SLOT_COUNT_COMMAND,
@@ -119,12 +121,16 @@ def _build_static_record_request(command_id: int) -> ProtocolFrame:
         RECORD_PART_TWO_COMMAND,
     ):
         raise FrameError("Unsupported Stage 2F record request.")
-    first_seven = bytes((FRAME_PREFIX, command_id, 0, 0, 0, 0, REQUEST_MARKER))
+    if command_id == RECORD_SLOT_COUNT_COMMAND:
+        parameters = (USER_ONE_SELECTOR, 0, 0, 0)
+    else:
+        parameters = (0, 0, 0, USER_ONE_SELECTOR)
+    first_seven = bytes((FRAME_PREFIX, command_id, *parameters, REQUEST_MARKER))
     return ProtocolFrame(first_seven + bytes((checksum_for(first_seven),)))
 
 
 def build_record_slot_count_request() -> ProtocolFrame:
-    """Build the statically traced 0x2B current-user slot query."""
+    """Build the statically traced 0x2B User1 slot query."""
     return _build_static_record_request(RECORD_SLOT_COUNT_COMMAND)
 
 

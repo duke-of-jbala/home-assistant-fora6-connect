@@ -32,7 +32,7 @@
     },
     "probe_protocol_record": {
       "name": "Probe first stored record (development only)",
-      "description": "Stage 2F only. Confirm GD82 identity, then query current-user record slots and raw index zero through custom 1524. Returns status only. No clock setting, pairing, or production sync.",
+      "description": "Physical Stage 2F testing is paused pending review of corrected selector evidence. Stage 2F only: confirm GD82 identity, then query User1 record slots and raw index zero through custom 1524. Returns status only. No clock setting, pairing, or production sync.",
       "fields": {
         "address": {
           "name": "Bluetooth address (private)",

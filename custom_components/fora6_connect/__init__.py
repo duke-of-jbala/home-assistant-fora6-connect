@@ -103,7 +103,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     )
 
     async def async_handle_probe_protocol_record(call: ServiceCall) -> dict:
-        """Return only sanitized status for one current-user raw slot."""
+        """Return only sanitized status for one User1 raw slot."""
         if probe_lock.locked():
             raise ServiceValidationError(
                 "A FORA development action is already running."

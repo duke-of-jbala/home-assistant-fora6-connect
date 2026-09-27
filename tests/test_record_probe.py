@@ -21,9 +21,14 @@ def _synthetic_response(command: int, data: bytes = b"\x00\x00\x00\x00") -> byte
     return first_seven + bytes((sum(first_seven) & 0xFF,))
 
 
-COUNT_REQUEST = bytes.fromhex("51 2B 00 00 00 00 A3 1F")
-PART_ONE_REQUEST = bytes.fromhex("51 25 00 00 00 00 A3 19")
-PART_TWO_REQUEST = bytes.fromhex("51 26 00 00 00 00 A3 1A")
+COUNT_REQUEST = bytes.fromhex("51 2B 01 00 00 00 A3 20")
+PART_ONE_REQUEST = bytes.fromhex("51 25 00 00 00 01 A3 1A")
+PART_TWO_REQUEST = bytes.fromhex("51 26 00 00 00 01 A3 1B")
+OBSOLETE_ALL_ZERO_REQUESTS = (
+    bytes.fromhex("51 2B 00 00 00 00 A3 1F"),
+    bytes.fromhex("51 25 00 00 00 00 A3 19"),
+    bytes.fromhex("51 26 00 00 00 00 A3 1A"),
+)
 COUNT_RESPONSE = _synthetic_response(0x2B, b"\x01\x00\x00\x00")
 PART_ONE_RESPONSE = _synthetic_response(0x25)
 PART_TWO_RESPONSE = _synthetic_response(0x26)
@@ -123,6 +128,10 @@ class RecordProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             [call.args[1] for call in self.client.write_gatt_char.call_args_list],
             list(EXPECTED_REQUESTS),
+        )
+        self.assertFalse(
+            set(OBSOLETE_ALL_ZERO_REQUESTS)
+            & {call.args[1] for call in self.client.write_gatt_char.call_args_list}
         )
         self.assertEqual(
             self.events,

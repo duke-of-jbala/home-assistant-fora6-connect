@@ -2,13 +2,13 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stage 0 and Stage 1 are complete; Stage 2 is in progress. Stage 2E's real Home Assistant identity probe succeeded with the meter ON and confirmed project `0x4183`. Stage 2F's offline review supports a development-only probe for **one raw record slot**; that probe has not yet been run on the physical meter. It returns only response-status flags, with no measurement or timestamp decoding. Production discovery, record synchronization, and measurement entities remain unimplemented; this project is not ready for health monitoring.
+**Status:** Stage 0 and Stage 1 are complete; Stage 2 is in progress. Stage 2E's real Home Assistant identity probe succeeded with the meter ON and confirmed project `0x4183`. Stage 2F's selector evidence gate was reopened when its committed record requests disagreed with the retained live app capture. A corrective, development-only one-slot probe is under review; **physical Stage 2F testing is paused** and no Home Assistant record request has been sent. Production discovery, record synchronization, and measurement entities remain unimplemented; this project is not ready for health monitoring.
 
 The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect.
 
 ## Project plan
 
-[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 2F evidence record](docs/STAGE2F_TD4183_RECORD_PROBE.md) separates static request construction from the pending physical test. **Exact next gate:** one controlled user-run Home Assistant invocation of `fora6_connect.probe_protocol_record` on the existing stored record, followed by review of its privacy-safe result. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
+[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 2F evidence record](docs/STAGE2F_TD4183_RECORD_PROBE.md) explains the selector correction and remaining index-order uncertainty. **Exact next gate:** review the corrected evidence and implementation before any decision to resume physical Stage 2F testing. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
 
 ## Development
 

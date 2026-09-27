@@ -138,21 +138,30 @@ class Stage2CFrameTests(unittest.TestCase):
 class Stage2FRecordFrameTests(unittest.TestCase):
     """Static app-derived fixed requests and artificial response metadata."""
 
-    def test_exact_current_user_index_zero_requests(self) -> None:
+    def test_exact_user_one_index_zero_requests_match_live_wire(self) -> None:
         expected = (
-            (protocol.build_record_slot_count_request(), "51 2B 00 00 00 00 A3 1F"),
+            (protocol.build_record_slot_count_request(), "51 2B 01 00 00 00 A3 20"),
             (
                 protocol.build_first_record_part_one_request(),
-                "51 25 00 00 00 00 A3 19",
+                "51 25 00 00 00 01 A3 1A",
             ),
             (
                 protocol.build_first_record_part_two_request(),
-                "51 26 00 00 00 00 A3 1A",
+                "51 26 00 00 00 01 A3 1B",
             ),
         )
-        for frame, hex_bytes in expected:
+        obsolete_all_zero = (
+            "51 2B 00 00 00 00 A3 1F",
+            "51 25 00 00 00 00 A3 19",
+            "51 26 00 00 00 00 A3 1A",
+        )
+        for (frame, hex_bytes), obsolete in zip(expected, obsolete_all_zero):
             with self.subTest(command=frame.command_id):
                 self.assertEqual(frame.data, bytes.fromhex(hex_bytes))
+                self.assertNotEqual(frame.data, bytes.fromhex(obsolete))
+                self.assertEqual(
+                    protocol.checksum_for(frame.data[:7]), frame.data[7]
+                )
                 frame.require_request()
         with self.assertRaises(protocol.FrameError):
             protocol._build_static_record_request(0x33)
@@ -160,11 +169,12 @@ class Stage2FRecordFrameTests(unittest.TestCase):
             protocol._build_static_record_request(0x50)
 
     def test_synthetic_raw_slot_count_only(self) -> None:
-        first_seven = bytes.fromhex("51 2B 01 00 00 00 A5")
+        # Artificial count 0x0123; bytes 4–5 are separate newest-index data.
+        first_seven = bytes.fromhex("51 2B 23 01 02 00 A5")
         response = protocol.ProtocolFrame(
             first_seven + bytes((protocol.checksum_for(first_seven),))
         )
-        self.assertEqual(protocol.parse_record_slot_count(response), 1)
+        self.assertEqual(protocol.parse_record_slot_count(response), 0x0123)
         with self.assertRaises(protocol.FrameError):
             protocol.parse_record_slot_count(protocol.build_record_slot_count_request())
         with self.assertRaises(protocol.FrameError):
