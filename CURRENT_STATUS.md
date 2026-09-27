@@ -1,5 +1,16 @@
 # Current Status — FORA 6 Connect
 
+## Stage 11 release candidate — repository checks, pending real HACS validation
+
+- **Branch/date and starting checkpoint:** clean `main`, 2026-09-27 (Europe/London), `a7a1d37c805af6e5567efefaf837e88a6bdbfc9b` — `docs: close Stage 10 HACS readiness`; `origin/main` matched before this task.
+- **Observed repository checks:** a fresh GitHub Actions [HACS/hassfest run 36355057262](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355057262) passed on that SHA. The local suite passed **375/375**; compileall, tabnanny, four JSON/two YAML/one TOML parses, and isolated 27-module component copy passed. Public repository metadata remains active with MIT license, issues, description, and topics.
+- **User-supplied installation context:** HACS is installed, while the currently working FORA component is a manual copy. No Stage 11 HACS download, Home Assistant restart/reload after HACS install, HACS re-download, or post-install physical refresh has been observed yet. Earlier Stage 9 proxy evidence predates HACS ownership.
+- **Stage status:** **pending real HACS/manual validation**. Manifest stays at `0.1.0`; no RC tag/release or v1 publication is authorized. [The Stage 11 procedure](docs/STAGE11_RELEASE_CANDIDATE_VALIDATION.md) preserves the existing config entry and defines privacy-safe evidence and rollback.
+- **Changes after checkpoint:** yes; `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/STAGE10_HACS_PACKAGING_READINESS.md`, and new `docs/STAGE11_RELEASE_CANDIDATE_VALIDATION.md` changed. Only Markdown changed. The working tree was modified during this pre-commit observation. The task commit SHA, remote result, and final tree state must be verified after commit/push.
+- **Other checks actually run:** `git diff --check` and `git diff --cached --check` passed; changed-Markdown scans found no MAC-shaped address, IPv4 address, private home path, health timestamp, credential assignment, or raw capture extension. No prohibited tracked artifact or runtime/test/CI diff appeared. No Stage 11 physical Home Assistant test is claimed.
+
+**Exact next gate:** user-run controlled HACS handoff from the manual component, real Home Assistant restart/reload and manual refresh with direct proxy Source evidence, then review sanitized results before Stage 11 closure. Do not begin Stage 8H or Stage 12.
+
 ## Stage 10 HACS packaging — validation closure, pre-commit
 
 - **Branch/date and validated checkpoint:** `main`, 2026-09-27 (Europe/London), `cc06e9666fbb305a7433509f5ec7706b911db8f1` — `fix: satisfy hassfest packaging checks`. `git status --short` returned no entries at this checkpoint, and origin/main matched it.

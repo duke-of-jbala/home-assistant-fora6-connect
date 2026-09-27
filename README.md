@@ -90,6 +90,9 @@ measurement times, tokens, IP addresses, and unredacted logs/screenshots.
 
 The [Stage 10 packaging review](docs/STAGE10_HACS_PACKAGING_READINESS.md)
 records installation and release evidence. The
+[Stage 11 validation plan](docs/STAGE11_RELEASE_CANDIDATE_VALIDATION.md)
+describes the controlled handoff from an existing manual copy to HACS; real
+installation validation is pending. The
 [master roadmap](FORA6_MASTER_ROADMAP.md) tracks separately authorized work.
 The [protocol evidence register](docs/PROTOCOL.md) explains the bounded
 command and measurement model. Local [brand assets](docs/BRANDING.md) are

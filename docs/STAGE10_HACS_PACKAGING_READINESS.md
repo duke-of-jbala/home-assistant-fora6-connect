@@ -79,9 +79,10 @@ version. No tag or release is created at Stage 10.
 single development version in the distributable default branch. The old
 `0.0.0` was a bootstrap placeholder. The manifest is the integration version
 seen by Home Assistant; the GitHub release tag, when one exists, is the HACS
-remote update version. Stage 11 should choose one SemVer release candidate
-such as **`1.0.0-rc.1`**, set that exact manifest version, then validate its
-candidate release and HACS update behavior under separate authorization.
+remote update version. The Stage 10 proposal was to choose a SemVer release
+candidate such as **`1.0.0-rc.1`**. The later [Stage 11 decision](STAGE11_RELEASE_CANDIDATE_VALIDATION.md)
+keeps `0.1.0` for controlled default-branch HACS installation; an RC version,
+tag, and published release require separate authorization and validation.
 Stage 12 may use `1.0.0` only after RC acceptance and explicit release
 approval. The tag and published GitHub release should use the same version
 string as the manifest. Development commits without a release remain

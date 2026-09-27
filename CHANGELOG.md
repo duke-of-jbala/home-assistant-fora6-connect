@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Packaging
+- Stage 11 release-candidate preparation reran HACS and hassfest on the Stage 10 checkpoint, rechecked the isolated integration package and 375 synthetic tests, and documented a non-destructive handoff from a manual component copy to HACS. Real HACS installation and post-install proxy refresh remain pending; no version, tag, release, or runtime behavior changed.
 - Stage 10 prepared the repository for HACS custom Integration installation: replaced the bootstrap manifest version with `0.1.0`, added official HACS/hassfest validation workflow, documented install/update/removal and version policy, and corrected stale development-action wording. No BLE or sensor behavior changed.
 - The first HACS validator passed; hassfest exposed an existing manifest key-order error and missing config-entry-only schema warning. The follow-up sorts the manifest, declares the schema, and tests that declaration.
 - HACS Integration validation and Home Assistant hassfest both passed on the corrected Stage 10 package. A controlled HACS UI install/update remains for Stage 11.

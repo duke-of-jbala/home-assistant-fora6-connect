@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 11 release candidate — pending physical HACS install
+
+Starting state was clean public `main` at `a7a1d37c805af6e5567efefaf837e88a6bdbfc9b` (`docs: close Stage 10 HACS readiness`) on 2026-09-27 (Europe/London); `origin/main` matched. The user confirmed HACS is installed but the active FORA component was manually copied. A fresh [official HACS/hassfest run](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36355057262) passed on the baseline. Local **375/375** tests, compileall, tabnanny, resource parsing, and isolated package copy passed. Stage 9's physical proxy result is prior evidence, not proof of a HACS-installed run.
+
+This task changes only the Markdown files listed in `CURRENT_STATUS.md`, including [the controlled Stage 11 procedure](docs/STAGE11_RELEASE_CANDIDATE_VALIDATION.md) and a draft RC note. Keep manifest `0.1.0` for the default-branch HACS test. HACS does not adopt manual files automatically; it must download the custom repository into the same component path. Back up the installation, preserve the config entry and registry objects, and stop if HACS reports a file conflict. Do not tag or release to simulate an update. This is a pre-commit observation; verify the actual commit, remote, CI, and clean tree afterward.
+
+**Exact next gate:** user-run HACS download of the custom Integration, restart/reload, registry and action checks, real manual refresh with direct Bluetooth Connections proxy Source, safe re-download if offered, and sanitized log review. Stage 11 remains pending those results. Stage 8H and Stage 12 are not started.
+
 ## Stage 10 HACS packaging — validated closure, pre-commit
 
 Public `main` was clean at `cc06e9666fbb305a7433509f5ec7706b911db8f1` (`fix: satisfy hassfest packaging checks`) on 2026-09-27 (Europe/London), with origin/main matching. [GitHub Actions run 36354523910](https://github.com/duke-of-jbala/home-assistant-fora6-connect/actions/runs/36354523910) completed **successfully** for this SHA: both official HACS Integration validation and Home Assistant hassfest passed. Stage 10 is complete for repository packaging and validation. The initial manifest-order failure was addressed by the later narrow follow-up. No HACS UI install/update is claimed; that controlled user-facing exercise belongs to Stage 11.

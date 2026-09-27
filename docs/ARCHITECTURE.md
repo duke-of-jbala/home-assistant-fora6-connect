@@ -59,7 +59,7 @@ The manually invoked development-only `gatt_probe.py` validated Home Assistant c
 
 ## Documentation and packaging
 
-The custom integration uses `translations/en.json` for runtime localization. `strings.json` is included only to match the requested repository structure; Home Assistant's custom integration guidance does not use it as a runtime translation source. Manifest version `0.0.0` is a development placeholder required for a custom integration, not a release. The repository layout targets HACS; HACS readiness is a Stage 10 gate.
+The custom integration uses `translations/en.json` for runtime localization. `strings.json` is included only to match the requested repository structure; Home Assistant's custom integration guidance does not use it as a runtime translation source. The current custom-integration manifest version is `0.1.0` for default-branch HACS validation; no release or tag exists. Stage 10 validated the repository package, while [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md) awaits a real HACS UI handoff.
 
 ## Stage 6B entry and entity boundary
 

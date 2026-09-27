@@ -1,5 +1,17 @@
 # Architecture decisions
 
+## Stage 11 — validate default-branch HACS install before RC publication
+
+**Status:** Accepted for the current controlled validation. Keep manifest
+`0.1.0` while testing HACS installation of the default branch over the user's
+manual component copy. HACS must download the files; it does not adopt an
+existing local directory automatically. Preserve the Home Assistant config
+entry/device/entity and back up the working component first. A same-branch
+re-download can test package replacement but does not prove versioned update
+notification. A future explicitly authorized release candidate should use a
+single prerelease version across manifest, tag, and published release after
+validator acceptance. No RC tag/release is created here. See [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md).
+
 ## Stage 10 — default-branch HACS distribution before releases
 
 **Status:** Accepted for the pre-RC packaging gate. Use one `custom_components/fora6_connect/` package, root `hacs.json`, original local brand icon, and a `0.1.0` development manifest version. HACS custom repositories can use the default branch without a GitHub release; release-based update selection begins only after an explicitly authorized release. Stage 11 should use matching manifest/tag/release SemVer for a candidate such as `1.0.0-rc.1`. CI validates HACS and hassfest; a separate controlled HACS UI install/update remains Stage 11. See [Stage 10](STAGE10_HACS_PACKAGING_READINESS.md).
