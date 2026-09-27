@@ -1,6 +1,6 @@
 # Stage 6B — guarded Config Flow and persistent device identity
 
-**Scope:** offline implementation and synthetic validation. No physical Config Flow run, production record synchronization, polling, pairing, RACP, or new FORA command occurred in this stage. The controlled Home Assistant setup test remains a separate gate.
+**Scope:** implementation, synthetic validation, and user-run real Home Assistant discovery/setup validation on one GD82. No production record synchronization, polling, pairing, RACP, or new FORA command was introduced.
 
 ## Evidence and boundaries
 
@@ -35,6 +35,10 @@ Collision handling cannot prove global serial uniqueness. Any suspected two-mete
 
 The Home Assistant APIs followed are [Bluetooth manifest matchers](https://developers.home-assistant.io/docs/creating_integration_manifest/), [Config Flow unique IDs](https://developers.home-assistant.io/docs/core/integration/config_flow/), [entry setup forwarding](https://developers.home-assistant.io/docs/config_entries_index/), [device identifiers](https://developers.home-assistant.io/docs/device_registry_index/), and [sensor entities](https://developers.home-assistant.io/docs/core/entity/sensor/).
 
-## Next gate
+## Real Home Assistant validation and conclusion
 
-After code review, separately authorize a controlled real Home Assistant Bluetooth discovery/setup test with the meter ON. Observe whether the manifest candidate reaches the confirmation form, complete one guarded setup, check that one unavailable uric-acid entity belongs to one generic FORA device, and repeat discovery to confirm duplicate abort. Report only privacy-safe booleans/status; do not share the serial, address, raw bytes, or health result. Any Auto-mode/proxy-path claim remains Stage 9 evidence. Stage 7 historical synchronization requires separate authorization and a further evidence-backed record traversal/deduplication policy.
+The user deployed this implementation and observed automatic discovery of FORA 6 Connect, the discovery card, the confirmation flow, and successful setup. Home Assistant created one device with metadata `GD82` by `ForaCare` and exactly one uric-acid entity whose state was Unavailable, as expected without Stage 7 data. No serial or Bluetooth address appeared in the observed UI. After a meter OFF/ON cycle, no discovery card reappeared and the totals remained one device and one uric-acid entity.
+
+This validates production discovery, guarded identity confirmation, private serial identity, ConfigEntry creation, DeviceInfo association, and one-device/entity registration for this meter. The explicit duplicate-abort flow was not exercised because Home Assistant did not offer the already-configured meter again. Do not claim that branch was physically tested or infer population-wide serial uniqueness.
+
+**Stage 6B is complete for its authorized scope.** Population-wide serial uniqueness, factory-reset/firmware-update behavior, long-term Bluetooth address stability, manufacturer-data semantics, exact scanner/proxy path (Stage 9), historical record synchronization, deduplication/resume policy, and automatic measurement retrieval remain unresolved or deferred. **Exact next gate:** separately authorize Stage 7 synchronization design and implementation.

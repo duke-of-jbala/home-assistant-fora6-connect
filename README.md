@@ -2,13 +2,13 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stages 0–5A and 6A–6A1c are complete for their authorized scopes. Stage 6B implements a guarded Bluetooth Config Flow using the validated private `0x2A25` serial for one HA entry/device and registers one initially unavailable uric-acid sensor. The flow and entity are synthetic-tested; real setup has not been run. There is no production record synchronization or polling, so this project is not ready for health monitoring.
+**Status:** Stages 0–5A and 6A–6A1c are complete for their authorized scopes. Stage 6B implements a guarded Bluetooth Config Flow using the validated private `0x2A25` serial for one HA entry/device and registers one initially unavailable uric-acid sensor. The user validated discovery, confirmation, setup, device association, and one unavailable sensor on the real GD82. Duplicate-abort itself was not exercised. There is no production record synchronization or polling, so this project is not ready for health monitoring.
 
 The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect.
 
 ## Project plan
 
-[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and physical regression closure. The [Stage 5 model](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md), [Stage 5A unit evidence](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md), and [Stage 6A identity policy](docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md) document the current product and discovery boundaries. **Exact next gate:** separately authorize a controlled real Home Assistant Stage 6B discovery/setup test after review; Stage 7 synchronization requires its own authorization. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
+[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and physical regression closure. The [Stage 5 model](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md), [Stage 5A unit evidence](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md), and [Stage 6A identity policy](docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md) document the current product and discovery boundaries. **Exact next gate:** separately authorize Stage 7 synchronization design and implementation; no history retrieval or polling exists yet. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
 
 ## Development
 
