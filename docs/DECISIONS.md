@@ -85,3 +85,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 ## Stage 6B guarded identity implementation
 
 **Status:** Implemented and synthetic-tested on 2026-09-27; controlled physical setup validation pending. [Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) uses exact validated `0x2A25` UTF-8 text only for private ConfigEntry unique ID and shared DeviceInfo identifier. The Bluetooth address persists only as a mutable locator; same-serial/new-locator updates require explicit review and stop when the old locator is still connectable or another entry owns the new one. One uric-acid entity is registered unavailable until a later sync stage supplies an evidenced measurement. Population serial uniqueness and address rotation remain unresolved; no Stage 7 behavior is implied.
+
+## Stage 7A — defer production history traversal
+
+**Status:** Accepted evidence gate, 2026-09-27. [Stage 7A](STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) finds that both TD4183 app versions parse a raw `0x2B` count and retrieve a raw slot through `0x25`/`0x26`, but their multi-parameter heuristic and one private `1 → 0 → 1` sequence do not prove general index order, wrap, latest selection, or a collision-safe deduplication key. Do not activate coordinator retrieval, cursor persistence, polling, or entity updates. A development-only bounded Stage 7B physical probe requires separate authorization. Meter-local time stays naive and separate from future ingestion time.

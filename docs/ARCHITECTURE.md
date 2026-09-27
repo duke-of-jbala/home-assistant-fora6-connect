@@ -25,7 +25,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 - `measurement.py`: pure-Python Stage 5/5A product measurement mapping. It applies `/10` only to valid identified uric acid, retains category/transmitted/meter-local time, and assigns the app's evidenced mg/dL base unit to that valid analyte only.
 - `sensor_state.py`: pure Stage 5/5A ordinary uric-acid state mapping and inert per-entry runtime holder.
 - `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; no BLE I/O or polling.
-- `coordinator.py`: future retrieval and synchronization state.
+- `coordinator.py`: future retrieval and synchronization state; Stage 7A added no runtime coordinator behavior.
 - `config_flow.py`: Stage 6B passive candidate, user review, bounded active project/serial confirmation, and private persistent identity.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
@@ -44,3 +44,7 @@ The custom integration uses `translations/en.json` for runtime localization. `st
 ## Stage 6B entry and entity boundary
 
 [Stage 6B](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) enables an observed-shape Bluetooth candidate matcher and user-confirmed active model/serial identification. Exact `0x2A25` text is internal ConfigEntry/DeviceInfo identity; the address is mutable transport location only. Entry setup forwards one unavailable uric-acid sensor backed by inert measurement state. Neither discovery nor entity setup starts record retrieval, polling, or synchronization. The user-run real setup created one GD82 device and one unavailable uric-acid entity; after OFF/ON, no discovery card returned and the device/entity totals remained one. The explicit duplicate-abort flow was not exercised.
+
+## Stage 7A history gate
+
+[Stage 7A](STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) reviewed raw-count parsing, indexed pair retrieval, multi-parameter companion logic, and deduplication without adding a data path. The app's observed `1 → 0 → 1` access does not establish general history traversal or latest-record ordering. No collision-safe record ID or resume state is known. The one existing entity remains unavailable; `coordinator.py` is still inert. A separately authorized bounded Stage 7B probe is the next gate before production synchronization.

@@ -110,3 +110,7 @@ References checked during bootstrap: [Home Assistant integration manifests](http
 ## Stage 6B guarded setup
 
 [The Stage 6B record](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) describes the new manifest candidate matcher, confirmation forms, existing Stage 4 project exchange and Stage 6A1 serial read, exact serial unique ID, locator collision policy, and inert uric-acid platform. Synthetic tests and user-run real Home Assistant discovery/setup validation succeeded. One GD82 device and one unavailable uric-acid entity were created; no serial/address appeared in the observed UI. OFF/ON did not create another entry. The explicit duplicate-abort flow was not exercised. No new application command, record read, polling, or production sync was run. **Exact next gate:** separately authorize Stage 7 synchronization design and implementation.
+
+## Stage 7A offline history review
+
+[Stage 7A](STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) traces both private TD4183 app handlers and the already sanitized `1 → 0 → 1` import evidence. It documents raw `0x2B` count/newest fields, the last-slot single/multi heuristic, low-level pair order, and why latest ordering and deduplication remain unresolved. [The Stage 7 gate record](STAGE7_HISTORY_SYNC.md) keeps the intended synchronization policy separate from implemented behavior. No production sync, history test, or fixture was added. **Exact next gate:** separately authorize implementation and user-run validation of the bounded Stage 7B probe; no broad traversal or polling.
