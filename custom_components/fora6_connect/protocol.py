@@ -217,6 +217,26 @@ def build_first_record_part_two_request() -> ProtocolFrame:
     return _build_static_record_request(RECORD_PART_TWO_COMMAND)
 
 
+def _build_second_record_request(command_id: int) -> ProtocolFrame:
+    """Build only the app-captured User1 raw-index-one pair request."""
+    if command_id not in (RECORD_PART_ONE_COMMAND, RECORD_PART_TWO_COMMAND):
+        raise FrameError("Unsupported Stage 7B indexed request.")
+    first_seven = bytes(
+        (FRAME_PREFIX, command_id, 1, 0, 0, USER_ONE_SELECTOR, REQUEST_MARKER)
+    )
+    return ProtocolFrame(first_seven + bytes((checksum_for(first_seven),)))
+
+
+def build_second_record_part_one_request() -> ProtocolFrame:
+    """Build the Stage 7B User1 0x25 query for raw index one only."""
+    return _build_second_record_request(RECORD_PART_ONE_COMMAND)
+
+
+def build_second_record_part_two_request() -> ProtocolFrame:
+    """Build the Stage 7B User1 0x26 query for raw index one only."""
+    return _build_second_record_request(RECORD_PART_TWO_COMMAND)
+
+
 def validate_response_echo(request: ProtocolFrame, response: ProtocolFrame) -> None:
     """Validate the request/response roles and observed command-ID echo."""
     request.require_request()
@@ -243,6 +263,14 @@ def parse_record_slot_count(response: ProtocolFrame) -> int:
     if response.command_id != RECORD_SLOT_COUNT_COMMAND:
         raise FrameError("Expected a GD82 record-slot response.")
     return int.from_bytes(response.data[2:4], "little")
+
+
+def parse_record_newest_index(response: ProtocolFrame) -> int:
+    """Extract the app-labeled newest index without assigning ordering policy."""
+    response.require_response()
+    if response.command_id != RECORD_SLOT_COUNT_COMMAND:
+        raise FrameError("Expected a GD82 record-slot response.")
+    return int.from_bytes(response.data[4:6], "little")
 
 
 def parse_td4183_record_part_one(response: ProtocolFrame) -> TD4183RecordPartOne:

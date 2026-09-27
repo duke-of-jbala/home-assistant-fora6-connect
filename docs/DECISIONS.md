@@ -93,3 +93,7 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 ## Stage 6B device metadata refinement
 
 **Status:** Accepted for the pre-GitHub metadata update, 2026-09-27. Exact validated `0x2A25` serial text is intentionally displayed through `DeviceInfo.serial_number` in the authenticated local Home Assistant device page, while remaining private in logs, diagnostics, actions, entity attributes, and public documentation. The serial remains the ConfigEntry unique ID and `(DOMAIN, serial)` device identifier. Home Assistant's supported `CONNECTION_BLUETOOTH` type carries the current runtime address as connection metadata at entity registration; it is not a ConfigEntry unique ID or `DeviceInfo` identifier. Name, manufacturer, and model remain `FORA 6 Connect`, `ForaCare`, and `GD82`. No IP is assigned to the BLE meter. Automatic pruning of an old registry connection after a confirmed locator change remains unresolved; no Config Flow or BLE behavior changes here.
+
+## Stage 7B — fixed two-slot physical-evidence gate
+
+**Status:** Implementation and synthetic tests only; no physical result yet. [The Stage 7B action](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) sends `1 → 0 → 1` only after identity and an exact raw-count-two metadata result. It compares repeated index-one frames only in memory and exposes equality booleans. This is a deliberately fixed physical-evidence probe, not authorization for history traversal, deduplication, persistence, polling, or an entity update. A sanitized user-run result must be reviewed at a separate gate.

@@ -26,6 +26,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Sta
 - `sensor_state.py`: pure Stage 5/5A ordinary uric-acid state mapping and inert per-entry runtime holder.
 - `sensor.py`: one unavailable uric-acid entity associated with the serial-backed HA device; the local device page shows the exact validated serial and the runtime Bluetooth address is connection metadata. No BLE I/O or polling.
 - `coordinator.py`: future retrieval and synchronization state; Stage 7A added no runtime coordinator behavior.
+- `history_probe.py`: manually invoked Stage 7B fixed two-slot observation through the Stage 4 transport. It selects only the documented User1 count gate and `1 → 0 → 1` pairs, returns structural/equality booleans, and never feeds measurement state.
 - `config_flow.py`: Stage 6B passive candidate, user review, bounded active project/serial confirmation, and private persistent identity.
 - `diagnostics.py`: future non-sensitive diagnostics.
 
@@ -52,3 +53,7 @@ The custom integration uses `translations/en.json` for runtime localization. `st
 ## Device metadata refinement
 
 The entity's `DeviceInfo` now places the exact validated `0x2A25` text in `serial_number` for the authenticated local device page. `(DOMAIN, serial)` remains the logical device identifier and ConfigEntry unique ID. The current runtime address uses Home Assistant's dedicated `CONNECTION_BLUETOOTH` type in `connections`, without becoming the canonical identifier. Name, ForaCare manufacturer, and GD82 model remain as before; the BLE meter has no IP address. [The Stage 6B record](STAGE6B_CONFIG_FLOW_DEVICE_IDENTITY.md) documents the privacy and address-rotation limits. No entity value, BLE command, or sync path changed.
+
+## Stage 7B development boundary
+
+[Stage 7B](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) adds only a bounded, explicitly invoked probe. Its index-one request constructors and newest-index parser remain in pure `protocol.py`; the Home Assistant action chooses the fixed sequence and uses `Fora6BluetoothTransport`. The raw count must equal two. Existing identity/record actions retain their schemas and sequences. `coordinator.py`, the configured uric-acid entity, Config Flow, and persistent state are untouched. Physical Stage 7B validation is pending; production traversal remains blocked.

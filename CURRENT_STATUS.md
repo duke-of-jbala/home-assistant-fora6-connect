@@ -1,23 +1,21 @@
 # Current Status — FORA 6 Connect
 
-Stages 0–5A and 6A–6B are complete for their authorized scopes. Stage 7A's offline history review is complete. The configured GD82 has one device and one uric-acid entity, currently Unavailable. Production synchronization is not implemented. The exact protocol-work gate remains a separately authorized Stage 7B bounded history probe.
+Stages 0–6B are complete for their authorized scopes, including the real GD82 setup validation. Stage 7A's offline history review is complete. **Stage 7B's bounded development action is implemented and synthetic-tested; its physical validation is pending.** The configured meter still has one unavailable uric-acid entity. There is no production history synchronization, polling, deduplication, or persistence.
 
-## Pre-publication rewrite observation
+## Stage 7B pre-commit repository observation
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed/checkpoint commit:** `95f751a9ef40f7bbcb5b16781d7f6bc0fd12b2a7` — `chore: prepare repository for public development` (rewritten tip before this documentation correction).
-- **Starting tree:** clean before the rewrite and clean after it; `git status --short` returned no entries at both points. The configured `origin` URL is the intended GitHub repository. No tags or backup refs exist.
-- **Changes after checkpoint:** yes, this pre-commit documentation correction updates obsolete commit references and the handover state. The history rewrite changed only the private temporary-workspace reference in the current Stage 2 static-analysis note; runtime code and assets remain byte-identical to the pre-rewrite tip. Report the task commit SHA and post-commit status separately.
-- **Files changed by this correction:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `docs/STAGE2F_TD4183_RECORD_PROBE.md`. The rewrite itself also redacted `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md` in the current tree.
-- **History rewrite:** `git filter-repo` retained all 47 commits and their subject order while replacing the user's personal author/committer email with the verified GitHub noreply address, preserving the display name, and redacting historical local paths. The external safety bundle remains local and verified. No old-history backup ref remains reachable from the branch.
-- **Publication state at this observation:** the intended GitHub repository had not yet been created or pushed. The user authorized creation as an empty public repository after the local audit. No tag or release is planned.
+- **Last completed/checkpoint commit:** `2e59a47763c6d6bd1af3071e5a8d7cfdc4eaefe0` — `docs: refresh rewritten-history references`. Public `origin/main` matched this checkpoint before work began. Older pre-rewrite SHAs are obsolete.
+- **Starting tree:** clean; `git status --short` returned no entries before this task.
+- **Changes after checkpoint:** yes. This is a pre-commit observation with tracked edits and new files; report the task commit SHA and post-commit status separately.
+- **Files changed:** `custom_components/fora6_connect/__init__.py`, `history_probe.py`, `protocol.py`, `services.yaml`, `translations/en.json`; `tests/test_history_probe.py`, `tests/test_gatt_probe.py`; `docs/STAGE7B_BOUNDED_TRAVERSAL_PROBE.md`, `docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md`, `docs/STAGE7_HISTORY_SYNC.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`; `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`.
+- **Behavior:** one manually invoked `probe_history_window` action, fixed User1 `0x22 → 0x24 → 0x2B` identity/metadata prefix, then only if raw count equals two, three `0x25`/`0x26` pairs at indexes `1 → 0 → 1`. Index-one requests and the `0x2B` app-labeled newest-index parser are pure protocol additions. Results expose structure and repeat equality only. Existing identity/record action schemas, Config Flow, transport, coordinator, and entity state are unchanged. Codex ran no physical test.
 
-## Checks actually run before this correction
+## Checks actually run before commit
 
-- Full unit suite: **242 passed** (`python3 -m unittest discover -s tests -v`).
+- Full unit suite: **265 passed** (`python3 -m unittest discover -s tests -q`), including 23 new Stage 7B tests; prior public baseline was 242.
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
-- Manifest, strings, translation, and HACS JSON plus services YAML parsed successfully; `git diff --check` passed.
-- Rewritten-object scan found no previous personal email, historical workstation path, private workspace string, credential marker, or proprietary binary. The only MAC-shaped value is the existing synthetic all-`AA` test fixture. All four branding PNGs passed format, dimension, and alpha checks. The runtime command set and Stage 7 boundary are unchanged.
-- The complete checks will be repeated after this documentation correction and staged-diff review before the first push.
+- Four JSON files and one services YAML file parsed successfully; `git diff --check` passed.
+- Synthetic tests confirm the exact nine-write maximum, exact User1 requests, count mismatch stopping after metadata, per-part fail-closed stops, no command retry, equality-only repeat comparison, privacy-safe output, `response=True`, and cleanup/cancellation. Full staged diff, privacy/artifact, and command audits are required before commit and push.
 
-**Exact next project gate:** separately authorize the bounded Stage 7B probe described in [Stage 7A](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). Do not begin Stage 7B or production synchronization as part of repository publication.
+**Exact next gate:** after code review, the user deploys the committed integration, restarts Home Assistant, turns the GD82 ON, runs `fora6_connect.probe_history_window` once, and shares only the sanitized result. Review that result separately before any broader traversal or production synchronization authorization.

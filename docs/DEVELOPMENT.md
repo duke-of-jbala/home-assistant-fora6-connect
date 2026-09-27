@@ -114,3 +114,7 @@ References checked during bootstrap: [Home Assistant integration manifests](http
 ## Stage 7A offline history review
 
 [Stage 7A](STAGE7A_HISTORY_TRAVERSAL_DESIGN.md) traces both private TD4183 app handlers and the already sanitized `1 → 0 → 1` import evidence. It documents raw `0x2B` count/newest fields, the last-slot single/multi heuristic, low-level pair order, and why latest ordering and deduplication remain unresolved. [The Stage 7 gate record](STAGE7_HISTORY_SYNC.md) keeps the intended synchronization policy separate from implemented behavior. No production sync, history test, or fixture was added. **Exact next gate:** separately authorize implementation and user-run validation of the bounded Stage 7B probe; no broad traversal or polling.
+
+## Stage 7B bounded development action
+
+`fora6_connect.probe_history_window` is manually invoked with only the private runtime address. [Its fixed procedure](STAGE7B_BOUNDED_TRAVERSAL_PROBE.md) confirms project `0x4183`, queries User1 metadata once, and reads User1 raw indexes `1 → 0 → 1` only when raw count equals two. The action returns no record, value, timestamp, serial, address, or payload digest. It does not touch coordinator or sensor state. Run the synthetic unit tests before review; the user may then deploy, restart Home Assistant, turn the meter ON, invoke the action once, and share only its sanitized result. Codex performs no physical test. **Exact next gate:** review that controlled result before authorizing any further traversal work.

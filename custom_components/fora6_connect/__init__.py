@@ -7,6 +7,7 @@ from homeassistant.exceptions import ServiceValidationError
 
 from .const import DOMAIN
 from .gatt_probe import ProbeError, async_probe_gatt
+from .history_probe import async_probe_history_window
 from .notification_observer import ObservationError, async_observe_notifications
 from .protocol_probe import async_probe_protocol_identity, async_probe_protocol_record
 from .serial_probe import async_probe_serial_identity
@@ -16,6 +17,7 @@ SERVICE_PROBE_GATT = "probe_gatt"
 SERVICE_OBSERVE_NOTIFICATIONS = "observe_notifications"
 SERVICE_PROBE_PROTOCOL_IDENTITY = "probe_protocol_identity"
 SERVICE_PROBE_PROTOCOL_RECORD = "probe_protocol_record"
+SERVICE_PROBE_HISTORY_WINDOW = "probe_history_window"
 SERVICE_PROBE_SERIAL_IDENTITY = "probe_serial_identity"
 SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
 
@@ -130,6 +132,32 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_PROBE_PROTOCOL_RECORD,
         async_handle_probe_protocol_record,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_history_window(call: ServiceCall) -> dict:
+        """Return only bounded two-slot traversal and equality status."""
+        if probe_lock.locked():
+            raise ServiceValidationError(
+                "A FORA development action is already running."
+            )
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_history_window(hass, address.strip())
+        except Exception:
+            raise ServiceValidationError(
+                "FORA history window probe failed."
+            ) from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_HISTORY_WINDOW,
+        async_handle_probe_history_window,
         supports_response=SupportsResponse.ONLY,
     )
 

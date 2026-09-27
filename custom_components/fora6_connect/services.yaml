@@ -66,6 +66,24 @@ probe_protocol_record:
       required: true
       selector:
         text: {}
+probe_history_window:
+  name: Probe bounded history window (development only)
+  description: >-
+    Development-only Stage 7B. Confirm GD82 identity, query User1 raw slot
+    metadata once, and read only the fixed raw-index sequence 1, 0, 1 when
+    the raw slot count is exactly two. Returns structural and repeat-equality
+    flags only; never a health value, timestamp, serial, address, or payload.
+    No production synchronization or automatic repeat.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the runtime meter address privately from Advertisement Monitor.
+        It is used only in memory for this manually invoked action; never
+        returned, logged, or persisted.
+      required: true
+      selector:
+        text: {}
 probe_serial_identity:
   name: Probe serial identity (development only)
   description: >-
