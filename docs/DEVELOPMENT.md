@@ -147,4 +147,4 @@ Stage 7E completed its fixed count-four probe on the real GD82 in one state. If 
 
 ## Stage 7G update
 
-For Stage 7G, invoke `fora6_connect.probe_history_chronology` only as a development action with a private runtime Bluetooth address and the meter manually ON. It stops after User1 `0x2B` unless the raw count is exactly four, then reads only raw indexes 0 and 2. Share only the sanitized booleans, never displayed values or times. No production sensor update occurs.
+For Stage 7G1, invoke `fora6_connect.probe_history_chronology` only as a development action with a private runtime Bluetooth address and the meter manually ON. It stops after User1 `0x2B` unless the raw count is exactly four, then reads only raw indexes 0 and 2. The action response now contains private health values and meter-local times for gated records. Compare with the meter display locally; do not share the response or its health fields. No production sensor update occurs.

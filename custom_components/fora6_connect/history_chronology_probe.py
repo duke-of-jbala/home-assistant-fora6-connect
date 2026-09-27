@@ -109,6 +109,16 @@ async def async_probe_history_chronology(
             and result[f"{name}_value_valid"]
             and not record.is_qc
         )
+        if result[f"{name}_semantic_match"]:
+            # These two fields are deliberately limited to this private
+            # development action response. No product state is changed.
+            scaled_value = record.uric_acid_scaled_value
+            if scaled_value is None:
+                raise _ProbeFailure(name, "invalid_measurement")
+            result[f"{name}_meter_local_time"] = (
+                record.meter_local_time.as_naive_datetime().strftime("%Y-%m-%d %H:%M")
+            )
+            result[f"{name}_uric_acid_value_mg_dl"] = float(scaled_value)
         return record
 
     try:

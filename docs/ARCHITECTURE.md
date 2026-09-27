@@ -87,4 +87,4 @@ Stage 7E’s fixed count-four action was physically validated in one GD82 state.
 
 ## Stage 7G update
 
-Stage 7G adds a standalone development probe using the centralized Bluetooth transport and existing pure record parsers. It gates on project `0x4183`, raw count four, and two valid General uric-acid primaries at raw indexes 0 and 2. Only relative naive meter-local time order leaves the probe; no coordinator, sensor-state, persistence, or production sync path is connected.
+Stage 7G adds a standalone development probe using the centralized Bluetooth transport and existing pure record parsers. It gates on project `0x4183`, raw count four, and two valid General uric-acid primaries at raw indexes 0 and 2. Stage 7G1 permits each gated primary's mg/dL value and naive meter-local minute in the private action response alongside relative order. No coordinator, sensor-state, persistence, or production sync path is connected.

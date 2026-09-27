@@ -74,3 +74,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## Development — Stage 7G
 
 - Added a development-only, count-four two-primary chronology probe. It compares parsed meter-local time only in memory and returns structural and relative-order booleans; production sensor state is untouched. Physical validation is pending.
+
+## Development — Stage 7G1
+
+- The existing private chronology development action can now return evidence-backed uric-acid mg/dL values and timezone-unknown meter-local minute times for semantically valid primary slots. The protocol sequence and production sensor state are unchanged; physical validation is pending.

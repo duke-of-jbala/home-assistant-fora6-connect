@@ -114,20 +114,31 @@ class ChronologyProbeTests(unittest.IsolatedAsyncioTestCase):
     def assert_private(self, result):
         public = json.dumps(result)
         self.assertNotIn(ADDRESS, public)
-        for case in (self.zero, self.two):
-            self.assertNotIn(str(case.year), public)
+        private_response_keys = {
+            f"index_{index}_{field}"
+            for index in (0, 2)
+            for field in ("meter_local_time", "uric_acid_value_mg_dl")
+        }
         self.assertTrue(all(
+            key in private_response_keys or
             value is None or isinstance(value, (bool, list)) or
             (key == "expected_raw_slot_count" and value == 4) or
             (key in ("error_stage", "error_code") and isinstance(value, str))
             for key, value in result.items()
         ))
+        for key in private_response_keys & result.keys():
+            if key.endswith("meter_local_time"):
+                self.assertRegex(result[key], r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$")
+                self.assertNotIn("Z", result[key])
+                self.assertNotIn("+", result[key])
+            else:
+                self.assertIsInstance(result[key], float)
         for raw in self.responses:
             if raw is not None:
                 self.assertNotIn(raw.hex(), public.lower())
         for key in result:
             self.assertNotIn(key, (
-                "raw_value", "scaled_value", "unit", "meter_local_time", "serial",
+                "raw_value", "scaled_value", "unit", "serial", "system_id",
                 "address", "hash", "digest", "raw_frame", "payload", "time_delta",
             ))
         self.client.read_gatt_char.assert_not_awaited()
@@ -148,6 +159,12 @@ class ChronologyProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["chronology_comparison_complete"])
         self.assertTrue(result["index_0_semantic_match"])
         self.assertTrue(result["index_2_semantic_match"])
+        self.assertEqual(result["index_0_uric_acid_value_mg_dl"], self.zero.raw_value / 10)
+        self.assertEqual(result["index_2_uric_acid_value_mg_dl"], self.two.raw_value / 10)
+        self.assertNotEqual(result["index_0_uric_acid_value_mg_dl"], self.zero.raw_value)
+        self.assertNotEqual(result["index_2_uric_acid_value_mg_dl"], self.two.raw_value)
+        self.assertEqual(result["index_0_meter_local_time"], "2037-10-14 09:42")
+        self.assertEqual(result["index_2_meter_local_time"], "2099-12-31 23:59")
         self.assertTrue(result["index_0_time_before_index_2"])
         self.assertEqual(sum(result[key] for key in (
             "index_0_time_before_index_2", "index_0_time_equal_index_2", "index_0_time_after_index_2"
@@ -186,6 +203,9 @@ class ChronologyProbeTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(self.client.write_gatt_char.await_count, 3)
                 self.assertFalse(result["raw_slot_count_matches_expected"])
                 self.assertFalse(result["chronology_probe_performed"])
+                for index in (0, 2):
+                    self.assertNotIn(f"index_{index}_meter_local_time", result)
+                    self.assertNotIn(f"index_{index}_uric_acid_value_mg_dl", result)
                 self.assert_cleanup()
                 self.assert_private(result)
 
@@ -206,6 +226,13 @@ class ChronologyProbeTests(unittest.IsolatedAsyncioTestCase):
                     self.assertFalse(result["chronology_probe_performed"])
                     self.assertFalse(result["chronology_comparison_complete"])
                     self.assertEqual(self.client.write_gatt_char.await_count, 5 if position == "zero" else 7)
+                    failing_index = 0 if position == "zero" else 2
+                    self.assertNotIn(f"index_{failing_index}_uric_acid_value_mg_dl", result)
+                    self.assertNotIn(f"index_{failing_index}_meter_local_time", result)
+                    if position == "zero":
+                        self.assertNotIn("index_2_uric_acid_value_mg_dl", result)
+                    else:
+                        self.assertIn("index_0_uric_acid_value_mg_dl", result)
                     self.assert_cleanup()
                     self.assert_private(result)
 
@@ -317,3 +344,17 @@ class ChronologyProbeTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse({0x2F, 0x33, 0x50} & {data[1] for data in self.expected})
         self.assertNotIn("homeassistant", (INTEGRATION / "protocol.py").read_text().lower())
         self.assertNotIn("bleak", (INTEGRATION / "protocol.py").read_text().lower())
+
+    async def test_valid_health_fields_are_response_only(self):
+        with patch.object(logging.Logger, "_log") as log_call:
+            result = await self.run_probe()
+        log_call.assert_not_called()
+        self.assertIn("index_0_meter_local_time", result)
+        self.assertIn("index_2_uric_acid_value_mg_dl", result)
+        self.assert_private(result)
+        source = (INTEGRATION / "history_chronology_probe.py").read_text()
+        for forbidden in (
+            "hass.data", "storage", "Store(", "async_store", "config_entries",
+            "async_write_ha_state", "logger", "logging", "print(",
+        ):
+            self.assertNotIn(forbidden, source)

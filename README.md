@@ -24,4 +24,4 @@ This is a development integration, not a validated installation or release. The 
 
 MIT; see [LICENSE](LICENSE).
 
-The [Stage 7G probe](docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md) compares only the relative meter-local time of two fixed primary slots when raw count is four. It returns no measurement or timestamp and does not update the unavailable entity.
+The [Stage 7G/G1 probe](docs/STAGE7G_PRIMARY_CHRONOLOGY_PROBE.md) compares two fixed primary slots when raw count is four. Its private development response may include valid uric-acid mg/dL values and timezone-unknown meter-local times for direct comparison with the meter display. It does not update the unavailable entity; the response contains health data and should remain private.

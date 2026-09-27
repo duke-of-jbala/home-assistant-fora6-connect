@@ -120,4 +120,4 @@ These decisions are accepted for Stage 0. Revisit only on explicit instruction o
 
 ## Stage 7G update
 
-Stage 7G is a bounded evidence step ahead of Stage 7F’s proposed production refresh. At exactly four raw slots, compare only validated General uric-acid primaries 0 and 2 within one session, without exposing times or selecting a production latest record. A one-snapshot relation does not establish general index order.
+Stage 7G is a bounded evidence step ahead of Stage 7F’s proposed production refresh. At exactly four raw slots, compare only validated General uric-acid primaries 0 and 2 within one session. Stage 7G1 separately permits their decoded values and meter-local times in the private development response so the user can correlate them locally with the display. It selects no production latest record. A one-snapshot relation does not establish general index order.

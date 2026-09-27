@@ -71,8 +71,8 @@
       }
     },
     "probe_history_chronology": {
-      "name": "Compare two primary record times (development only)",
-      "description": "Stage 7G only. At exactly four User1 raw slots, read only indexes 0 and 2 and return semantic gates and relative meter-local time order. No values, timestamps, identifiers, persistence, entity update, or production synchronization.",
+      "name": "Inspect two primary records (private development action)",
+      "description": "Stage 7G only. At exactly four User1 raw slots, read only indexes 0 and 2. Validated General uric-acid primaries return private mg/dL values and timezone-unknown meter-local times alongside semantic and relative-order results. Do not share this health-data response publicly. No identifiers, persistence, entity update, or production synchronization.",
       "fields": {
         "address": {
           "name": "Bluetooth address (private)",

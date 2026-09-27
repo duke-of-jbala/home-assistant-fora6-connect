@@ -118,12 +118,14 @@ probe_history_window_four:
       selector:
         text: {}
 probe_history_chronology:
-  name: Compare two primary record times (development only)
+  name: Inspect two primary records (private development action)
   description: >-
     Development-only Stage 7G. After confirming GD82 identity and exactly four
     User1 raw slots, read only primary indexes 0 and 2. Return semantic gates
-    and relative meter-local time order only. No values, timestamps, identifiers,
-    persistence, entity update, or production synchronization.
+    and relative meter-local time order. For validated General uric-acid primaries,
+    also return private mg/dL values and timezone-unknown meter-local times.
+    This response contains private health data; do not share it publicly.
+    No identifiers, persistence, entity update, or production synchronization.
   fields:
     address:
       name: Bluetooth address (private)

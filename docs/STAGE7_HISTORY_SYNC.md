@@ -22,4 +22,4 @@ The user-run Stage 7E probe succeeded in one four-slot GD82 state: fixed `3 → 
 
 ## Stage 7G update
 
-Stage 7G now supplies a development-only fixed-count chronology comparison for raw primaries 0 and 2. It has synthetic validation only, returns no timestamp or value, and does not update the sensor or implement historical synchronization. The next gate is user-run Stage 7G physical validation and interpretation; production sync remains unauthorized.
+Stage 7G supplies a development-only fixed-count chronology comparison for raw primaries 0 and 2. Stage 7G1 additionally permits their decoded values and meter-local times in the private action response after semantic validation. It has synthetic validation only and does not update the sensor or implement historical synchronization. The next gate is user-run private display correlation; production sync remains unauthorized.
