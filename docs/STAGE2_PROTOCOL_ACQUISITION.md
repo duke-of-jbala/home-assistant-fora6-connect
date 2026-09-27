@@ -101,3 +101,7 @@ The gate above records the **Stage 2A decision at that time**. Stage 2B was subs
 ## Stage 2C/2D follow-up — 2026-09-27
 
 The Stage 2A source register and its then-current Stage 2B gate above are historical. Stage 2B subsequently found app-derived commands and the `TD4183` handler. The user has now supplied a sanitized summary of a **private live HCI capture** made while a patched, locally re-signed iFORA HM 1.7.6 research copy imported an existing uric-acid record from the physical GD82. The [Stage 2C evidence record](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) documents exactly what that session confirms and what remains unknown; raw capture and app artifacts are excluded from Git. Stage 2D implements offline, HA-independent primitives only. The current gate is separate authorization of a narrowly scoped Stage 2E Home Assistant transport prototype, not a production write path.
+
+## Stage 2E follow-up — 2026-09-27
+
+The Stage 2C/2D gate above is historical. Stage 2E was subsequently authorized for a **manually invoked development-only** Home Assistant identity probe limited to custom `1524` subscription, captured `0x22` wake, captured `0x24` project query, response validation, project `0x4183` check, and cleanup. The implementation is prepared, but no physical Home Assistant Stage 2E result has been supplied. See [the controlled test guide](STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md). The next gate is review of the real privacy-safe action result, not record retrieval or production synchronization.

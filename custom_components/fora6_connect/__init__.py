@@ -8,13 +8,15 @@ from homeassistant.exceptions import ServiceValidationError
 from .const import DOMAIN
 from .gatt_probe import ProbeError, async_probe_gatt
 from .notification_observer import ObservationError, async_observe_notifications
+from .protocol_probe import async_probe_protocol_identity
 
 SERVICE_PROBE_GATT = "probe_gatt"
 SERVICE_OBSERVE_NOTIFICATIONS = "observe_notifications"
+SERVICE_PROBE_PROTOCOL_IDENTITY = "probe_protocol_identity"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Register the manually invoked Stage 1B and Stage 1C actions."""
+    """Register the manually invoked development-only Bluetooth actions."""
     probe_lock = asyncio.Lock()
 
     async def async_handle_probe_gatt(call: ServiceCall) -> dict:
@@ -69,6 +71,33 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_OBSERVE_NOTIFICATIONS,
         async_handle_observe_notifications,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_probe_protocol_identity(call: ServiceCall) -> dict:
+        """Return only bounded, sanitized wake/project identity status."""
+        if probe_lock.locked():
+            raise ServiceValidationError(
+                "A FORA development action is already running."
+            )
+        address = call.data.get("address")
+        if not isinstance(address, str) or not address.strip():
+            raise ServiceValidationError(
+                "A Bluetooth address is required for this development action."
+            )
+        try:
+            async with probe_lock:
+                return await async_probe_protocol_identity(hass, address.strip())
+        except Exception:
+            raise ServiceValidationError(
+                "FORA identity probe failed; inspect private Home Assistant "
+                "diagnostics."
+            ) from None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_PROTOCOL_IDENTITY,
+        async_handle_probe_protocol_identity,
         supports_response=SupportsResponse.ONLY,
     )
     return True

@@ -1,35 +1,28 @@
 # FORA 6 Connect Codex Handover
 
-## Task and repository checkpoint
+## Stage and checkpoint
 
-Stage 2D live-evidence consolidation and offline protocol implementation was explicitly authorized after the user completed a controlled Stage 2C app capture. This handover describes the **dirty pre-commit** state on 2026-09-27 (Europe/London), not the result of the pending commit.
+Stage 0 and Stage 1 are complete. Stage 2A public review, 2B static analysis, 2C controlled app capture, and 2D offline primitives are complete. **Stage 2E is authorized and its development-only Home Assistant identity probe is implemented, but no physical Stage 2E result exists yet.** Production synchronization, record retrieval, pairing, standard Glucose/RACP operations, and entities remain out of scope.
 
-- **Branch/checkout:** `main`, this repository's active checkout. Private absolute paths and usernames are omitted.
-- **Last completed checkpoint:** `8d4105f7180bd8e378b3dd07190094b551bb1ec3` — `docs: analyze iFORA HM protocol evidence`.
-- **Starting tree:** clean (`git status --short` empty); `git log -3 --oneline` and `git rev-parse HEAD` confirmed the checkpoint.
-- **Changes after checkpoint:** yes. Files: `AGENTS.md`, `.gitignore`, `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `custom_components/fora6_connect/protocol.py`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md`, `docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md`, and `tests/test_protocol.py`. Verify the post-commit SHA and tree status separately.
-- **Stage state:** Stage 0 and Stage 1 complete; Stage 2 in progress; Stage 2A, 2B, and 2C complete; Stage 2D offline protocol work complete at this review. Stage 2E is not authorized.
+- **Branch:** `main`.
+- **Last completed checkpoint:** `0d293b3d37ef867670468566f14eac55f347be5b` — `feat: add evidence-backed GD82 protocol primitives`.
+- **Starting tree:** clean at the verified checkpoint.
+- **Changes after checkpoint:** yes; this handover describes the dirty pre-commit state. Report the task commit SHA and final working-tree status separately.
+- **Files changed:** `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `custom_components/fora6_connect/__init__.py`, `custom_components/fora6_connect/protocol_probe.py`, `custom_components/fora6_connect/services.yaml`, `custom_components/fora6_connect/translations/en.json`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md`, `tests/test_gatt_probe.py`, and `tests/test_protocol_probe.py`.
 
-## Evidence and implementation
+## Implementation boundary
 
-The user supplied privacy-safe findings from a private HCI capture: a **patched, locally re-signed research copy** of iFORA HM 1.7.6 (original APK SHA-256 `dd154de094fc28de86c5a153aada1393816159e5c6ba852235938813c449449c`) was made compatible with Android 8.1/API 27 by changing minimum SDK 30 to 27. It connected to the physical GD82 and imported the existing uric-acid record. This is not an untouched officially signed runtime specimen. The raw capture, patched APK, signing material, actual health value, timestamp, and identifiers are absent from Git.
+`fora6_connect.probe_protocol_identity` takes a private runtime-only address, resolves a connectable BLEDevice through Home Assistant, subscribes only to custom `1524`, writes the fixed Stage 2C `0x22` wake request and then the fixed `0x24` project request with `response=True`, validates matching checksummed notification frames using HA-independent `protocol.py`, requires project `0x4183`, and cleans up. Each wait is bounded; errors are stable sanitized categories. The action contains no record command or RACP/standard Glucose path. No automatic invocation, config flow, entity, polling, pairing, measurement parsing, or production synchronization was added. `protocol.py` was not changed.
 
-The user-supplied capture confirms proprietary `1523/1524` request/notification transport, an eight-byte summed envelope, `0x22` wake, `0x24` model query, and a physical project response of `0x4183` that confirms the Stage 2B `TD4183` association. Indexed `0x25`/`0x26` retrieval participated in the uric-acid import; the displayed uric-acid value was the parsed raw numeric value divided by ten. No bonding, SMP exchange, or observed encryption transition occurred in that successful proprietary session. This does not establish security for standard Glucose/RACP. See [the sanitized Stage 2C record](docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) and [protocol register](docs/PROTOCOL.md) for evidence classes and unresolved bytes.
-
-`protocol.py` now provides immutable frame validation, checksum and marker checks, command-ID extraction/echo, two fixed captured request constructors, project-ID parsing, and a **contextual** uric-acid scaling helper. Its `repr` omits payload data. Tests use only the non-private wake/project exchanges and a synthetic uric-acid value. The sanitized summary does **not** establish the `0x25`/`0x26` field positions, an analyte code, a timestamp timezone, or other analyte scaling; no record parser or dispatch was added. The module has no Home Assistant/Bluetooth imports. No production integration path calls these constructors or writes a FORA characteristic.
-
-The `.gitignore` now also excludes APK/XAPK/split archives and signing keystores; existing rules already excluded btsnoop/pcap captures. Private absolute paths were removed from tracked project-status guidance. No BLE operation was performed in Stage 2D.
+The first real Home Assistant run is **pending**. The prior patched research-app capture confirmed the corresponding proprietary exchange on GD82, but does not prove this Home Assistant path succeeds. See [Stage 2C evidence](docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md), [protocol register](docs/PROTOCOL.md), and [Stage 2E procedure](docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md). Raw notification bytes and the private address are neither returned nor persisted.
 
 ## Checks actually run
 
-- Targeted protocol suite: 9 passed before the later privacy-repr test.
-- Full `python3 -m unittest discover -s tests -v`: 52 passed after final code formatting.
-- `python3 -m compileall -q custom_components tests`: passed after final code formatting.
-- `python3 -m tabnanny custom_components tests`: passed after final code formatting.
-- `git diff --check`: passed before this final handover update; staged diff check follows.
-- Ruff unavailable, so not run.
-- Privacy/proprietary audit found 18 changed/new files with no private absolute path, MAC-shaped value, raw health value, capture/APK/keystore/native binary, or proprietary artifact. The request constructors are referenced only in offline `protocol.py` and its tests, not by Home Assistant transport code. Final staged review follows.
+- Focused new probe suite: 19 passed after connection-slot and log-privacy tests were added.
+- Full unit suite: 72 passed after implementation and documentation edits.
+- Compileall, tabnanny, and `git diff --check`: passed. Translation/manifest JSON and service YAML parsed successfully.
+- Ruff unavailable. Staged diff check passed; the 19 intended text files were staged and reviewed. Final privacy/scope audit found no private path, real Bluetooth address, health value, timestamp, capture/APK/signing artifact, or new production path. An older GATT test's `AA`-repeated address is synthetic. `protocol.py` remains HA/Bluetooth independent, and the new action references only the captured wake and project constructors.
 
 ## Exact next gate
 
-**Separate authorization for a controlled Stage 2E Home Assistant transport prototype** limited to custom `1524` subscription, captured `0x22` wake and response validation, captured `0x24` project query and `0x4183` response validation, then clean disconnect. No pairing, RACP, record retrieval, automatic connection, polling, sync, or entity work is authorized by Stage 2D. Stop after this task's focused commit.
+Privately install the development build in Home Assistant; invoke `fora6_connect.probe_protocol_identity` on the real GD82 and return only the action's privacy-safe structured result. Review that result before closing Stage 2E or authorizing further protocol or production work. No new health measurement is needed.

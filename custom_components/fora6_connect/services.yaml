@@ -31,3 +31,20 @@ observe_notifications:
       required: true
       selector:
         text: {}
+probe_protocol_identity:
+  name: Probe protocol identity (development only)
+  description: >-
+    Development-only Stage 2E. Connect through Home Assistant Bluetooth,
+    subscribe only to custom 1524, send the captured wake and project-query
+    requests once each with write response, validate the replies and project
+    0x4183, then unsubscribe and disconnect. No records are requested.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the known FORA 6 CONNECT address privately from Advertisement
+        Monitor. Used only in memory for this action; never returned, logged,
+        or persisted. Do not share it publicly.
+      required: true
+      selector:
+        text: {}

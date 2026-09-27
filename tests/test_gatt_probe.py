@@ -85,6 +85,10 @@ def _load_setup(probe_module):
     observer.async_observe_notifications = AsyncMock(
         return_value={"notifications_observed": 0}
     )
+    identity = types.ModuleType("_fora6_setup_test.protocol_probe")
+    identity.async_probe_protocol_identity = AsyncMock(
+        return_value={"identity_confirmed": True}
+    )
     spec = importlib.util.spec_from_file_location(
         "_fora6_setup_test",
         INTEGRATION / "__init__.py",
@@ -101,9 +105,11 @@ def _load_setup(probe_module):
             "_fora6_setup_test.const": const,
             "_fora6_setup_test.gatt_probe": gatt,
             "_fora6_setup_test.notification_observer": observer,
+            "_fora6_setup_test.protocol_probe": identity,
         },
     ):
         spec.loader.exec_module(module)
+    module._test_identity = identity
     return module, gatt, observer, exceptions
 
 
@@ -387,6 +393,34 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
+    async def test_identity_action_registration_and_private_runtime_address(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, gatt, observer, exceptions = _load_setup(probe)
+        services = types.SimpleNamespace(async_register=Mock())
+        hass = types.SimpleNamespace(services=services, data={}, config_entries=Mock())
+        address = "synthetic-private-device"
+
+        self.assertTrue(await integration.async_setup(hass, {}))
+        action = _registered_action(services, "probe_protocol_identity")
+        self.assertEqual(action.kwargs["supports_response"], "response_only")
+        result = await action.args[2](types.SimpleNamespace(data={"address": address}))
+        self.assertEqual(result, {"identity_confirmed": True})
+        self.assertNotIn(address, json.dumps(result))
+        integration._test_identity.async_probe_protocol_identity.assert_awaited_once_with(
+            hass, address
+        )
+        self.assertEqual(hass.data, {})
+        hass.config_entries.assert_not_called()
+        gatt.async_probe_gatt.assert_not_awaited()
+        observer.async_observe_notifications.assert_not_awaited()
+
+        integration._test_identity.async_probe_protocol_identity.side_effect = RuntimeError(
+            address
+        )
+        with self.assertRaises(exceptions.ServiceValidationError) as caught:
+            await action.args[2](types.SimpleNamespace(data={"address": address}))
+        self.assertNotIn(address, str(caught.exception))
+
     async def test_manual_action_registers_and_returns_probe_data(self) -> None:
         probe, _, _ = _load_probe()
         integration, gatt, observer, _ = _load_setup(probe)
