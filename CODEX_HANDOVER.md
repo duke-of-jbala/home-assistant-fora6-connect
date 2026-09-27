@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 9 Atom Lite proxy validation — physical closure, pre-commit
+
+Starting checkpoint: clean public `main` at `26f464f69091b944d9e75a4c854c6eafd63c0329` (`docs: define Atom Lite proxy validation`) on 2026-09-27 (Europe/London), with the expected origin. The user supplied direct connection-source evidence: HA Bluetooth → Connections showed active `FORA 6 CONNECT` with Source explicitly `(Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy` during `fora6_connect.refresh_current_uric_acid`; the row disappeared shortly after completion. The sanitized action succeeded at count four, updated the existing sensor, found two eligible primaries, and reported no ambiguity/error/cleanup errors. No duplicate device/entity was observed. Private measurement value/time/address are not recorded.
+
+This is **LIVE-CORROBORATED** direct evidence that this tested BLE/GATT transaction traversed the named Atom Lite proxy. Stage 9 is complete for that bounded path and run. It does not establish other adapters/proxies, meter states, counts, or hardware. No runtime code changed. Prior synthetic tests are not evidence of physical route selection; the user-supplied HA Source observation is the physical evidence. Stage 8H and Stage 10 are not started.
+
+Files changed are listed in `CURRENT_STATUS.md`. The full synthetic unit suite passed **374/374**; compileall, tabnanny, JSON/YAML parsing, whitespace and privacy/artifact checks passed. Synthetic tests do not establish proxy traversal; the direct HA Connections Source observation is the physical evidence. No real measurement value, measurement time, device address, screenshot, raw log, credential, or private path is included. Review and run the cached diff check before committing.
+
+**Exact next proposed gate:** separately authorize Stage 10 HACS packaging/readiness. Stage 8H history exposure is optional and not a prerequisite; neither gate is started by this closure.
+
 ## Stage 9 proxy-route preparation — pre-commit observation
 
 At the start, public `main` was clean at `9b4be25b396bee63a3b1c66c06fa2b1ec3935e81` (`fix: harden manual uric acid refresh`), on 2026-09-27 (Europe/London), with the expected origin. This task changes the documentation/status files listed in `CURRENT_STATUS.md`; the working tree is currently modified. This is a pre-commit observation. The task commit SHA, remote result, and final status belong in the post-commit report.

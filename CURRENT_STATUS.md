@@ -1,6 +1,18 @@
 # Current Status — FORA 6 Connect
 
-**Stage 9 is pending user-run physical validation.** The offline review found no integration change needed before testing the intended M5Stack Atom Lite ESPHome Bluetooth Proxy path. Home Assistant may choose a local adapter or another proxy, so a successful manual refresh alone is insufficient. [The Stage 9 plan](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md) requires actual Atom Lite connection evidence or a valid sole-route isolation run. No physical Stage 9 operation has occurred in this task.
+**Stage 9 is complete for the tested M5Stack Atom Lite proxy path.** The user observed the active `FORA 6 CONNECT` row in Home Assistant Bluetooth → Connections with Source explicitly naming the (Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy during `refresh_current_uric_acid`; the connection disappeared shortly after completion. The sanitized count-four action succeeded, updated the existing sensor, and reported no cleanup errors. No duplicate entry/device/entity appeared. Real value, timestamp, and address remain private. See [the Stage 9 closure](docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
+
+## Stage 9 proxy-path closure — pre-commit observation
+
+- **Branch/date:** `main`, 2026-09-27 (Europe/London).
+- **Starting checkpoint:** `26f464f69091b944d9e75a4c854c6eafd63c0329` — `docs: define Atom Lite proxy validation`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin was the expected public repository.
+- **Changes after checkpoint:** yes, documentation/status only. This is a pre-commit observation; verify/report post-commit and remote state separately.
+- **Physical evidence:** user supplied direct HA Bluetooth Connections evidence naming the Lounge M5Stack Atom Lite as Source for the active FORA connection during the manual refresh; the row disappeared shortly afterward. The sanitized refresh succeeded at supported raw count four, sensor updated, two eligible primaries, no ambiguity/error/cleanup errors. Existing device/entity remained with no duplicate observed. This establishes proxy traversal for the tested transaction, not population-wide behavior.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and `docs/STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md`.
+- **Checks actually run:** `python3 -m unittest discover -s tests -v` passed **374/374**; compileall and tabnanny passed; four JSON and one YAML file parsed; diff whitespace check passed; changed-doc privacy and artifact scans passed; no runtime source/config/test files changed. The test suite is synthetic and does not prove proxy routing; the direct HA Connections Source observation is the physical route evidence. Final cached-diff review/check remains before commit.
+
+**Exact next proposed gate:** separately authorize Stage 10 HACS packaging/readiness. Stage 8H remains optional and is not started.
 
 ## Stage 9 route-evidence preparation — pre-commit observation
 

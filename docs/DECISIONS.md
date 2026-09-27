@@ -2,7 +2,7 @@
 
 ## Stage 9 — require connection-specific proxy evidence
 
-**Status:** Accepted as an offline validation plan, not a physical pass. Keep Home Assistant's supported connectable-device resolution and existing connector; do not pin the scanner or add debug output to the production action. A current advertisement or successful refresh with several scanners available is insufficient to identify the route. A time-correlated Atom Lite GATT connection record, or a successful run with Atom Lite as the only enabled connectable route, can establish traversal. Keep private source identifiers/logs out of Git. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
+**Status:** Physically validated for the tested Lounge Atom Lite session. HA Bluetooth Connections showed the active FORA connection with Source explicitly naming the (Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy during the successful manual refresh; it disappeared shortly after. This direct evidence identifies the route for that run. Keep HA-selected scanner resolution and existing connector; no pinning/instrumentation is needed. Do not generalize to other routes or setups. Private device address and health data remain outside Git. See [Stage 9](STAGE9_ESPHOME_BLUETOOTH_PROXY_VALIDATION.md).
 
 ## Stage 8 — retain process-local current state and primary failure codes
 

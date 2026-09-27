@@ -1,6 +1,14 @@
 # Stage 9 — ESPHome Bluetooth Proxy path validation
 
-**Status: pending user-run physical validation.** This checkpoint reviews the existing path and defines a controlled test. No live Home Assistant connection, GD82 operation, Atom Lite log, or selected-scanner evidence was available to this offline review. Stage 9 is not complete merely because Stage 7H previously succeeded while proxies were present.
+**Status: complete for the tested M5Stack Atom Lite proxy path.** The user-run real Home Assistant validation below directly identified the Atom Lite as the active connection source during the existing manual refresh. This closes the route-evidence gate for that run; it does not generalize to other proxies, adapters, meter states, or hardware.
+
+## Physical validation result — user supplied
+
+In Home Assistant Bluetooth → Connections, an active row named `FORA 6 CONNECT` appeared during `fora6_connect.refresh_current_uric_acid`. Its **Source** explicitly named the **(Lounge) M5Stack Atom Lite ESPHome Bluetooth Proxy**. The row disappeared shortly after the action completed. This is direct, connection-specific evidence that the tested BLE/GATT session traversed the Lounge Atom Lite proxy rather than merely succeeding while a proxy was online.
+
+The sanitized action result reported `refresh_performed`, `refresh_successful`, `supported_raw_slot_count`, and `sensor_updated` true; `retained_previous_state` and `ambiguity_detected` false; no error stage/code or cleanup errors; raw count four; and two eligible primary candidates. An eligible primary was selected successfully. The user observed no duplicate FORA device or uric-acid entity. The private selected measurement, meter-local time, and Bluetooth address are excluded. The existing entry was targeted without a manually entered address.
+
+This is **LIVE-CORROBORATED** for the specific tested session and Lounge proxy source. Unit-test and prior synthetic results remain separate and do not by themselves establish proxy traversal. No runtime change or test was needed for this documentation-only closure.
 
 ## Architecture and evidence boundary
 
@@ -40,4 +48,4 @@ Stage 9 passes only when Atom Lite is online and active-capable; a current GD82 
 
 If the test fails, retain the previous valid in-process sensor state and classify the first failing stage: proxy offline/capability, reachability, connectable resolution, connection, GATT/service discovery, subscription, wake/project, metadata/count, record part `0x25`/`0x26`, selection, cleanup, or **route unproven**. Compare with a separately observed local/native path only if such an observation exists; do not assume a prior Stage 7H success used local Bluetooth. Stage 8 preserves a primary failure code when cleanup also fails. Do not add retries, sleeps, scanner pinning, special MAC handling, or protocol changes without evidence and separate review.
 
-**Exact next state:** Stage 9 **pending physical validation**. After the user supplies the sanitized result, either close Stage 9 with proven Atom Lite traversal and choose a separately authorized next stage, or define one narrow remediation gate from the observed failure. Stage 8H and Stage 10 are not started here.
+**Stage 9 is complete for this bounded physical proxy-path validation. Exact next proposed gate:** separately authorize **Stage 10 — HACS packaging/readiness**. Stage 8H bounded history exposure remains optional and is not required before Stage 10. Neither Stage 8H nor Stage 10 is implemented or started by this closure.

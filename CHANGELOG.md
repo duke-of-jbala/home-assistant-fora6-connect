@@ -7,7 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Evidence
-- Stage 9 offline review defines a controlled M5Stack Atom Lite ESPHome Bluetooth Proxy connection-path test. Actual proxy traversal and physical refresh through it remain pending; no runtime command or synchronization behavior changed.
+- Stage 9 physically validated the existing manual count-four refresh through the Lounge M5Stack Atom Lite ESPHome Bluetooth Proxy. Home Assistant Connections named the proxy as Source during the action; refresh succeeded, sensor updated, cleanup had no errors, and no duplicate device/entity was observed. Private health fields and address were not recorded. This confirms only the tested path/run.
 - Closed Stage 7H after user-run real-device count-four validation. The existing uric-acid entity became available and no duplicate entity appeared. The actual value, timestamp, screenshot, and identifiers were not added. Broader history synchronization and automatic refresh remain out of scope.
 
 ### Fixed
