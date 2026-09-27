@@ -184,7 +184,7 @@ class Fora6CurrentRefreshCoordinator:
                         result["cleanup_errors"].append("incomplete_cleanup")
                 except Exception:
                     result["cleanup_errors"] = ["cleanup_failed"]
-            if result["cleanup_errors"]:
+            if result["cleanup_errors"] and result["error_code"] is None:
                 result.update(error_stage="cleanup", error_code=result["cleanup_errors"][0])
             if selected is None or result["error_code"] is not None:
                 return result

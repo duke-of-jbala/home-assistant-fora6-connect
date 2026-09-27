@@ -1,5 +1,20 @@
 # Current Status — FORA 6 Connect
 
+**Stage 8 is complete for its authorized offline/synthetic scope.** The Stage 7H manual count-two/four current-state behavior remains the only production-facing refresh. A simultaneous cleanup failure no longer hides the primary refresh failure; cleanup errors remain separately visible. Repeat refresh, failure retention, reload, and two-entry isolation received additional synthetic coverage. No physical operation, history import, automatic trigger, identity change, or new command was made.
+
+## Stage 8 hardening — pre-commit observation
+
+- **Branch/date:** `main`, 2026-09-27 (Europe/London).
+- **Starting checkpoint:** `0775869d2fd7daf5a904795f4d468ac40bcc7798` — `docs: close Stage 7H manual refresh validation`.
+- **Starting tree:** clean (`git status --short` returned no entries); origin was the expected public repository.
+- **Changes after checkpoint:** yes. This is a pre-commit observation; verify/report post-commit and remote state separately.
+- **Code:** only `coordinator.py` changes: preserve the original stage/code if cleanup also fails. The count gates, command plans, selection, state update, transport, and triggers are unchanged.
+- **Product decisions:** repeated same reading updates the same current-state holder/entity without integration-driven historical import. Later failures retain a prior valid in-process reading. Reload/restart deliberately starts unavailable until another manual refresh; no HA restoration, measurement-time/status attribute, or diagnostic entity is introduced. The private action response is the current status/time surface. Native value remains mg/dL; app mmol/L floor formatting remains separate. Device metadata and canonical MAC identity are unchanged.
+- **Files changed:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `custom_components/fora6_connect/coordinator.py`, `tests/test_manual_refresh.py`, `tests/test_stage6b_setup.py`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md`, `docs/STAGE7_HISTORY_SYNC.md`, `docs/URIC_ACID_UNIT_CONVERSION.md`, and new `docs/STAGE8_CURRENT_STATE_HARDENING_REVIEW.md`.
+- **Checks actually run:** full verbose suite **374/374 passed** (baseline 369); compileall, tabnanny, four JSON and one YAML parses passed; unstaged and staged diff checks passed. The complete staged diff was reviewed. Changed-file privacy scan found no private paths, real health examples, or secret assignments; MAC-shaped strings were the explicitly synthetic test fixtures. Tracked/untracked artifact scan and runtime command/automation/logging scans found no new prohibited path.
+
+**Exact next proposed gate:** separately authorize Stage 9 explicit ESPHome Bluetooth Proxy path validation. Stage 8H bounded manual uric-acid history exposure is optional and separately gated; neither has begun. Broader history, persistent dedup/resume, counts above four, and automatic refresh remain out of scope.
+
 **Stage 7H is complete for its authorized scope.** The user validated the manual current-state refresh on the real GD82 in a four-slot state. The configured-entry action selected the later eligible primary by meter-local time, updated the existing uric-acid entity, and completed cleanup. The same device and single sensor remained; the sensor became available. No real measurement value, timestamp, screenshot, or identifier is recorded here.
 
 ## Stage 7H physical closure — pre-commit observation

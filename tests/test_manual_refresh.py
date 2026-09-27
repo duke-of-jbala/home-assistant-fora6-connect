@@ -57,6 +57,7 @@ class ManualRefreshTests(unittest.IsolatedAsyncioTestCase):
 
         class FakeTransport:
             def __init__(self, hass, address, *, response_timeout):
+                self._address = address
                 outer.address = address
                 outer.timeout = response_timeout
 
@@ -66,7 +67,7 @@ class ManualRefreshTests(unittest.IsolatedAsyncioTestCase):
 
             async def async_subscribe(self):
                 if outer.fail_at == "subscribe":
-                    raise outer.bluetooth.TransportError("subscription", "subscribe_failed")
+                    raise outer.bluetooth.TransportError("subscription", "subscription_failed")
 
             async def async_exchange(self, request):
                 outer.requests.append(request)
@@ -223,6 +224,84 @@ class ManualRefreshTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result["retained_previous_state"])
         self.assertIs(self.runtime.measurement_state.latest, previous)
         self.assertIs(self.runtime.synchronized_at, previous_sync)
+
+    async def test_primary_failure_is_not_hidden_by_cleanup_failure(self):
+        self.prepare(["uric_general", "hct_qc_invalid"])
+        self.fail_at = "subscribe"
+        self.cleanup_errors = ("disconnect_failed",)
+        result = await self.coordinator.async_refresh()
+        self.assertEqual(result["error_stage"], "subscription")
+        self.assertEqual(result["error_code"], "subscription_failed")
+        self.assertEqual(result["cleanup_errors"], ["disconnect_failed"])
+        self.assertIsNone(self.runtime.measurement_state.native_value)
+
+    async def test_repeat_same_measurement_updates_same_state_holder(self):
+        notified = Mock()
+        self.runtime.measurement_state.subscribe(notified)
+        self.prepare(["uric_general", "hct_qc_invalid"])
+        first = await self.coordinator.async_refresh()
+        state = self.runtime.measurement_state
+        self.prepare(["uric_general", "hct_qc_invalid"])
+        second = await self.coordinator.async_refresh()
+        self.assertTrue(first["refresh_successful"])
+        self.assertTrue(second["refresh_successful"])
+        self.assertIs(self.runtime.measurement_state, state)
+        self.assertEqual(first["selected_uric_acid_value_mg_dl"], second["selected_uric_acid_value_mg_dl"])
+        self.assertEqual(self.closed, 2)
+        self.assertEqual(notified.call_count, 2)
+
+    async def test_later_failures_retain_last_valid_measurement(self):
+        self.prepare(["uric_general", "hct_qc_invalid"])
+        self.assertTrue((await self.coordinator.async_refresh())["refresh_successful"])
+        previous = self.runtime.measurement_state.latest
+        previous_sync = self.runtime.synchronized_at
+        for failure in ("connect", "subscribe", 4):
+            with self.subTest(failure=failure):
+                self.requests.clear()
+                self.prepare(["uric_general", "hct_qc_invalid"])
+                self.fail_at = failure
+                result = await self.coordinator.async_refresh()
+                self.assertFalse(result["sensor_updated"])
+                self.assertTrue(result["retained_previous_state"])
+                self.assertIs(self.runtime.measurement_state.latest, previous)
+                self.assertIs(self.runtime.synchronized_at, previous_sync)
+        self.fail_at = None
+        for count in (0, 1, 3, 5):
+            with self.subTest(count=count):
+                self.prepare([], count)
+                result = await self.coordinator.async_refresh()
+                self.assertEqual(result["error_code"], "unsupported_history_count")
+                self.assertIs(self.runtime.measurement_state.latest, previous)
+                self.assertIs(self.runtime.synchronized_at, previous_sync)
+
+    async def test_two_entries_have_independent_state_and_locks(self):
+        other_mac = "aa:bb:cc:dd:ee:02"  # Synthetic fixture only.
+        other_runtime = self.modules["sensor_state"].MeterRuntime(address=other_mac.upper())
+        other_entry = types.SimpleNamespace(unique_id=other_mac)
+        other = self.c.Fora6CurrentRefreshCoordinator(object(), other_entry, other_runtime)
+        entered, release = asyncio.Event(), asyncio.Event()
+        original_connect = self.c.Fora6BluetoothTransport.async_connect
+
+        async def held_first_connect(transport):
+            if transport._address == MAC.upper():
+                entered.set()
+                await release.wait()
+            await original_connect(transport)
+
+        self.prepare(["uric_general", "hct_qc_invalid"])
+        with patch.object(self.c.Fora6BluetoothTransport, "async_connect", held_first_connect):
+            first = asyncio.create_task(self.coordinator.async_refresh())
+            await entered.wait()
+            self.prepare(["future_time", "hct_qc_invalid"])
+            second_result = await other.async_refresh()
+            self.assertTrue(second_result["refresh_successful"])
+            self.assertIsNone(self.runtime.measurement_state.native_value)
+            self.assertEqual(str(other_runtime.measurement_state.native_value), "0.2")
+            self.prepare(["uric_general", "hct_qc_invalid"])
+            release.set()
+            self.assertTrue((await first)["refresh_successful"])
+        self.assertEqual(str(self.runtime.measurement_state.native_value), "123.4")
+        self.assertEqual(str(other_runtime.measurement_state.native_value), "0.2")
 
     async def test_private_result_and_no_automation(self):
         self.prepare(["uric_general", "hct_qc_invalid"])

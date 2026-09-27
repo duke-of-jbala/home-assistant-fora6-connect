@@ -1,5 +1,7 @@
 # Development
 
+**Stage 8 offline/synthetic review:** [the hardening record](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md) covers repeat refresh, later failure retention, reload, two-entry isolation, product UX, and Stage 8H/9 readiness. One bounded error-reporting fix preserves the first refresh failure when cleanup also fails. No physical operation was run and no new trigger or command was added. The exact next proposed gate is separately authorized Stage 9 explicit proxy-path validation; Stage 8H bounded manual history exposure remains optional and separately gated.
+
 **Stage 7H physical closure:** the user deployed/restarted Home Assistant, turned the GD82 on normally without history-arrow browsing, and ran `fora6_connect.refresh_current_uric_acid` once. The count-four action succeeded; the existing uric-acid entity became available and no duplicate appeared. The private value/time and screenshot are not recorded. See [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
 
 **Stage 6B3 physical validation:** the user restarted HA and confirmed the existing entry, single device, single unavailable uric-acid entity, Bluetooth connection, and GD82/ForaCare metadata were preserved; no bogus serial or discovery Add card appeared. A privacy-safe storage check found the ConfigEntry unique ID now uses canonical lowercase colon MAC format. No actual value was shared or recorded. The in-place migration is complete for this meter.

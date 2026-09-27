@@ -1,6 +1,10 @@
 # Architecture decisions
 
-**Stage 7H closure:** the user physically validated one manual count-four refresh on the real GD82. The later meter-local primary was selected, the existing entity became available, and no duplicate appeared. This validates the bounded path for that snapshot only. Keep the count-two/four plans, fail-closed equal-minute rule, and failure retention. Historical import, durable dedup/resume, arbitrary counts, and automatic triggers remain gated. Stage 8 is the proposed offline/synthetic hardening review; [Stage 7H record](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
+## Stage 8 — retain process-local current state and primary failure codes
+
+**Status:** Accepted for the Stage 8 offline/synthetic hardening scope. Repeat manual refresh writes to the same existing sensor; only a complete, clean session replaces its value. A later failed refresh keeps the previous in-process value. Reload/restart intentionally starts unavailable until another explicit refresh; HA-native restoration is deferred because an old private health reading could appear current. The private action response already supplies selected meter-local time and bounded status, so no time/status entity attributes or diagnostic entity are added. When a refresh and its cleanup both fail, retain the original failure code and list cleanup errors separately. See [Stage 8](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md). Stage 8H and Stage 9 remain separately gated.
+
+**Stage 7H closure:** the user physically validated one manual count-four refresh on the real GD82. The later meter-local primary was selected, the existing entity became available, and no duplicate appeared. This validates the bounded path for that snapshot only. Keep the count-two/four plans, fail-closed equal-minute rule, and failure retention. Historical import, durable dedup/resume, arbitrary counts, and automatic triggers remain gated. This was the checkpoint before Stage 8; [Stage 7H record](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
 
 **Stage 6B3 physical decision:** the user-run HA migration confirms the factory BT MAC fallback preserved the configured object graph for this GD82. Keep the exact fallback policy scoped to this meter's observed identity; do not generalize fixed-address or uniqueness claims to all GD82s. Reset/update behavior is open. Stage 7 remains separately gated.
 

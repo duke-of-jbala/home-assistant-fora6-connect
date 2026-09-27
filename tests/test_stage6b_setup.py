@@ -45,6 +45,24 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(await self.integration.async_unload_entry(self.hass, self.entry))
         self.hass.config_entries.async_unload_platforms.assert_awaited_once_with(self.entry, ["sensor"])
 
+    async def test_unload_disables_refresh_and_reload_creates_fresh_process_state(self):
+        self.entry.unique_id = "aa:bb:cc:dd:ee:01"  # Synthetic fixture only.
+        self.entry.data["address"] = "AA:BB:CC:DD:EE:01"
+        metadata = types.ModuleType(self.integration.__package__ + ".device_metadata")
+        metadata.async_reconcile_device_metadata = Mock()
+        with patch.dict(sys.modules, {self.integration.__name__: self.integration, metadata.__name__: metadata}):
+            self.assertTrue(await self.integration.async_setup_entry(self.hass, self.entry))
+            old_runtime = self.entry.runtime_data
+            self.assertIsNotNone(old_runtime.refresh_coordinator)
+            self.assertTrue(await self.integration.async_unload_entry(self.hass, self.entry))
+            self.assertIsNone(old_runtime.refresh_coordinator)
+            self.assertTrue(await self.integration.async_setup_entry(self.hass, self.entry))
+        self.assertIsNot(self.entry.runtime_data, old_runtime)
+        self.assertIsNotNone(self.entry.runtime_data.refresh_coordinator)
+        self.assertIsNone(self.entry.runtime_data.measurement_state.native_value)
+        self.assertEqual(self.hass.config_entries.async_forward_entry_setups.await_count, 2)
+        self.assertEqual(self.hass.config_entries.async_unload_platforms.await_count, 1)
+
     async def test_placeholder_migrates_before_sensor_forward(self):
         self.entry.unique_id = "Serial Number"
         self.entry.data["address"] = "AA:BB:CC:DD:EE:01"

@@ -1,5 +1,7 @@
 # Protocol evidence register
 
+**Stage 8:** offline current-state hardening changed only precedence of refresh error reporting when cleanup also fails. It added no request constructor, command ID, parser rule, record layout, index plan, or physical observation. See [the review](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md).
+
 **Stage 7H physical closure:** the user validated one real count-four manual refresh. The action selected raw primary zero by later parsed meter-local time and updated the existing sensor after clean cleanup. No new protocol command was added; this result does not generalize index ordering beyond that validated snapshot. The bounded command use is documented in [Stage 7H](STAGE7H_MANUAL_CURRENT_STATE_REFRESH.md).
 
 **Stage 6B3 closure:** physical HA validation confirms the placeholder-to-factory-MAC identity migration succeeded for this configured GD82. The System ID remains unusable and `0x2A25` remains a generic placeholder; no protocol command or record behavior changed. See [the identity record](STAGE6B3_FACTORY_MAC_IDENTITY.md).

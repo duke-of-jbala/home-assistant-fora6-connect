@@ -1,5 +1,7 @@
 # Stage 7H — manual current-state uric-acid refresh
 
+**Stage 8 follow-up:** [the offline hardening review](STAGE8_CURRENT_STATE_HARDENING_REVIEW.md) confirms repeat refresh uses the same entity, failures retain the prior in-process reading, and reload/restart intentionally returns it to unavailable until another manual refresh. A cleanup failure no longer masks an earlier primary error. The count-two/four commands, selection, and manual-only trigger remain unchanged.
+
 **Stage 7H is complete for its authorized scope.** The user deployed the implementation, restarted Home Assistant, manually powered on the real GD82 without pressing history arrows, and ran `fora6_connect.refresh_current_uric_acid` once. The real count-four action succeeded, considered two eligible primary candidates, selected the one with the later parsed meter-local minute, and completed cleanup. The existing GD82/ForaCare device remained; its existing single uric-acid entity became available and populated, with no duplicate sensor. The private value/time, screenshot, Bluetooth address, serial, and System ID are not part of this record.
 
 Stage 7H implements the first production-facing **manual** current-state refresh for the existing uric-acid sensor. It reads a bounded current memory snapshot and publishes one selected value. It does not import historical observations, backfill recorder/statistics, persist deduplication or a resume cursor, poll, or start a refresh automatically.

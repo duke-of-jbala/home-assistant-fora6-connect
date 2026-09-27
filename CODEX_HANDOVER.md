@@ -1,5 +1,17 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 8 current-state hardening — pre-commit observation
+
+At the start, public `main` was clean at `0775869d2fd7daf5a904795f4d468ac40bcc7798` (`docs: close Stage 7H manual refresh validation`), on 2026-09-27 (Europe/London), with the expected origin. This task has changed files after that checkpoint; the working tree is currently modified. This is a pre-commit observation. The task commit SHA, remote result, and final status belong in the post-commit report.
+
+Stage 8 is **complete for its authorized offline/synthetic review**. The only runtime change is a one-condition error-precedence fix in `coordinator.py`: if a refresh failed before cleanup and cleanup also failed, retain the original error stage/code and return cleanup errors separately. Successful refresh, count-two/four fixed commands, timestamp selection, privacy boundary, configured-entry target, and manual-only triggering are unchanged. New synthetic tests cover repeat same-measurement refresh, prior-state retention after later failures, combined primary/cleanup failures, unload/reload fresh runtime, and two independent entries/locks. The full verbose suite passed **374/374** (baseline 369). Compileall, tabnanny, four JSON and one YAML parse passed. Unstaged and staged diff checks passed, and the complete staged diff was reviewed before this final handover wording update; recheck the final cached diff before committing.
+
+The process-local current value intentionally becomes unavailable on reload/restart until manual refresh. No `RestoreSensor`, measurement-time or status attribute, diagnostic entity, history store, dedup/resume, startup/advertisement/post-measurement trigger, or polling was added. Action response already supplies selected private value/time and bounded status. The mg/dL native sensor value is separate from app mmol/L display formatting. Device identity/metadata is unchanged. Source review and synthetic tests support two-entry isolation at the coordinator/state level; a real multi-device HA validation has not occurred. The exact selected ESPHome proxy path is still unverified.
+
+Files changed are listed in `CURRENT_STATUS.md`; the new durable review is [Stage 8](docs/STAGE8_CURRENT_STATE_HARDENING_REVIEW.md). Changed-file privacy scan found no private paths, real health examples, or secret assignments; MAC-shaped strings occur only in explicitly synthetic test fixtures. Artifact and runtime command/automation/logging scans found no new prohibited path. No physical meter test was run.
+
+**Exact next proposed gate:** separately authorize Stage 9 explicit ESPHome Bluetooth Proxy path validation. Optional Stage 8H bounded manual uric-acid history exposure is a separate future gate, not a prerequisite. Do not start either from this handover.
+
 ## Stage 7H real-device closure — pre-commit observation
 
 Starting checkpoint: clean public `main` at `b5b21ceeaa933d10195febf82f333f74874cf766` (`feat: add manual uric acid refresh`) on 2026-09-27 (Europe/London). Origin is the expected public repository and no tags are present. This task changes Markdown status/evidence files only; this is a **pre-commit observation**. The working tree is currently modified, so report its post-commit/push state separately.
