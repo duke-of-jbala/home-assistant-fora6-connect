@@ -89,6 +89,9 @@ def _load_setup(probe_module):
     identity.async_probe_protocol_identity = AsyncMock(
         return_value={"identity_confirmed": True}
     )
+    identity.async_probe_protocol_record = AsyncMock(
+        return_value={"record_retrieval_confirmed": True}
+    )
     spec = importlib.util.spec_from_file_location(
         "_fora6_setup_test",
         INTEGRATION / "__init__.py",
@@ -393,6 +396,34 @@ class GattProbeTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ProbeServiceTests(unittest.IsolatedAsyncioTestCase):
+    async def test_record_action_registration_and_private_runtime_address(self) -> None:
+        probe, _, _ = _load_probe()
+        integration, gatt, observer, exceptions = _load_setup(probe)
+        services = types.SimpleNamespace(async_register=Mock())
+        hass = types.SimpleNamespace(services=services, data={}, config_entries=Mock())
+        address = "synthetic-private-device"
+
+        self.assertTrue(await integration.async_setup(hass, {}))
+        action = _registered_action(services, "probe_protocol_record")
+        self.assertEqual(action.kwargs["supports_response"], "response_only")
+        result = await action.args[2](types.SimpleNamespace(data={"address": address}))
+        self.assertEqual(result, {"record_retrieval_confirmed": True})
+        self.assertNotIn(address, json.dumps(result))
+        integration._test_identity.async_probe_protocol_record.assert_awaited_once_with(
+            hass, address
+        )
+        self.assertEqual(hass.data, {})
+        hass.config_entries.assert_not_called()
+        gatt.async_probe_gatt.assert_not_awaited()
+        observer.async_observe_notifications.assert_not_awaited()
+
+        integration._test_identity.async_probe_protocol_record.side_effect = RuntimeError(
+            address
+        )
+        with self.assertRaises(exceptions.ServiceValidationError) as caught:
+            await action.args[2](types.SimpleNamespace(data={"address": address}))
+        self.assertNotIn(address, str(caught.exception))
+
     async def test_identity_action_registration_and_private_runtime_address(self) -> None:
         probe, _, _ = _load_probe()
         integration, gatt, observer, exceptions = _load_setup(probe)

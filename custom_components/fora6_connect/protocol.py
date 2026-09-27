@@ -13,6 +13,9 @@ REQUEST_MARKER = 0xA3
 RESPONSE_MARKER = 0xA5
 WAKE_COMMAND = 0x22
 PROJECT_QUERY_COMMAND = 0x24
+RECORD_SLOT_COUNT_COMMAND = 0x2B
+RECORD_PART_ONE_COMMAND = 0x25
+RECORD_PART_TWO_COMMAND = 0x26
 
 
 class FrameError(ValueError):
@@ -104,6 +107,37 @@ def build_project_query_request() -> ProtocolFrame:
     return _build_confirmed_request(PROJECT_QUERY_COMMAND)
 
 
+def _build_static_record_request(command_id: int) -> ProtocolFrame:
+    """Build only the read-oriented current-user, raw-index-zero app requests.
+
+    Stage 2B's retained iFORA HM 1.7.6/1.7.9 builders and the Stage 2C
+    command sequence support these exact requests. This does not decode data.
+    """
+    if command_id not in (
+        RECORD_SLOT_COUNT_COMMAND,
+        RECORD_PART_ONE_COMMAND,
+        RECORD_PART_TWO_COMMAND,
+    ):
+        raise FrameError("Unsupported Stage 2F record request.")
+    first_seven = bytes((FRAME_PREFIX, command_id, 0, 0, 0, 0, REQUEST_MARKER))
+    return ProtocolFrame(first_seven + bytes((checksum_for(first_seven),)))
+
+
+def build_record_slot_count_request() -> ProtocolFrame:
+    """Build the statically traced 0x2B current-user slot query."""
+    return _build_static_record_request(RECORD_SLOT_COUNT_COMMAND)
+
+
+def build_first_record_part_one_request() -> ProtocolFrame:
+    """Build the statically traced 0x25 query for raw index zero only."""
+    return _build_static_record_request(RECORD_PART_ONE_COMMAND)
+
+
+def build_first_record_part_two_request() -> ProtocolFrame:
+    """Build the statically traced 0x26 query for raw index zero only."""
+    return _build_static_record_request(RECORD_PART_TWO_COMMAND)
+
+
 def validate_response_echo(request: ProtocolFrame, response: ProtocolFrame) -> None:
     """Validate the request/response roles and observed command-ID echo."""
     request.require_request()
@@ -117,6 +151,18 @@ def parse_project_id(response: ProtocolFrame) -> int:
     response.require_response()
     if response.command_id != PROJECT_QUERY_COMMAND:
         raise FrameError("Expected a GD82 project-query response.")
+    return int.from_bytes(response.data[2:4], "little")
+
+
+def parse_record_slot_count(response: ProtocolFrame) -> int:
+    """Extract raw storage slots from a validated 0x2B response.
+
+    The TD4183 app may reinterpret this count for multi-parameter records.
+    This value is not a logical measurement count or analyte identifier.
+    """
+    response.require_response()
+    if response.command_id != RECORD_SLOT_COUNT_COMMAND:
+        raise FrameError("Expected a GD82 record-slot response.")
     return int.from_bytes(response.data[2:4], "little")
 
 

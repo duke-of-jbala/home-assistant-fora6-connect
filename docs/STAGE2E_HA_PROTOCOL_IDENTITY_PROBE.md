@@ -27,3 +27,5 @@ With the physical GD82 **ON**, the action reported `device_found`, `connectable_
 An earlier, separate Stage 1C notification observer connected while the meter display appeared off. That observation does **not** show that the Stage 2E wake/project exchange worked while off. No address, raw notification, health value, or private timestamp is recorded here.
 
 **Next gate:** Stage 2F offline review of exact and non-destructive TD4183 record requests. No new live record command follows automatically from Stage 2E closure.
+
+**Later Stage 2F update:** That offline review has now traced a bounded, read-oriented index-zero request path and a separate development-only action implements it. This Stage 2E action and its successful ON-state result are unchanged. The Stage 2F physical result is pending; see [the Stage 2F evidence record](STAGE2F_TD4183_RECORD_PROBE.md).

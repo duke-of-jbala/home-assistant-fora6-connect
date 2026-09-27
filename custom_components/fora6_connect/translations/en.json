@@ -29,6 +29,16 @@
           "description": "Copy the known FORA 6 CONNECT address privately from Advertisement Monitor. Used only in memory; never returned, logged, or persisted. Do not share it publicly."
         }
       }
+    },
+    "probe_protocol_record": {
+      "name": "Probe first stored record (development only)",
+      "description": "Stage 2F only. Confirm GD82 identity, then query current-user record slots and raw index zero through custom 1524. Returns status only. No clock setting, pairing, or production sync.",
+      "fields": {
+        "address": {
+          "name": "Bluetooth address (private)",
+          "description": "Copy the known FORA 6 CONNECT address privately from Advertisement Monitor. Used only in memory; never returned, logged, or persisted. Do not share it publicly."
+        }
+      }
     }
   }
 }

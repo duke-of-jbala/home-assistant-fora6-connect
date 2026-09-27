@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Stage 2F offline TD4183 record-path evidence register and development-only `probe_protocol_record` action. After the Stage 2E identity gate it requests one current-user raw slot using exactly `0x2B`, `0x25`, and `0x26` at index zero, returning status only. Physical Stage 2F validation remains pending; no production sync or record decoder was added.
 - Recorded the successful real Stage 2E Home Assistant identity probe: with the GD82 ON, custom `1524` subscription, captured `0x22` and `0x24` exchanges, project `0x4183`, clean notification stop and disconnect. Stage 2F begins with an offline record-path evidence gate; no record command was added by this closure.
 - Development-only Stage 2E `probe_protocol_identity` Home Assistant action for the captured custom `1524` wake (`0x22`) and project (`0x24`) exchange, with bounded response validation, project `0x4183` identity check, privacy-safe result, and guaranteed cleanup. Its physical validation was pending when introduced and is recorded above; no production sync path was added.
 - Stage 2C privacy-safe live-capture evidence record: a patched, locally re-signed iFORA HM research copy imported the real GD82's existing uric-acid record through custom `1523/1524`; captured wake/project responses confirm project `0x4183`, the eight-byte summed envelope, and uric-acid raw-value `/10` scaling without recording the private value or timestamp.

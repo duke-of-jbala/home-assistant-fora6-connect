@@ -105,3 +105,7 @@ The Stage 2A source register and its then-current Stage 2B gate above are histor
 ## Stage 2E follow-up — 2026-09-27
 
 The Stage 2C/2D gate above is historical. Stage 2E was subsequently authorized for a **manually invoked development-only** Home Assistant identity probe limited to custom `1524` subscription, captured `0x22` wake, captured `0x24` project query, response validation, project `0x4183` check, and cleanup. The user supplied a successful real action result: both exchanges, project `0x4183`, and cleanup validated **while the meter was ON**. This closes Stage 2E; it does not establish record retrieval or off-state wake behavior. See [the Stage 2E evidence](STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md). The next gate is Stage 2F offline review of the exact, non-destructive TD4183 record path.
+
+## Stage 2F follow-up — 2026-09-27
+
+The Stage 2E next gate above is historical. [The Stage 2F offline review](STAGE2F_TD4183_RECORD_PROBE.md) traces exact, read-oriented TD4183 current-user `0x2B`, `0x25`, and `0x26` requests for raw index zero. A bounded development-only Home Assistant action implements them after the confirmed `0x22`/`0x24`/`0x4183` identity gate. It is awaiting one physical test. No `0x33` clock set, private serial query, record decoding, or production sync was added. Next gate: one user-run action and review of only its privacy-safe result.

@@ -135,5 +135,43 @@ class Stage2CFrameTests(unittest.TestCase):
                 protocol.scale_td4183_uric_acid(invalid)
 
 
+class Stage2FRecordFrameTests(unittest.TestCase):
+    """Static app-derived fixed requests and artificial response metadata."""
+
+    def test_exact_current_user_index_zero_requests(self) -> None:
+        expected = (
+            (protocol.build_record_slot_count_request(), "51 2B 00 00 00 00 A3 1F"),
+            (
+                protocol.build_first_record_part_one_request(),
+                "51 25 00 00 00 00 A3 19",
+            ),
+            (
+                protocol.build_first_record_part_two_request(),
+                "51 26 00 00 00 00 A3 1A",
+            ),
+        )
+        for frame, hex_bytes in expected:
+            with self.subTest(command=frame.command_id):
+                self.assertEqual(frame.data, bytes.fromhex(hex_bytes))
+                frame.require_request()
+        with self.assertRaises(protocol.FrameError):
+            protocol._build_static_record_request(0x33)
+        with self.assertRaises(protocol.FrameError):
+            protocol._build_static_record_request(0x50)
+
+    def test_synthetic_raw_slot_count_only(self) -> None:
+        first_seven = bytes.fromhex("51 2B 01 00 00 00 A5")
+        response = protocol.ProtocolFrame(
+            first_seven + bytes((protocol.checksum_for(first_seven),))
+        )
+        self.assertEqual(protocol.parse_record_slot_count(response), 1)
+        with self.assertRaises(protocol.FrameError):
+            protocol.parse_record_slot_count(protocol.build_record_slot_count_request())
+        with self.assertRaises(protocol.FrameError):
+            protocol.parse_record_slot_count(
+                protocol.ProtocolFrame(Stage2CFrameTests.PROJECT_RESPONSE)
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

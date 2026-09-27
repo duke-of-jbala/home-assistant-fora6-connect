@@ -48,3 +48,20 @@ probe_protocol_identity:
       required: true
       selector:
         text: {}
+probe_protocol_record:
+  name: Probe first stored record (development only)
+  description: >-
+    Stage 2F controlled diagnostic. Confirm GD82 identity with captured wake
+    and project queries, then query current-user record slots and only raw
+    index zero through custom 1524. Returns status only, never health data.
+    No clock setting, pairing, or production synchronization.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the known FORA 6 CONNECT address privately from Advertisement
+        Monitor. Used only in memory for this action; never returned, logged,
+        or persisted. Do not share it publicly.
+      required: true
+      selector:
+        text: {}
