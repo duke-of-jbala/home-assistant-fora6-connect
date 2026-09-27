@@ -1,23 +1,23 @@
 # FORA 6 Connect Codex Handover
 
-## First public GitHub push: blocked by historical paths
+## Pre-publication rewritten-history checkpoint
 
-The first-publication audit found specific local absolute filesystem paths in older revisions of `AGENTS.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, and `FORA6_MASTER_ROADMAP.md`. Current tracked revisions no longer contain them, but they remain in Git history. All existing commits also expose a personal, non-noreply author name and email; decide whether that attribution is intended for publication. Per the user's first-push gate, **do not push `main` until a separately authorized history cleanup removes the paths and the rewritten history is re-audited**. No rewrite, force push, tag, release, physical test, or Stage 7B work was performed. The known local path also named another repository in an early `AGENTS.md` revision; that repository was not accessed.
+The user authorized a targeted privacy rewrite before the first public push. `git filter-repo` preserved the 47-commit sequence and subject order, retained the user's display name, replaced the previous personal author/committer email with the verified GitHub noreply address, and redacted historical local checkout and private temporary-workspace paths. A verified local-only safety bundle remains outside Git. The rewritten history contains no backup refs, tags, old personal email, or private local paths. The only current-tree content change caused by the rewrite is the intentional temporary-workspace redaction in the Stage 2 static-analysis note. No runtime behavior changed.
 
 - **Branch/date:** `main`, 2026-09-27 (Europe/London).
-- **Last completed/checkpoint commit before task:** `e40caca2b7ab621e94925a48854b15a172588e3e` — `feat: enrich FORA device metadata`.
-- **Starting working tree:** clean, verified before edits. `origin` matched the intended GitHub repository and there were no tags.
-- **Changes after checkpoint:** yes, public README and ignore-file corrections plus status/handover refresh. This is a pre-commit observation; verify and report the task commit SHA and final tree separately.
-- **Files changed:** `.gitignore`, `README.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`.
-- **Runtime boundary:** no integration code, BLE commands, action schemas, Config Flow, measurement mapping, or synchronization behavior changed.
+- **Last completed/checkpoint commit before this correction:** `95f751a9ef40f7bbcb5b16781d7f6bc0fd12b2a7` — `chore: prepare repository for public development` (rewritten tip).
+- **Starting working tree:** clean before and after the history rewrite, verified with `git status --short`.
+- **Changes after checkpoint:** yes, this pre-commit correction refreshes status/handover and replaces the now-unreachable Stage 2F commit reference. Verify and report the new task commit SHA and final tree separately.
+- **Files changed by this correction:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `docs/STAGE2F_TD4183_RECORD_PROBE.md`. The rewrite itself also redacted `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md` in the current tree.
+- **Remote:** `origin` retains the intended GitHub URL. The repository did not exist when checked before this correction; the user explicitly authorized creating it as empty and public. No code had been pushed at this observation.
+- **Runtime boundary:** no integration code, BLE commands, action schemas, Config Flow, measurement mapping, synchronization, or Stage 7B implementation changed.
 
-## Audit and checks
+## Audit and checks before this correction
 
 - Full unit suite: **242 passed** (`python3 -m unittest discover -s tests -v`).
 - `compileall` and `tabnanny`: passed; four JSON and one YAML file parsed.
-- Four placeholder PNGs validated for format, dimensions, alpha, and size; landscape artwork rendered and inspected. MIT license present. HACS metadata and manifest represent development status, with no release tag.
-- Complete tracked-file inventory and 573 historical blobs reviewed for filenames, capture/package/key artifacts, local paths, MAC-shaped values, and common credential markers. No captured/proprietary binary or credential marker was found; the one historical MAC shape was an all-`AA` synthetic fixture. The historical absolute paths are the publication blocker.
-- Runtime command and dependency review found no Stage 7 sync loop, new BLE command, or BLE I/O in `sensor.py`; pure protocol/model/measurement modules remain free of HA/Bleak imports.
-- `git diff --check` and staged-diff checks are recorded in the final task report after staging.
+- Rewritten history scan: 47 commits retain the display name and use only the verified noreply email. No previous personal email, private local path, private workspace name, common credential marker, or proprietary binary was found in reachable objects. The only MAC-shaped bytes are the synthetic all-`AA` test value.
+- Current tracked-file inventory: 80 paths; MIT license, development-stage README/manifest/HACS metadata, and temporary original branding remain. Four PNG dimensions and alpha channels validated. No Stage 7 sync loop, new BLE command, or BLE I/O in `sensor.py`; pure protocol/model/measurement modules remain free of HA/Bleak imports.
+- `git diff --check` passed before this correction. Rerun the full gate and `git diff --cached --check` after staging. The public push must happen only after the correction commit and final audit pass.
 
-**Immediate publication gate:** decide whether to retain or anonymize personal Git attribution, authorize a focused history cleanup preserving substantive commits, then rerun the full privacy and quality gates before the first public push. **Exact protocol gate after that:** separately authorize Stage 7B bounded physical traversal probe implementation and user-run validation under [the Stage 7A design](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). General traversal, latest ordering, deduplication, and production entity updates remain deferred.
+**Exact next project gate:** separately authorize Stage 7B bounded physical traversal probe implementation and user-run validation under [the Stage 7A design](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). General traversal, latest ordering, deduplication, and production entity updates remain deferred.

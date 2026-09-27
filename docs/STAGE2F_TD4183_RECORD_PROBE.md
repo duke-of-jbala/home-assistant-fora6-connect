@@ -24,7 +24,7 @@ In the 1.7.9 decompilation, the project-code factory `g2/a.java` selects `d2/w.j
 
 ## Selector and index reconciliation
 
-Both retained enum definitions assign `CurrentUser = 0` and `User1 = 1`. Neither `0x2B` nor `0x25`/`0x26` builder applies `+1` to the enum value. The 1.7.6 import service selects `values()[import_extension + 1]`; for the observed `0x4183` project path, the extension defaults to zero, selecting `User1`. The retained 1.7.9 fallback import path likewise indexes the enum with an incremented extension. Thus the live `1` is **User1**, not a wire remapping of `CurrentUser`. The old all-zero constructors in commit `4ae3efa7a1993140afbfe4575b35917a11192dfd` selected `CurrentUser` and did not match the successful import's requests. This was discovered before any Home Assistant Stage 2F physical test.
+Both retained enum definitions assign `CurrentUser = 0` and `User1 = 1`. Neither `0x2B` nor `0x25`/`0x26` builder applies `+1` to the enum value. The 1.7.6 import service selects `values()[import_extension + 1]`; for the observed `0x4183` project path, the extension defaults to zero, selecting `User1`. The retained 1.7.9 fallback import path likewise indexes the enum with an incremented extension. Thus the live `1` is **User1**, not a wire remapping of `CurrentUser`. The old all-zero constructors in commit `340cc7b308108697de2c720d3438afeccb39d0b6` selected `CurrentUser` and did not match the successful import's requests. This was discovered before any Home Assistant Stage 2F physical test.
 
 This establishes the selector used by the successful app import on this physical GD82. It does not establish that every GD82 profile or future import should select User1.
 

@@ -2,21 +2,22 @@
 
 Stages 0–5A and 6A–6B are complete for their authorized scopes. Stage 7A's offline history review is complete. The configured GD82 has one device and one uric-acid entity, currently Unavailable. Production synchronization is not implemented. The exact protocol-work gate remains a separately authorized Stage 7B bounded history probe.
 
-## First-publication audit observation
+## Pre-publication rewrite observation
 
 - **Date/branch:** 2026-09-27 (Europe/London), `main`.
-- **Last completed/checkpoint commit:** `e40caca2b7ab621e94925a48854b15a172588e3e` — `feat: enrich FORA device metadata`.
-- **Starting tree:** clean (`git status --short` returned no entries). `origin` matched the intended GitHub repository; `git tag --list` returned no tags.
-- **Changes after checkpoint:** yes, public README and ignore-file corrections plus this status/handover update. This is a pre-commit observation; the task commit SHA and final tree state must be reported separately.
-- **Files changed:** `.gitignore`, `README.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`.
-- **Publication gate:** blocked. A full-history blob scan found specific local absolute filesystem paths in older `AGENTS.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, and `FORA6_MASTER_ROADMAP.md` revisions. The current tracked versions contain none of those paths. All existing commit metadata also contains a personal, non-noreply author name and email; publication of that attribution needs an explicit decision. A later commit cannot remove either item from history. No push, tag, release, or history rewrite was performed.
-- **Other audit findings:** current tracked files contain no captured/proprietary artifacts or discovered secrets. Historical MAC-shaped strings were synthetic all-`AA` test values. The four temporary original-brand PNGs validated and rendered. MIT license and development-stage manifest/HACS metadata remain in place. The runtime command set and Stage 7 boundary are unchanged.
+- **Last completed/checkpoint commit:** `95f751a9ef40f7bbcb5b16781d7f6bc0fd12b2a7` — `chore: prepare repository for public development` (rewritten tip before this documentation correction).
+- **Starting tree:** clean before the rewrite and clean after it; `git status --short` returned no entries at both points. The configured `origin` URL is the intended GitHub repository. No tags or backup refs exist.
+- **Changes after checkpoint:** yes, this pre-commit documentation correction updates obsolete commit references and the handover state. The history rewrite changed only the private temporary-workspace reference in the current Stage 2 static-analysis note; runtime code and assets remain byte-identical to the pre-rewrite tip. Report the task commit SHA and post-commit status separately.
+- **Files changed by this correction:** `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `docs/STAGE2F_TD4183_RECORD_PROBE.md`. The rewrite itself also redacted `docs/STAGE2_IFORA_HM_STATIC_ANALYSIS.md` in the current tree.
+- **History rewrite:** `git filter-repo` retained all 47 commits and their subject order while replacing the user's personal author/committer email with the verified GitHub noreply address, preserving the display name, and redacting historical local paths. The external safety bundle remains local and verified. No old-history backup ref remains reachable from the branch.
+- **Publication state at this observation:** the intended GitHub repository had not yet been created or pushed. The user authorized creation as an empty public repository after the local audit. No tag or release is planned.
 
-## Checks actually run
+## Checks actually run before this correction
 
 - Full unit suite: **242 passed** (`python3 -m unittest discover -s tests -v`).
 - `python3 -m compileall -q custom_components tests` and `python3 -m tabnanny custom_components tests`: passed.
-- Four JSON and one YAML file parsed successfully. Branding PNG dimensions and alpha channels validated.
-- Current tracked-file and 573-blob Git-history inventory, secret/path/artifact pattern audit, runtime command/import audit, and synthetic-fixture review performed. `git diff --check` and staged-diff checks are recorded in the task's final report after edits are staged.
+- Manifest, strings, translation, and HACS JSON plus services YAML parsed successfully; `git diff --check` passed.
+- Rewritten-object scan found no previous personal email, historical workstation path, private workspace string, credential marker, or proprietary binary. The only MAC-shaped value is the existing synthetic all-`AA` test fixture. All four branding PNGs passed format, dimension, and alpha checks. The runtime command set and Stage 7 boundary are unchanged.
+- The complete checks will be repeated after this documentation correction and staged-diff review before the first push.
 
-**Immediate publication gate:** decide whether to retain or anonymize personal Git attribution, then explicitly authorize a privacy-preserving history cleanup that retains the substantive commits. Re-audit every rewritten object and push only after all gates pass. **Next protocol gate:** separately authorize the bounded Stage 7B probe described in [Stage 7A](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). Do not begin Stage 7B or production synchronization during publication cleanup.
+**Exact next project gate:** separately authorize the bounded Stage 7B probe described in [Stage 7A](docs/STAGE7A_HISTORY_TRAVERSAL_DESIGN.md). Do not begin Stage 7B or production synchronization as part of repository publication.
