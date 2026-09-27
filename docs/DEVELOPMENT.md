@@ -87,7 +87,9 @@ The actual retained private 1.7.6/1.7.9 decompilation paths were not preserved i
 
 **Stage 6A1 bounded serial probe:** [The Stage 6A1 record](STAGE6A1_SERIAL_IDENTITY_READ.md) documents manual `fora6_connect.probe_serial_identity`. It reads only Device Information `0x2A25` once and returns structural booleans, never serial text, digest, length, or address. The user-run real GD82 test with the meter ON returned usable UTF-8 text and clean disconnect. This alone does not prove stability or uniqueness.
 
-**Stage 6A1b private comparison:** [The Stage 6A1b record](STAGE6A1B_SERIAL_STABILITY.md) documents `fora6_connect.probe_serial_stability`: `set_reference` and `compare` use the same bounded read, with one private exact-byte reference in HA process memory and equality-only public output. It has no physical comparison result yet. **Exact next gate:** controlled user-run comparison before and after a meter OFF/ON cycle, then separate uniqueness and production-policy review if stable. Config Flow remains deferred.
+**Stage 6A1b private comparison:** [The Stage 6A1b record](STAGE6A1B_SERIAL_STABILITY.md) documents `fora6_connect.probe_serial_stability`: `set_reference` and `compare` use the same bounded read, with one private exact-byte reference in HA process memory and equality-only public output. User-run comparisons matched immediately and after a meter OFF/ON cycle, with clean disconnects. The serial remains unpublished; stability is shown only for that meter and tested conditions.
+
+**Stage 6A1c identity policy:** [The evidence review](STAGE6A1C_SERIAL_IDENTITY_POLICY.md) combines Bluetooth SIG instance-serial semantics, manufacturer/manual limits, retained app paths, physical stability, and HA unique-ID guidance. It conditionally selects exact validated `0x2A25` text for a future domain-scoped config-entry/device identifier with fail-closed collision handling. Address remains a runtime locator. **Exact next gate:** separately authorize Stage 6B guarded Config Flow implementation; no matcher, entry, device, or entity was added here.
 
 ## Temporary Stage 1C Home Assistant notification observer
 

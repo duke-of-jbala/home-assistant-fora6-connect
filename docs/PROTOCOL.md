@@ -277,4 +277,8 @@ The [Stage 5A evidence record](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) traces both a
 
 ### Stage 6A1b private in-memory equality
 
-[The Stage 6A1b record](STAGE6A1B_SERIAL_STABILITY.md) adds a development-only exact-byte comparison against one process-local private reference. Each set/compare reads `0x2A25` at most once; no serial, digest, length, address, or raw bytes enter results or persistent state. No physical comparison has yet been run. A match before and after a power cycle would support stability under those tested conditions, while uniqueness and production identity policy still need separate review. **Exact next gate:** controlled user-run private comparison and sanitized result review.
+[The Stage 6A1b record](STAGE6A1B_SERIAL_STABILITY.md) adds a development-only exact-byte comparison against one process-local private reference. Each set/compare reads `0x2A25` at most once; no serial, digest, length, address, or raw bytes enter results or persistent state. User-run real-GD82 comparisons matched immediately and after a meter OFF/ON cycle, with clean disconnects. This supports stability for the tested meter and states, not global uniqueness.
+
+### Stage 6A1c serial identity policy
+
+[The Stage 6A1c review](STAGE6A1C_SERIAL_IDENTITY_POLICY.md) classifies Bluetooth SIG `0x2A25` instance-serial meaning as standard-documented, the tested meter's power-cycle stability as live-corroborated, and population uniqueness as unresolved. FORA's manual has an SN marking but does not link it to GATT; retained app versions have a separate proprietary serial parser not proven equivalent to `0x2A25`. A future guarded Stage 6B flow may use exact validated serial text internally for one integration-domain config entry and device identifier, with collision and failure handling. No Config Flow or persistent identifier is implemented. **Exact next gate:** separately authorize Stage 6B implementation and controlled validation.

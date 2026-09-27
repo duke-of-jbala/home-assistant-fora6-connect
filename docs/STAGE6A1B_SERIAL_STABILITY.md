@@ -1,7 +1,15 @@
 # Stage 6A1b — private in-memory serial stability comparison
 
-**State:** Development-only set/compare action implemented and hardware-free
-tested. No Stage 6A1b physical comparison has been performed.
+**State:** Development-only set/compare action implemented, hardware-free
+tested, and physically validated by the user on the real GD82 with the meter
+ON. [Stage 6A1c](STAGE6A1C_SERIAL_IDENTITY_POLICY.md) records the later
+identity-policy review.
+
+The privacy-safe physical results show a usable reference set, an immediate
+`serial_matches_reference: true`, and another match after one meter OFF/ON
+cycle. Each read and disconnect succeeded. No serial, hash, length, address,
+or recoverable representation was published. This demonstrates stability for
+this one physical meter under those conditions, not population uniqueness.
 
 ## Evidence and boundary
 
@@ -74,9 +82,6 @@ duplicate-device handling, and any transformation into a config-entry ID
 still require a separately reviewed evidence and policy gate. No Config Flow
 or DeviceInfo identifier is enabled here.
 
-**Exact next gate:** user-run controlled Stage 6A1b comparison and sanitized
-result review. If repeated and power-cycle comparisons match, review the
-uniqueness basis and production identity policy before Config Flow. If they
-mismatch, investigate the identity source without registering the meter. If
-the serial becomes unreadable or unusable, consider separately authorizing a
-bounded `0x2A23` System ID review.
+**Current next gate:** separately authorize Stage 6B implementation of the
+guarded identity policy after reviewing [Stage 6A1c](STAGE6A1C_SERIAL_IDENTITY_POLICY.md).
+No Config Flow or device registration was enabled by the comparison action.
