@@ -2,27 +2,25 @@
 
 ## Stage and checkpoint
 
-Stage 0 and Stage 1 are complete. Stage 2A public review, 2B static analysis, 2C controlled app capture, and 2D offline primitives are complete. **Stage 2E is authorized and its development-only Home Assistant identity probe is implemented, but no physical Stage 2E result exists yet.** Production synchronization, record retrieval, pairing, standard Glucose/RACP operations, and entities remain out of scope.
+Stage 0 and Stage 1 are complete. Stage 2A–2E are complete. **Stage 2E's physical Home Assistant identity probe succeeded with the meter ON.** Stage 2F is separately authorized, beginning with a mandatory offline evidence gate. This handover describes the dirty pre-commit Stage 2E closure state; it does not claim Stage 2F record retrieval is implemented.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `0d293b3d37ef867670468566f14eac55f347be5b` — `feat: add evidence-backed GD82 protocol primitives`.
+- **Last completed checkpoint:** `861d861389fd80990ba27d505def6a48ad6a4dbf` — `feat: add development FORA protocol identity probe`.
 - **Starting tree:** clean at the verified checkpoint.
-- **Changes after checkpoint:** yes; this handover describes the dirty pre-commit state. Report the task commit SHA and final working-tree status separately.
-- **Files changed:** `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `custom_components/fora6_connect/__init__.py`, `custom_components/fora6_connect/protocol_probe.py`, `custom_components/fora6_connect/services.yaml`, `custom_components/fora6_connect/translations/en.json`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2_PROTOCOL_ACQUISITION.md`, `docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md`, `tests/test_gatt_probe.py`, and `tests/test_protocol_probe.py`.
+- **Changes after checkpoint:** yes; this documentation-only Stage 2E closure changes `CHANGELOG.md`, `CODEX_HANDOVER.md`, `CURRENT_STATUS.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `docs/ARCHITECTURE.md`, `docs/CAPTURE_GUIDE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md`, and `docs/STAGE2_PROTOCOL_ACQUISITION.md`. Report the final closure SHA and status separately.
 
-## Implementation boundary
+## User-supplied Stage 2E observation
 
-`fora6_connect.probe_protocol_identity` takes a private runtime-only address, resolves a connectable BLEDevice through Home Assistant, subscribes only to custom `1524`, writes the fixed Stage 2C `0x22` wake request and then the fixed `0x24` project request with `response=True`, validates matching checksummed notification frames using HA-independent `protocol.py`, requires project `0x4183`, and cleans up. Each wait is bounded; errors are stable sanitized categories. The action contains no record command or RACP/standard Glucose path. No automatic invocation, config flow, entity, polling, pairing, measurement parsing, or production synchronization was added. `protocol.py` was not changed.
+On the physical GD82 **while its meter was ON**, the development-only `fora6_connect.probe_protocol_identity` action resolved a connectable Home Assistant BLEDevice, connected, subscribed to custom `1524`, validated the captured `0x22` wake response and `0x24` project response, confirmed project `16771` (`0x4183`), then stopped notifications and disconnected cleanly. Its result reported no error or cleanup errors. The connection's exact scanner/proxy is unknown. No record was requested; no private address, health value, timestamp, or raw response is recorded.
 
-The first real Home Assistant run is **pending**. The prior patched research-app capture confirmed the corresponding proprietary exchange on GD82, but does not prove this Home Assistant path succeeds. See [Stage 2C evidence](docs/STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md), [protocol register](docs/PROTOCOL.md), and [Stage 2E procedure](docs/STAGE2E_HA_PROTOCOL_IDENTITY_PROBE.md). Raw notification bytes and the private address are neither returned nor persisted.
+The earlier Stage 1C observer's connection while the display appeared off is a separate observation. It does not prove the Stage 2E wake/project exchange works with the meter off. Stage 2E closure confirms the bounded Home Assistant proprietary identity path only.
+
+## Stage 2F boundary and next gate
+
+Review the TD4183 static-analysis and sanitized Stage 2C record path before adding any new application write. Each proposed command needs exact request construction and evidence that it is non-destructive. `0x33` is prohibited from live Stage 2F transport. If the gate fails, document the missing evidence and stop without a record action. Production sync, pairing, polling, entities, and config flow remain outside scope.
 
 ## Checks actually run
 
-- Focused new probe suite: 19 passed after connection-slot and log-privacy tests were added.
-- Full unit suite: 72 passed after implementation and documentation edits.
-- Compileall, tabnanny, and `git diff --check`: passed. Translation/manifest JSON and service YAML parsed successfully.
-- Ruff unavailable. Staged diff check passed; the 19 intended text files were staged and reviewed. Final privacy/scope audit found no private path, real Bluetooth address, health value, timestamp, capture/APK/signing artifact, or new production path. An older GATT test's `AA`-repeated address is synthetic. `protocol.py` remains HA/Bluetooth independent, and the new action references only the captured wake and project constructors.
-
-## Exact next gate
-
-Privately install the development build in Home Assistant; invoke `fora6_connect.probe_protocol_identity` on the real GD82 and return only the action's privacy-safe structured result. Review that result before closing Stage 2E or authorizing further protocol or production work. No new health measurement is needed.
+- Full unit suite: 72 passed.
+- Compileall, tabnanny, `git diff --check`, and manifest/translation JSON plus service YAML validation: passed.
+- Staged diff check and privacy/scope audit passed for the 13 intended Markdown files. No private path, real address, health value, timestamp, capture, APK, keystore, code, or new command was added.

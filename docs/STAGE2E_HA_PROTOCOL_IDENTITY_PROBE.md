@@ -1,6 +1,6 @@
 # Stage 2E — Home Assistant proprietary identity probe
 
-**State:** Authorized, development-only implementation prepared; physical GD82 test and review pending. This document contains no claimed Home Assistant protocol result.
+**State:** COMPLETE. The user supplied a privacy-safe result from a successful real GD82 Home Assistant run. The meter was **ON** during this Stage 2E exchange.
 
 ## Evidence and boundary
 
@@ -16,8 +16,14 @@ All waits are bounded. Invalid, mismatched, or timed-out responses stop the sequ
 2. If the integration is not already loaded for development, add `fora6_connect:` to `configuration.yaml`. Restart **Home Assistant Core** to load the new Python code, service metadata, and translations. The generic ESPHome proxy firmware does not need to be changed for this action.
 3. Put the meter in its normal Bluetooth transfer state. Use Home Assistant's Bluetooth Advertisement Monitor to confirm the meter's row is current; for this controlled test, Lounge may temporarily use Active mode, as in Stage 1B. The action itself does not request or depend on a new advertisement callback. No new health measurement is needed.
 4. In **Developer Tools → Actions**, select `fora6_connect.probe_protocol_identity`. Privately enter the already identified meter's Bluetooth address in the required `address` field. Request the action response and invoke it once. Do not place the address in a screenshot, issue, or shared result.
-5. Share only the privacy-safe structured action result. On success, expect `identity_confirmed: true`, `project_id: 16771` (`0x4183`), both response-valid flags true, and clean notification/disconnect flags. This is an **expected schema**, not an observed Stage 2E result. An error result's `error_stage`/`error_code` identifies the bounded failure gate without exposing packets.
+5. Share only the privacy-safe structured action result. The observed Stage 2E run returned `identity_confirmed: true`, `project_id: 16771` (`0x4183`), both response-valid flags true, and clean notification/disconnect flags. An error result's `error_stage`/`error_code` identifies the bounded failure gate without exposing packets.
 
 The response fields are `device_found`, `connectable_device_resolved`, `connection_successful`, `connected_via_ha_bluetooth`, `custom_characteristic_found`, `notification_subscription_successful`, `wake_write_successful`, `wake_response_valid`, `project_query_write_successful`, `project_response_valid`, `project_id`, `expected_project_id`, `project_id_matches`, `notification_stopped_cleanly`, `disconnected_cleanly`, `identity_confirmed`, `error_stage`, `error_code`, and `cleanup_errors`.
 
-**Next gate:** review the real privacy-safe Home Assistant action result. Stage 2E is not complete on code/test success alone. Any subsequent protocol operation requires separate authorization.
+## Real Stage 2E observation — user-supplied
+
+With the physical GD82 **ON**, the action reported `device_found`, `connectable_device_resolved`, `connection_successful`, `connected_via_ha_bluetooth`, `custom_characteristic_found`, `notification_subscription_successful`, `wake_write_successful`, `wake_response_valid`, `project_query_write_successful`, `project_response_valid`, `project_id_matches`, `notification_stopped_cleanly`, `disconnected_cleanly`, and `identity_confirmed` all true. `project_id` and `expected_project_id` were both `16771` (`0x4183`). `error_stage` and `error_code` were null; `cleanup_errors` was empty. This confirms the bounded Home Assistant custom identity path. It does not identify the selected scanner/proxy or establish any record operation.
+
+An earlier, separate Stage 1C notification observer connected while the meter display appeared off. That observation does **not** show that the Stage 2E wake/project exchange worked while off. No address, raw notification, health value, or private timestamp is recorded here.
+
+**Next gate:** Stage 2F offline review of exact and non-destructive TD4183 record requests. No new live record command follows automatically from Stage 2E closure.

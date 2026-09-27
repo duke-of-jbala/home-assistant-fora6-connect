@@ -7,7 +7,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
-- Development-only Stage 2E `probe_protocol_identity` Home Assistant action for the captured custom `1524` wake (`0x22`) and project (`0x24`) exchange, with bounded response validation, project `0x4183` identity check, privacy-safe result, and guaranteed cleanup. Physical Home Assistant validation is pending; no production sync path was added.
+- Recorded the successful real Stage 2E Home Assistant identity probe: with the GD82 ON, custom `1524` subscription, captured `0x22` and `0x24` exchanges, project `0x4183`, clean notification stop and disconnect. Stage 2F begins with an offline record-path evidence gate; no record command was added by this closure.
+- Development-only Stage 2E `probe_protocol_identity` Home Assistant action for the captured custom `1524` wake (`0x22`) and project (`0x24`) exchange, with bounded response validation, project `0x4183` identity check, privacy-safe result, and guaranteed cleanup. Its physical validation was pending when introduced and is recorded above; no production sync path was added.
 - Stage 2C privacy-safe live-capture evidence record: a patched, locally re-signed iFORA HM research copy imported the real GD82's existing uric-acid record through custom `1523/1524`; captured wake/project responses confirm project `0x4183`, the eight-byte summed envelope, and uric-acid raw-value `/10` scaling without recording the private value or timestamp.
 - Stage 2D HA-independent immutable frame/checksum helpers, fixed captured wake/project-query constructors, project-ID parser, and contextual uric-acid scaling helper, with sanitized/synthetic tests. No Home Assistant BLE write path or record parser was added.
 - Git ignore rules for APK/XAPK/split archives and local signing keystores; capture ignore rules already covered btsnoop and pcap files.
