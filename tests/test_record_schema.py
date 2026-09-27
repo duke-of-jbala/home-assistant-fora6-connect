@@ -110,19 +110,19 @@ class TD4183PartTwoTests(unittest.TestCase):
         self.assertEqual(part.auxiliary_value, 17)
         self.assertEqual(part.code_number, 32)
         self.assertFalse(part.invalid_raw_value)
-        self.assertFalse(part.is_control_solution)
+        self.assertFalse(part.is_qc)
         self.assertEqual(
             protocol.scale_td4183_uric_acid(part.raw_value), Decimal("7.3")
         )
         self.assertNotIn("73", repr(part))
 
-    def test_qc_control_solution_and_invalid_raw_sentinel(self) -> None:
+    def test_qc_category_and_invalid_raw_sentinel(self) -> None:
         part = protocol.parse_td4183_record_part_two(
             synthetic_response(0x26, bytes.fromhex("FF FF 00 D8"))
         )
         self.assertIs(part.analyte, protocol.TD4183Analyte.HEMATOCRIT)
         self.assertIs(part.category, protocol.TD4183RecordCategory.QC)
-        self.assertTrue(part.is_control_solution)
+        self.assertTrue(part.is_qc)
         self.assertTrue(part.invalid_raw_value)
         with self.assertRaises(ValueError):
             protocol.scale_td4183_uric_acid(part.raw_value)
@@ -140,7 +140,7 @@ class TD4183PartTwoTests(unittest.TestCase):
                 )
                 self.assertIs(part.category, expected)
                 self.assertEqual(
-                    part.is_control_solution,
+                    part.is_qc,
                     expected is protocol.TD4183RecordCategory.QC,
                 )
 

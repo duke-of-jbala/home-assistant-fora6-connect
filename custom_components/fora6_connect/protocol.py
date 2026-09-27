@@ -91,8 +91,8 @@ class TD4183RecordPartTwo:
     raw_payload: bytes = field(repr=False)
 
     @property
-    def is_control_solution(self) -> bool:
-        """The app's QC category is distinct from general measurements."""
+    def is_qc(self) -> bool:
+        """Return whether the app-mapped record category is QC."""
         return self.category is TD4183RecordCategory.QC
 
 

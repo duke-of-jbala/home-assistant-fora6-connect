@@ -1,5 +1,11 @@
 # Current Status — FORA 6 Connect
 
+## Post-Stage-3 QC semantics correction
+
+The protocol-level convenience property now reports `is_qc`, matching the app-mapped category only. QC is not labeled as a control solution; that meaning and any related policy remain unresolved. Stage 2A–2G are complete for their authorized scopes, and remaining semantics are open/deferred without invalidating Stage 3. This correction changes no parser fields, fixture bytes, BLE behavior, action schema, or command set.
+
+**Correction checkpoint:** based on `98c84a5f5b46bdace0e00a92d043afb3ebe3d3f8` (`feat: add offline TD4183 record model and synthetic fixtures`), branch `main`, clean starting tree. Files changed for this correction: `custom_components/fora6_connect/protocol.py`, `tests/test_record_schema.py`, `docs/STAGE2G_TD4183_RECORD_SCHEMA.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md`. Checks run and commit SHA are recorded in the final report; this file describes the pre-commit state.
+
 **Stages 0, 1, and 3 are complete for their authorized scope.** Stage 2 remains in progress, with Stages 2A–2G complete. Stage 3 added only an offline combined TD4183 record model and ten synthetic fixture cases. The live development actions, BLE command set, and response schemas remain unchanged. There is no production record synchronization or measurement entity.
 
 ## Stage 3 result

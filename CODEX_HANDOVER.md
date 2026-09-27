@@ -1,5 +1,14 @@
 # FORA 6 Connect Codex Handover
 
+## Current corrective task — QC terminology
+
+The protocol record part exposes `is_qc`, which reflects only `TD4183RecordCategory.QC`. It makes no control-solution interpretation. Stage 2A–2G are complete for their authorized scopes; remaining protocol semantics are open/deferred and do not invalidate Stage 3. The focused change alters no fixture bytes, parser behavior, command IDs, BLE behavior, or action schemas.
+
+- **Branch/checkpoint:** `main`, `98c84a5f5b46bdace0e00a92d043afb3ebe3d3f8` — `feat: add offline TD4183 record model and synthetic fixtures`.
+- **Starting tree:** clean before this correction.
+- **Changed files:** `custom_components/fora6_connect/protocol.py`, `tests/test_record_schema.py`, `docs/STAGE2G_TD4183_RECORD_SCHEMA.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`, `CURRENT_STATUS.md`, and `CODEX_HANDOVER.md`.
+- **Checks:** final suite and static/privacy checks are performed before commit; record results and post-commit status in the final response.
+
 ## Stage and checkpoint
 
 Stages 0, 1, and 3 are complete for their authorized scope. Stage 2 remains in progress; Stages 2A–2G are complete. Stage 3 added an offline combined TD4183 record model and synthetic fixtures only. No live BLE operation, action result schema, production synchronization, or entity changed.

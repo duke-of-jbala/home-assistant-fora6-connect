@@ -6,6 +6,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Fixed
+- Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
+
 ### Added
 - Stage 3 offline immutable TD4183 record model and ten synthetic, checksummed fixture cases. Invalid `0xFFFF` remains unusable as a numeric measurement; contextual raw/10 scaling applies only to valid identified uric-acid records. No live action or BLE behavior changed.
 - Evidence-backed, Home Assistant-independent TD4183 `0x25`/`0x26` offline parsers for packed meter-local minute, transmitted flag, raw measurement, analyte selector, QC/category, and invalid sentinel, with synthetic tests. Private in-memory capture validation confirmed the uric-acid index-zero and hematocrit/QC sentinel companion classifications; no private bytes or result were committed. The live probe and production paths are unchanged.
