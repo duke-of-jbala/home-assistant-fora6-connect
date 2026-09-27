@@ -1,5 +1,14 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A — post-v1 automatic-trigger architecture, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `dd26b65ab467381db58ba7a525c6b8eabca8e00a` — `chore: prepare FORA 6 Connect v1.0.0`; `origin/main` matched. Local and remote `v1.0.0` peel to that commit; the stable GitHub release exists. No released ref is changed.
+- **Evidence/result:** current setup has discovery and an explicit configured-entry manual coordinator, but no automatic Bluetooth callback. HA may deduplicate unchanged advertisements, replay cached data, and delay unavailable notices; ESPHome advert reception differs from limited GATT connection slots. Normal manual ON is validated; one post-measurement flashing episode failed notification subscription. No reproducible pre-connection readiness signature or reliable episode boundary is established. [Stage 13A](docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md) therefore selects physical advertisement-state observation before auto-sync implementation.
+- **Changes after checkpoint:** yes; `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, and new `docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md`. The working tree is modified at this pre-commit observation. Only Markdown changes; no physical operation, production callback, automatic refresh, new command, or test code is added.
+- **Checks actually run on the modified tree:** baseline SHA, branch, released tag, clean starting tree, and matching remote main verified; current HA Bluetooth and ESPHome official guidance and repository call paths reviewed. Full `unittest` suite **375/375** passed; compileall and tabnanny passed; four JSON, two YAML, one TOML parsed; `git diff --check` and unstaged runtime/test/CI diff audit passed. Nine changed Markdown files passed identifier, credential, private-path, health-time, logging/automatic-sync/history, and tracked-artifact audits. Staged diff check and pushed HACS/hassfest CI remain to be verified after staging/push.
+
+**Exact next gate:** separately authorize a privacy-safe physical advertisement-state observation, with a development-only structural observer only if HA UI evidence is insufficient. Do not start Stage 13B automatic synchronization or Stage 8H from this review.
+
 ## Stage 12 Phase A — v1.0.0 release preparation, pre-commit
 
 - **Branch/date and starting checkpoint:** clean `main`, 2026-09-27 (Europe/London), `9cb9a22c46c9c1842eb7916c6edcb02be322a3be` — `docs: close Stage 11 HACS validation`; `origin/main` matched before this task.

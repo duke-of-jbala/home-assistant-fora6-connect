@@ -1,5 +1,13 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A — post-v1 auto-trigger review, pre-commit
+
+Started from clean `main` on 2026-09-28 (Europe/London) at `dd26b65ab467381db58ba7a525c6b8eabca8e00a` (`chore: prepare FORA 6 Connect v1.0.0`), with `origin/main` matching and local/remote `v1.0.0` peeling to that released commit. The release remains unchanged. [The Stage 13A record](docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md) audits current HA Bluetooth callbacks and ESPHome proxy guidance against the configured-entry manual coordinator, compares trigger candidates, and defines a privacy-safe physical state-observation gate. The observed post-measurement notification-subscription failure means advertisement visibility is not a readiness guarantee. Current-state refresh remains manual-only.
+
+This task changes the nine Markdown files listed in `CURRENT_STATUS.md`; the tree is modified at this pre-commit observation. No runtime, test, protocol, identity, or v1 release artifact changes are made. Baseline/ref checks and official documentation/code review were completed. Full **375/375** tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and changed-Markdown privacy/artifact audit passed. Staged diff review and post-push official validators must be verified before reporting completion.
+
+**Exact next gate:** separately authorize privacy-safe physical advertisement-state observation (and a bounded development-only structural observer only if needed), then reassess whether a Stage 13B opt-in auto-refresh trigger can be safely specified. Stage 8H remains unstarted.
+
 ## Stage 12 Phase A — prepared for final release review, pre-commit
 
 Starting state was clean `main` at `9cb9a22c46c9c1842eb7916c6edcb02be322a3be` (`docs: close Stage 11 HACS validation`) on 2026-09-27 (Europe/London), with `origin/main` matching. The user authorized Phase A release preparation only. [The Stage 12 record](docs/STAGE12_V1_RELEASE_PREPARATION.md) defines manifest `1.0.0`, a future annotated `v1.0.0` tag and stable latest GitHub release, no custom HACS asset, exact release commands, rollback policy, and known limits. [The release body](docs/RELEASE_NOTES_V1.0.0.md) is prepared but unpublished. The changelog has a concise 1.0.0 section and preserves stage history separately. No runtime Python or test behavior changed; no tag or release exists.

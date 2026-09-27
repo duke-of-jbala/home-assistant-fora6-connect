@@ -1,5 +1,16 @@
 # Architecture decisions
 
+## Stage 13A — physical evidence before an automatic trigger
+
+**Status:** Design review accepted; trigger implementation deferred. The
+released v1.0.0 manual action and HA-selected scanner/proxy path remain intact.
+HA changed-advertisement callbacks, availability transitions, and cached
+replay do not establish GD82 subscription readiness, particularly after the
+observed post-measurement failure. Prefer an opt-in, configured-address,
+live-only callback only after physical state/episode correlation; reuse the
+existing per-entry refresh lock and retain manual fallback. See
+[the Stage 13A review](STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md).
+
 ## Stage 12 Phase A — stable version and normal HACS release source
 
 **Status:** Prepared, awaiting final approval. Use manifest `1.0.0` and a

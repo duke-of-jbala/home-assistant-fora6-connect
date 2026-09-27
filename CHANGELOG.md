@@ -6,7 +6,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
-No changes since the prepared 1.0.0 release content.
+### Documentation
+- Stage 13A reviewed Home Assistant Bluetooth trigger APIs and the current manual refresh architecture. It specifies a privacy-safe physical advertisement-state gate and bounded future auto-refresh guards. No production automatic sync or runtime behavior changed; `v1.0.0` remains the released baseline.
 
 ## [1.0.0]
 
