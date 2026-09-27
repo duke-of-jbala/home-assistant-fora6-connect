@@ -83,3 +83,30 @@ probe_serial_identity:
       required: true
       selector:
         text: {}
+probe_serial_stability:
+  name: Compare serial stability (development only)
+  description: >-
+    Development-only Stage 6A1b. Read standard Device Information Serial
+    Number String 0x2A25 once per invocation. Set one private reference in
+    Home Assistant process memory or compare a new read against it. Returns
+    equality only, never the serial, digest, length, or address. No FORA
+    command, write, notification subscription, pairing, or persistence.
+  fields:
+    address:
+      name: Bluetooth address (private)
+      description: >-
+        Copy the runtime meter address privately from Advertisement Monitor.
+        It is not returned or persisted.
+      required: true
+      selector:
+        text: {}
+    operation:
+      name: Operation
+      description: >-
+        Set or replace the process-local reference, or compare one new read.
+      required: true
+      selector:
+        select:
+          options:
+            - set_reference
+            - compare

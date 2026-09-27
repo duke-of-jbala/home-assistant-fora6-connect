@@ -109,11 +109,9 @@ def _usable_serial(raw: bytes) -> tuple[bool, bool]:
     return True, bool(stripped) and all(char.isprintable() for char in stripped)
 
 
-async def async_probe_serial_identity(
-    hass: HomeAssistant, address: str
-) -> dict[str, Any]:
-    """Resolve, read standard 0x2A25 once, and return only safe booleans."""
-    result: dict[str, Any] = {
+def _empty_result() -> dict[str, Any]:
+    """Build the original Stage 6A1 public result without private data."""
+    return {
         "device_found": False,
         "connectable_device_resolved": False,
         "connection_successful": False,
@@ -130,7 +128,15 @@ async def async_probe_serial_identity(
         "error_code": None,
         "cleanup_errors": [],
     }
+
+
+async def _async_read_serial_private(
+    hass: HomeAssistant, address: str
+) -> tuple[dict[str, Any], bytes | None]:
+    """Read once; return bytes only to integration-local comparison code."""
+    result = _empty_result()
     client = None
+    raw: bytes | None = None
     try:
         try:
             device = bluetooth.async_ble_device_from_address(
@@ -212,4 +218,14 @@ async def async_probe_serial_identity(
                 if result["error_code"] is None:
                     result["error_stage"] = "cleanup"
                     result["error_code"] = "disconnect_failed"
+    if result["error_code"] is not None or not result["serial_value_usable"]:
+        raw = None
+    return result, raw
+
+
+async def async_probe_serial_identity(
+    hass: HomeAssistant, address: str
+) -> dict[str, Any]:
+    """Preserve the Stage 6A1 public result and one-read behavior."""
+    result, _private_raw = await _async_read_serial_private(hass, address)
     return result

@@ -273,4 +273,8 @@ The [Stage 5A evidence record](STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) traces both a
 
 ### Stage 6A1 bounded Device Information read
 
-[The Stage 6A1 record](STAGE6A1_SERIAL_IDENTITY_READ.md) specifies one manual standard `0x2A25` read after HA connectable resolution and no FORA application operation. Returned booleans classify presence, readability, text structure, and cleanup without exposing the value. No physical read has occurred at the implementation checkpoint. A structurally usable serial still needs private stability and uniqueness evidence before becoming a config-entry or device identifier. **Exact next gate:** controlled user-run read and sanitized result review.
+[The Stage 6A1 record](STAGE6A1_SERIAL_IDENTITY_READ.md) specifies one manual standard `0x2A25` read after HA connectable resolution and no FORA application operation. The user-run real GD82 result with the meter ON confirmed readable, nonempty, usable UTF-8 text and clean disconnect without publishing the value. One read is not evidence of stability or uniqueness.
+
+### Stage 6A1b private in-memory equality
+
+[The Stage 6A1b record](STAGE6A1B_SERIAL_STABILITY.md) adds a development-only exact-byte comparison against one process-local private reference. Each set/compare reads `0x2A25` at most once; no serial, digest, length, address, or raw bytes enter results or persistent state. No physical comparison has yet been run. A match before and after a power cycle would support stability under those tested conditions, while uniqueness and production identity policy still need separate review. **Exact next gate:** controlled user-run private comparison and sanitized result review.

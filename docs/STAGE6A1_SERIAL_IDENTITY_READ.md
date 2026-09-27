@@ -1,7 +1,15 @@
 # Stage 6A1 — bounded Device Information serial identity read
 
-**State:** Development-only action implemented and hardware-free tested. No
-physical read has yet been run; stable per-meter identity remains unresolved.
+**State:** Development-only action implemented and physically validated once
+by the user on the real GD82 with the meter ON. Stable per-meter identity
+remains unresolved.
+
+The privacy-safe physical result reported the connectable device, connection,
+Device Information service, readable `0x2A25`, successful read, nonempty usable
+UTF-8 text, and clean disconnect, with no errors. No serial, address, length,
+digest, or raw bytes were published. This one read establishes structural
+usability only. [Stage 6A1b](STAGE6A1B_SERIAL_STABILITY.md) adds a separately
+authorized private in-memory equality test; no comparison result exists yet.
 
 ## Evidence and exact scope
 
@@ -50,7 +58,7 @@ comparison evidence is required to establish stability across a power cycle,
 HA restart, and preferably more than one physical meter. No persistent ID
 should be selected from the current result alone.
 
-## Controlled user-run test after review
+## Original controlled user-run plan
 
 With the meter ON and its address copied privately from HA Advertisement
 Monitor, invoke `fora6_connect.probe_serial_identity` once and retain only
@@ -61,7 +69,5 @@ equality and cross-meter uniqueness remain unresolved. If `0x2A25` is absent,
 unreadable, empty, or otherwise unusable, stop. A bounded `0x2A23` System ID
 read would require separate Stage 6A2 authorization.
 
-**Exact next gate:** user-run controlled Stage 6A1 read and sanitized result
-review. If structurally usable, separately design/authorize private stability
-comparison before persistent Config Flow or device registration. If unusable,
-consider a separately authorized Stage 6A2 System ID evidence review.
+**Current next gate:** user-run controlled Stage 6A1b set/compare test and
+sanitized result review. No Config Flow or device registration yet.
