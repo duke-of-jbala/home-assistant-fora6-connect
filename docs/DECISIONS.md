@@ -1,5 +1,7 @@
 # Architecture decisions
 
+**Stage 6B1 identity correction:** a known Bluetooth locator suppresses rediscovery, but remains transport metadata rather than logical identity. The current GD82 entry's unique ID was privately found to be the generic literal “Serial Number,” so it does not establish device-specific identity; do not silently migrate it to the BT MAC. Preserve the existing entry and hide the false serial field pending a separately authorized identity review. See [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md).
+
 These decisions are accepted for Stage 0. Revisit only on explicit instruction or documented new evidence.
 
 ## ADR-001 — FORA logic in Home Assistant

@@ -22,12 +22,15 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_setup_creates_inert_state_and_forwards_only_sensor(self):
-        with patch.dict(sys.modules, {self.integration.__name__: self.integration}):
+        metadata = types.ModuleType(self.integration.__package__ + ".device_metadata")
+        metadata.async_reconcile_device_metadata = Mock()
+        with patch.dict(sys.modules, {self.integration.__name__: self.integration, metadata.__name__: metadata}):
             self.assertTrue(await self.integration.async_setup_entry(self.hass, self.entry))
         self.assertEqual(self.entry.runtime_data.address, "SYNTHETIC-LOCATOR-A")
         self.assertIsNone(self.entry.runtime_data.measurement_state.native_value)
         self.assertNotIn("SYNTHETIC-LOCATOR-A", repr(self.entry.runtime_data))
         self.hass.config_entries.async_forward_entry_setups.assert_awaited_once_with(self.entry, ["sensor"])
+        metadata.async_reconcile_device_metadata.assert_called_once_with(self.hass, self.entry, "SYNTHETIC-LOCATOR-A")
 
     async def test_missing_identity_or_locator_does_not_setup(self):
         with patch.dict(sys.modules, {self.integration.__name__: self.integration}):

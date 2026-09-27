@@ -82,22 +82,26 @@ def _load_flow():
     identity = types.ModuleType(f"{PACKAGE}.setup_identity")
     identity.SetupIdentityError = type("SetupIdentityError", (Exception,), {"__init__": lambda self, code: (Exception.__init__(self, code), setattr(self, "code", code)) and None})
     identity.async_confirm_meter_identity = AsyncMock(return_value="SYNTHETIC-SERIAL-A")
+    metadata = types.ModuleType(f"{PACKAGE}.device_metadata")
+    metadata.async_reconcile_device_metadata = Mock(return_value=None)
+    metadata.async_restore_device_connections = Mock()
     modules = {
         PACKAGE: package, "homeassistant": ha, "homeassistant.config_entries": entries,
         "voluptuous": voluptuous,
         "homeassistant.components": components, "homeassistant.components.bluetooth": bluetooth,
         f"{PACKAGE}.const": const, f"{PACKAGE}.setup_identity": identity,
+        f"{PACKAGE}.device_metadata": metadata,
     }
     with patch.dict(sys.modules, modules):
         discovery = _load("discovery")
         flow = _load("config_flow")
-    return discovery, flow, identity, bluetooth
+    return discovery, flow, identity, bluetooth, metadata
 
 
 class DiscoveryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.discovery, _, _, _ = _load_flow()
+        cls.discovery, _, _, _, _ = _load_flow()
 
     def test_observed_padded_candidate_and_optional_manufacturer_data(self):
         self.assertTrue(self.discovery.is_fora_candidate(_candidate()))
@@ -123,7 +127,7 @@ class DiscoveryTests(unittest.TestCase):
 
 class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        self.discovery, self.module, self.identity, self.bluetooth = _load_flow()
+        self.discovery, self.module, self.identity, self.bluetooth, self.metadata = _load_flow()
         self.flow = self.module.Fora6ConfigFlow()
         self.address = "SYNTHETIC-LOCATOR-A"
         self.serial = "SYNTHETIC-SERIAL-A"
@@ -159,11 +163,19 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_duplicate_same_serial_same_address_aborts(self):
         self.flow._entries = [types.SimpleNamespace(unique_id=self.serial, data={"address": self.address})]
-        self.assertEqual((await self._confirmed())["reason"], "already_configured")
+        self.assertEqual((await self.flow.async_step_bluetooth(_candidate()))["reason"], "already_configured")
+        self.identity.async_confirm_meter_identity.assert_not_awaited()
 
     async def test_same_address_different_serial_conflicts(self):
         self.flow._entries = [types.SimpleNamespace(unique_id="SYNTHETIC-SERIAL-B", data={"address": self.address})]
-        self.assertEqual((await self._confirmed())["reason"], "identity_conflict")
+        self.assertEqual((await self.flow.async_step_bluetooth(_candidate()))["reason"], "already_configured")
+        self.identity.async_confirm_meter_identity.assert_not_awaited()
+
+    async def test_locator_claimed_after_form_aborts_before_connection(self):
+        await self.flow.async_step_bluetooth(_candidate())
+        self.flow._entries = [types.SimpleNamespace(unique_id=self.serial, data={"address": self.address})]
+        self.assertEqual((await self.flow.async_step_confirm({}))["reason"], "already_configured")
+        self.identity.async_confirm_meter_identity.assert_not_awaited()
 
     async def test_same_serial_new_address_requires_second_review(self):
         existing = types.SimpleNamespace(unique_id=self.serial, data={"address": "SYNTHETIC-OLD-LOCATOR"})
@@ -174,6 +186,7 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
         result = await self.flow.async_step_update_locator({})
         self.assertEqual(result["reason"], "locator_updated")
         self.flow.hass.config_entries.async_update_entry.assert_called_once_with(existing, data={"address": self.address})
+        self.metadata.async_reconcile_device_metadata.assert_called_once_with(self.flow.hass, existing, self.address)
         self.bluetooth.async_ble_device_from_address.assert_called_once_with(self.flow.hass, "SYNTHETIC-OLD-LOCATOR", connectable=True)
 
     async def test_simultaneous_old_locator_rejects_update(self):
@@ -189,6 +202,17 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
         await self._confirmed()
         self.flow._entries.append(types.SimpleNamespace(unique_id="SYNTHETIC-SERIAL-B", data={"address": self.address}))
         self.assertEqual((await self.flow.async_step_update_locator({}))["reason"], "identity_conflict")
+
+    async def test_failed_locator_update_rolls_back_registry_connections(self):
+        existing = types.SimpleNamespace(unique_id=self.serial, data={"address": "SYNTHETIC-OLD-LOCATOR"})
+        self.flow._entries = [existing]
+        await self._confirmed()
+        previous = {("bluetooth", "SYNTHETIC-OLD-LOCATOR")}
+        self.metadata.async_reconcile_device_metadata.return_value = previous
+        self.flow.hass.config_entries.async_update_entry.side_effect = RuntimeError("private")
+        self.assertEqual((await self.flow.async_step_update_locator({}))["reason"], "identity_conflict")
+        self.metadata.async_restore_device_connections.assert_called_once_with(self.flow.hass, existing, previous)
+        self.assertEqual(existing.data["address"], "SYNTHETIC-OLD-LOCATOR")
 
     async def test_serial_and_project_failure_codes_are_private(self):
         for code in ("serial_unavailable", "not_fora6_connect", "cannot_connect", "identity_failed"):
@@ -208,7 +232,7 @@ class ConfigFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(self.flow.unique_id)
 
     async def test_unusable_serial_from_identity_helper_fails_closed(self):
-        for serial in ("", " \x00 ", "SYNTHETIC\x01SERIAL"):
+        for serial in ("", " \x00 ", "SYNTHETIC\x01SERIAL", "Serial Number"):
             with self.subTest(serial=serial):
                 self.identity.async_confirm_meter_identity.return_value = serial
                 result = await self._confirmed()

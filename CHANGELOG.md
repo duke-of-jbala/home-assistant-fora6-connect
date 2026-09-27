@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Fixed
+- Suppressed repeat discovery forms for configured Bluetooth locators. A private check found the existing ConfigEntry unique ID itself is the generic “Serial Number” text, explaining the device display; new flows reject that placeholder, and existing entries hide it without destructive migration. Confirmed non-placeholder locator changes replace stale Bluetooth connections. Meter-specific identity needs a separate evidence gate.
 - Hardened Stage 4 transport sessions so any failed post-write exchange rejects later exchanges until a fresh session is created, preventing late notification reuse; connection cancellation now owns and disconnects clients returned during cancellation or timeout. Hardware-free regression only.
 - Kept TD4183 QC as an app-mapped record category without equating it to control-solution semantics; the protocol convenience property and schema tests now use QC terminology.
 

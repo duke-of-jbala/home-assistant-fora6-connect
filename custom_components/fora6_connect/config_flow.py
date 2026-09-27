@@ -9,8 +9,9 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components import bluetooth
 
-from .const import DOMAIN, NAME
+from .const import DOMAIN, NAME, PLACEHOLDER_SERIAL
 from .discovery import is_fora_candidate
+from .device_metadata import async_reconcile_device_metadata, async_restore_device_connections
 from .setup_identity import SetupIdentityError, async_confirm_meter_identity
 
 LOCATOR_KEY = "address"
@@ -36,6 +37,13 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="not_fora6_connect")
         if not isinstance(discovery_info.address, str) or not discovery_info.address:
             return self.async_abort(reason="identity_failed")
+        # The persisted locator is a discovery suppression hint, not identity.
+        # Never start a new confirmation flow for an already known address.
+        if any(
+            entry.data.get(LOCATOR_KEY) == discovery_info.address
+            for entry in self._async_current_entries()
+        ):
+            return self.async_abort(reason="already_configured")
         self._candidate_address = discovery_info.address
         self.context["title_placeholders"] = {"name": NAME}
         return await self.async_step_confirm()
@@ -44,6 +52,12 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Connect only after the user confirms the candidate."""
         if self._candidate_address is None:
             return self.async_abort(reason="identity_failed")
+        # An entry may have claimed this locator while the review form was open.
+        if any(
+            entry.data.get(LOCATOR_KEY) == self._candidate_address
+            for entry in self._async_current_entries()
+        ):
+            return self.async_abort(reason="already_configured")
         if user_input is None:
             return self.async_show_form(step_id="confirm", data_schema=vol.Schema({}))
         try:
@@ -56,6 +70,7 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="identity_failed")
         if (
             not isinstance(serial, str)
+            or serial == PLACEHOLDER_SERIAL
             or not serial.strip("\x00 \t\r\n")
             or not all(char.isprintable() for char in serial.strip("\x00 \t\r\n"))
         ):
@@ -110,10 +125,24 @@ class Fora6ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if old_device is not None:
                 return self.async_abort(reason="identity_conflict")
             try:
-                self.hass.config_entries.async_update_entry(
-                    existing, data={**existing.data, LOCATOR_KEY: self._candidate_address}
+                previous_connections = async_reconcile_device_metadata(
+                    self.hass, existing, self._candidate_address
                 )
             except Exception:
+                return self.async_abort(reason="identity_conflict")
+            try:
+                updated = self.hass.config_entries.async_update_entry(
+                    existing, data={**existing.data, LOCATOR_KEY: self._candidate_address}
+                )
+                if updated is False:
+                    raise RuntimeError("locator update rejected")
+            except Exception:
+                try:
+                    async_restore_device_connections(
+                        self.hass, existing, previous_connections
+                    )
+                except Exception:
+                    pass
                 return self.async_abort(reason="identity_conflict")
             runtime = getattr(existing, "runtime_data", None)
             if runtime is not None:

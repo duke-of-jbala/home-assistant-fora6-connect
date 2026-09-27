@@ -1,5 +1,7 @@
 # Development
 
+**Stage 6B1:** [The metadata/rediscovery follow-up](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) adds a known-locator Config Flow guard, rejects a generic GATT serial placeholder for new setups, and refreshes the existing registry metadata on reload without BLE I/O. A controlled HA reload/rediscovery regression is the next gate; a separate private identity review is needed before migrating the placeholder-backed entry. No production sync is present.
+
 ## Stage discipline
 
 Read `AGENTS.md`, `CURRENT_STATUS.md`, and `PROTOCOL.md` before implementation. Stage 1B has a development-only GATT probe, and Stage 1C has a separately invoked notification-metadata observer. Stage 2D added HA-independent frame/project/scaling helpers to `protocol.py`; Stage 2E's custom wake/project identity probe succeeded on the real meter. Stage 2F's corrected one-slot record-response probe also succeeded with the meter ON. Stage 2G parsing remains offline. Stage 6B now enables a guarded discovery/setup flow and one initially unavailable uric-acid entity; production synchronization and polling remain inactive.

@@ -119,6 +119,13 @@ class EntityTests(unittest.IsolatedAsyncioTestCase):
             {("fora6_connect", "  SYNTHETIC-é-01  ")},
         )
 
+    async def test_legacy_placeholder_is_not_displayed_as_a_serial(self):
+        self.entry.unique_id = "Serial Number"
+        entity = self.module.Fora6UricAcidSensor(self.entry, self.state)
+        self.assertIsNone(entity._attr_device_info["serial_number"])
+        self.assertEqual(entity._attr_device_info["identifiers"], {("fora6_connect", "Serial Number")})
+        self.assertFalse(entity.available)
+
     async def test_serial_and_locator_are_not_logged_or_exposed_as_state(self):
         with patch.object(logging.Logger, "_log") as logged:
             entity = self.module.Fora6UricAcidSensor(self.entry, self.state)

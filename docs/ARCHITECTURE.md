@@ -1,5 +1,7 @@
 # Architecture
 
+**Stage 6B1:** [The locator follow-up](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) suppresses configured-address discovery before any active exchange. A private check showed this meter's retained unique ID is a generic placeholder, so the current device-specific identity is unresolved. New flows reject that placeholder; existing entry/device/entity are preserved and the false serial display is hidden on reload. No synchronization was added.
+
 ## Intended data path
 
 ```text

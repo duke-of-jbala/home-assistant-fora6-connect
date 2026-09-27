@@ -261,6 +261,13 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
         return False
     entry.runtime_data = MeterRuntime(address=address)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    # Refresh retained registry metadata for existing entries without a BLE read.
+    from .device_metadata import async_reconcile_device_metadata
+
+    try:
+        async_reconcile_device_metadata(hass, entry, address)
+    except Exception:
+        raise RuntimeError("FORA device metadata refresh failed") from None
     return True
 
 

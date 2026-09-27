@@ -1,5 +1,7 @@
 # Stage 6A1c — serial uniqueness and production identity policy
 
+**Later Stage 6B1 correction:** repeated stability and UTF-8 usability did not prove meter specificity. The user privately found the configured unique ID is the generic literal “Serial Number.” The current HA Bluetooth locator matches the printed BT MAC, but printed/GATT serial equality remains unproven. See [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md).
+
 **State:** Evidence and policy review complete. The user-run Stage 6A1b
 comparison found one GD82's `0x2A25` value unchanged on an immediate repeat
 and after one meter OFF/ON cycle. No Config Flow, persisted serial, matcher,

@@ -1,5 +1,7 @@
 # Protocol evidence register
 
+**Stage 6B1 identity correction:** the user privately confirmed the HA Bluetooth locator matches the printed factory BT MAC. The configured unique ID is literally “Serial Number,” which passed earlier structural/stability checks but is not evidence of a meter-specific identifier. Printed/GATT serial equality is unresolved. [Stage 6B1](STAGE6B1_REDISCOVERY_LOCATOR_FIX.md) adds no FORA command or parser behavior.
+
 This page separates historical discovery and static findings from the later [Stage 2C live protocol evidence](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) and Stage 2D offline implementation. The [ForaCare FAQ Rev 5.5](https://www.foracare.ch/wp-content/uploads/2023/03/3.1-BGM-FAQ_Rev5.5_230313.pdf) and [GD82 manual](https://switzerland.foracare.ch/wp-content/uploads/2021/10/FORA-6-Connect-GD82-4183D_meter-manual_311-4183400-070.pdf) were independently reviewed for Stage 2A. No private identifiers, health data, or raw captures are stored here.
 
 ## Confirmed for this project brief

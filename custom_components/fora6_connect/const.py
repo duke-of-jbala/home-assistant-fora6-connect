@@ -1,6 +1,7 @@
 """Established integration identifiers and documented GATT UUIDs."""
 
 DOMAIN = "fora6_connect"
+PLACEHOLDER_SERIAL = "Serial Number"
 NAME = "FORA 6 Connect"
 
 # From FORA 6 Connect GD82 documentation. These UUIDs do not identify a

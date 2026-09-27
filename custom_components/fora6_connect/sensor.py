@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import CONNECTION_BLUETOOTH, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import NAME
+from .const import NAME, PLACEHOLDER_SERIAL
 from .sensor_state import MeasurementState, meter_device_identifier
 
 
@@ -32,7 +32,11 @@ class Fora6UricAcidSensor(SensorEntity):
             name=NAME,
             manufacturer="ForaCare",
             model="GD82",
-            serial_number=entry.unique_id,
+            # An older entry may contain the literal GATT placeholder. Do not
+            # present that text as a verified physical serial number.
+            serial_number=(
+                None if entry.unique_id == PLACEHOLDER_SERIAL else entry.unique_id
+            ),
         )
 
     @property
