@@ -1,11 +1,13 @@
-"""Offline GD82 frame primitives supported by the sanitized Stage 2C evidence.
+"""Offline GD82 frame and TD4183 record primitives backed by captured evidence.
 
 This module has no Home Assistant or Bluetooth dependency. Constructing a frame
 here never transmits it; live FORA writes require a separately authorized gate.
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
+from enum import IntEnum
 
 FRAME_LENGTH = 8
 FRAME_PREFIX = 0x51
@@ -21,6 +23,77 @@ USER_ONE_SELECTOR = 0x01
 
 class FrameError(ValueError):
     """An observed-format GD82 frame is malformed or used in the wrong role."""
+
+
+class TD4183Analyte(IntEnum):
+    """Wire type selectors in 0x26 byte 5 bits 2–5, as mapped by both apps."""
+
+    GENERAL = 0
+    HEMATOCRIT = 6
+    KETONE = 7
+    URIC_ACID = 8
+    CHOLESTEROL = 9
+    HEMOGLOBIN = 11
+    LACTATE = 12
+    TRIGLYCERIDE = 13
+
+
+class TD4183RecordCategory(IntEnum):
+    """The app's symbolic 0x26 byte 5 bits 6–7 categories."""
+
+    GENERAL = 0
+    AC = 1
+    PC = 2
+    QC = 3
+
+
+@dataclass(frozen=True, slots=True, repr=False)
+class MeterLocalTimestamp:
+    """Meter wall-clock fields, with minute precision and unknown timezone."""
+
+    year: int
+    month: int
+    day: int
+    hour: int
+    minute: int
+
+    def __post_init__(self) -> None:
+        try:
+            datetime(self.year, self.month, self.day, self.hour, self.minute)
+        except ValueError as exc:
+            raise FrameError("Invalid TD4183 meter-local date or time.") from exc
+
+    def as_naive_datetime(self) -> datetime:
+        """Represent the minute-precision fields without attaching a timezone."""
+        return datetime(self.year, self.month, self.day, self.hour, self.minute)
+
+
+@dataclass(frozen=True, slots=True)
+class TD4183RecordPartOne:
+    """Decoded 0x25 fields; uninterpreted payload bits remain available."""
+
+    meter_local_time: MeterLocalTimestamp = field(repr=False)
+    transmitted: bool
+    raw_payload: bytes = field(repr=False)
+
+
+@dataclass(frozen=True, slots=True)
+class TD4183RecordPartTwo:
+    """Decoded 0x26 fields, without assigning a unit or scaled value."""
+
+    raw_value: int = field(repr=False)
+    analyte_code: int
+    analyte: TD4183Analyte | None
+    category: TD4183RecordCategory
+    auxiliary_value: int = field(repr=False)
+    code_number: int = field(repr=False)
+    invalid_raw_value: bool
+    raw_payload: bytes = field(repr=False)
+
+    @property
+    def is_control_solution(self) -> bool:
+        """The app's QC category is distinct from general measurements."""
+        return self.category is TD4183RecordCategory.QC
 
 
 def checksum_for(first_seven_bytes: bytes) -> int:
@@ -172,12 +245,76 @@ def parse_record_slot_count(response: ProtocolFrame) -> int:
     return int.from_bytes(response.data[2:4], "little")
 
 
+def parse_td4183_record_part_one(response: ProtocolFrame) -> TD4183RecordPartOne:
+    """Decode the app's 0x25 packed meter-local minute and transmit flag.
+
+    The source app converts these fields through the phone's default timezone.
+    A meter timezone is not supplied, so this parser retains wall-clock fields.
+    Invalid calendar fields are rejected instead of adopting Java Calendar's
+    lenient normalization. Other payload bits remain opaque.
+    """
+    response.require_response()
+    if response.command_id != RECORD_PART_ONE_COMMAND:
+        raise FrameError("Expected a TD4183 record-part-one response.")
+    day_and_month = response.data[2]
+    month_and_year = response.data[3]
+    minute_and_flags = response.data[4]
+    hour_and_flags = response.data[5]
+    meter_local_time = MeterLocalTimestamp(
+        year=2000 + (month_and_year >> 1),
+        month=(day_and_month >> 5) + ((month_and_year & 1) << 3),
+        day=day_and_month & 0x1F,
+        hour=hour_and_flags & 0x1F,
+        minute=minute_and_flags & 0x3F,
+    )
+    return TD4183RecordPartOne(
+        meter_local_time=meter_local_time,
+        transmitted=bool(hour_and_flags & 0x40),
+        raw_payload=response.opaque_data,
+    )
+
+
+def parse_td4183_record_part_two(response: ProtocolFrame) -> TD4183RecordPartTwo:
+    """Decode the app's 0x26 raw value, type selector, and record category.
+
+    The app calls byte 4 an ambient value and byte 5 low six bits a code
+    number. Neither has a verified unit; code-number bits overlap the type.
+    Unknown analyte codes stay numeric and cannot become uric acid by context.
+    """
+    response.require_response()
+    if response.command_id != RECORD_PART_TWO_COMMAND:
+        raise FrameError("Expected a TD4183 record-part-two response.")
+    raw_value = int.from_bytes(response.data[2:4], "little")
+    type_and_category = response.data[5]
+    analyte_code = (type_and_category & 0x3C) >> 2
+    try:
+        analyte = TD4183Analyte(analyte_code)
+    except ValueError:
+        analyte = None
+    return TD4183RecordPartTwo(
+        raw_value=raw_value,
+        analyte_code=analyte_code,
+        analyte=analyte,
+        category=TD4183RecordCategory(type_and_category >> 6),
+        auxiliary_value=response.data[4],
+        code_number=type_and_category & 0x3F,
+        invalid_raw_value=raw_value == 0xFFFF,
+        raw_payload=response.opaque_data,
+    )
+
+
 def scale_td4183_uric_acid(raw_value: int) -> Decimal:
     """Scale an already identified TD4183 uric-acid raw value by ten.
 
-    This does not locate a field in a record or identify an analyte. The
-    0x25/0x26 record byte layout remains unpublished in sanitized evidence.
+    Call only after the 0x26 type field identifies uric acid and the raw
+    value is not the app's 0xFFFF invalid sentinel. The helper itself remains
+    contextual and does not identify an analyte or attach a unit.
     """
-    if isinstance(raw_value, bool) or not isinstance(raw_value, int) or raw_value < 0:
-        raise ValueError("A uric-acid raw value must be a nonnegative integer.")
+    if (
+        isinstance(raw_value, bool)
+        or not isinstance(raw_value, int)
+        or raw_value < 0
+        or raw_value >= 0xFFFF
+    ):
+        raise ValueError("A uric-acid raw value must be a valid 16-bit reading.")
     return Decimal(raw_value) / Decimal(10)

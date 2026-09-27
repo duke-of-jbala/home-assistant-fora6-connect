@@ -20,7 +20,7 @@ The ESPHome proxy forwards Bluetooth activity; it has no FORA-specific code. Pro
 ## Boundaries
 
 - `bluetooth.py`: future HA Bluetooth transport and notifications. No FORA frame decoding.
-- `protocol.py`: future pure-Python frame parsing and validation, testable with raw bytes alone. No HA, ESPHome, adapter, or physical meter requirement.
+- `protocol.py`: pure-Python frame validation and evidence-backed offline TD4183 record-part parsing, testable with synthetic bytes alone. No HA, ESPHome, adapter, or physical meter requirement. Meter-local time remains separate from ingestion time; unknown timezone, units, and flags are not invented.
 - `models.py`: future validated measurement structures. Keep original meter time separate from sync time and distinguish control-solution readings when available.
 - `coordinator.py`: future retrieval and synchronization state.
 - `sensor.py`: future entities associated with one HA device per physical meter.

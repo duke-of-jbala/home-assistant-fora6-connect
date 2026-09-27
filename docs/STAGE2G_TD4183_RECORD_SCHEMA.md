@@ -1,49 +1,62 @@
-# Stage 2G — TD4183 offline record-schema evidence review
+# Stage 2G — TD4183 offline record schema and parser
 
-**State at 2026-09-27 review:** Stage 2G was authorized for offline analysis. The user requested that parser implementation pause until the actual retained 1.7.6/1.7.9 decompilation directories are located. The previously suggested private workspace path did not exist in this environment, and the durable notes do not preserve the actual paths. The retained private HCI import capture was available and inspected in place; it was not copied into Git. Exact field extraction cannot be established from the capture and sanitized repository notes alone. No semantic record parser or new BLE operation was performed.
+**State:** Evidence-backed offline parser implemented for the supported `0x25` and `0x26` fields. Stage 2F's bounded physical probe succeeded with the GD82 ON, retrieving User1/raw-index-zero frames without `0x33`; it decoded no health data. Stage 2G performed no BLE operation and did not change the development action, transport, synchronization, or entities. Private app source and HCI capture remained outside Git.
 
-## Stage 2F physical closure
+## Evidence provenance and parser path
 
-The user-supplied privacy-safe result from the corrected bounded probe on the GD82 **with the meter ON** confirms valid command-matched `0x2B` metadata and User1/raw-index-zero `0x25` and `0x26` responses after the `0x22`/`0x24`/`0x4183` identity gate. Cleanup succeeded. The probe sent no `0x33`, so it was not required for this bounded read in the tested meter state. It decoded no analyte, value, or timestamp, and no production synchronization exists. Earlier wake-write and subscription failures stopped before record commands.
+- The retained private iFORA HM 1.7.6 APK and 1.7.9 XAPK decompilations were inspected in place. Their mirror provenance, hashes, signing evidence, and authenticity limit are recorded in [Stage 2B](STAGE2_IFORA_HM_STATIC_ANALYSIS.md). Decompiled source was not copied into this repository.
+- In 1.7.9, the `TD4183` factory maps to `d2/w.java` → `d2/C0428c.java` → `d2/AbstractC0426a.java`. `C0428c.k()` obtains indexed `0x25` then `0x26` responses and calls `f2/a.L()` → `M()`; `f2/a.e()` decodes the first response's time. The relevant private source locations are `d2/C0428c.java` around lines 118–187 and `f2/a.java` around lines 225–300, 684–750, and 797–820.
+- In 1.7.6, `z3/u.java` → `z3/c.java` → `z3/a.java` follows the same pair. `z3/c.k()` calls `b4/a.L()` → `M()`; `b4/a.e()` decodes time. Relevant private locations are `z3/c.java` around lines 113–183 and `b4/a.java` around lines 225–350, 690–750, and 796–820. Decompiled 1.7.6 `M()` has duplicated/awkward control flow, so the clearer 1.7.9 branch and 1.7.6 enum/consumer behavior were considered together for category dispatch.
+- Both versions' record base classes (`e2/b.java`, `a4/b.java`) classify raw `0xFFFF` as invalid. The multifunction handlers probe the last slot for a QC hematocrit companion when deciding single versus multi-parameter storage. The 1.7.9 handler omits the secondary hematocrit attachment when that raw field is `0xFFFF`.
+- The retained private successful GD82 HCI import capture was read in place with a local btsnoop/ATT inspection. It contains valid indexed `0x25`/`0x26` request/response pairs for indexes `1 → 0 → 1`, plus a later app `0x2F` exchange. All three `0x25` response payloads matched. The two index-one `0x26` payloads matched; index zero differed at offsets 2, 3, and 5. No raw response, health value, date, address, or private identifier is published here.
+- The user-supplied privacy-safe Stage 2F result independently confirms Home Assistant retrieved valid User1/index-zero `0x25`/`0x26` frames with the meter ON. It did not expose payload bytes. The Stage 2C private import summary corroborates uric-acid displayed value = parsed raw / 10, but no separate displayed-value/time specimen was available here for a second numeric/time comparison.
 
-## Evidence and call paths available at this checkpoint
+## `0x25` response byte map
 
-| Source | Provenance and access | Bounded conclusion |
+Offsets are zero based. The first response is an eight-byte checksummed frame. The original meter-local fields have **minute precision**; seconds and timezone are not present in this path.
+
+| Offset/bits | Meaning | Evidence class |
 | --- | --- | --- |
-| iFORA HM 1.7.6 and 1.7.9 | Mirror specimens and authenticity limits are recorded in [Stage 2B](STAGE2_IFORA_HM_STATIC_ANALYSIS.md). The exact retained decompilation paths were not preserved in durable notes; a suggested private workspace path was absent here. | Prior Stage 2B/2F notes trace the TD4183 handler and request construction, but the response parser cannot be rechecked byte by byte here. |
-| 1.7.9 TD4183 path | Prior Stage 2F static notes: factory `g2/a.java` → `d2/w.java` → `d2/C0428c.java` → `d2/AbstractC0426a.java`; builder `f2/a.java`; large import thread required JADX fallback. | The low-level raw-slot method pairs `0x25` and `0x26` for an index. The shared handler also queries category ranges with `0x2F`. No exact record payload fields are published in the notes. |
-| 1.7.6 TD4183 path | Prior Stage 2F static notes: `z3/u.java` → `z3/c.java` → `z3/a.java`; builder `b4/a.java`. | It agrees with 1.7.9 on User1 selector placement, raw index placement, paired retrieval, and the `0x2B` raw-count parsing previously documented. Record response field extraction is not available for cross-version comparison. |
-| Private Stage 2C HCI capture | A patched, locally re-signed 1.7.6 research app imported an existing uric-acid record; [sanitized capture summary](STAGE2C_GD82_LIVE_PROTOCOL_CAPTURE.md) is tracked, raw capture is not. The retained successful import capture was privately inspected during this review. | Valid eight-byte `0x25`/`0x26` request/notification pairs occurred for raw indexes `1 → 0 → 1`. All three `0x25` response payloads were byte-identical. The first and third `0x26` response payloads were identical; the index-zero payload differed from them at response offsets 2, 3, and 5. A `0x2F` request/response occurred later in the app import. These are byte-comparison observations only, with no published payload bytes or field meanings. The prior private import summary associates `0x25` with time, `0x26` with measurement/analyte data, and uric-acid display scaling with raw / 10. |
-| Stage 2F physical result | User-supplied semantic Home Assistant action result, recorded in [Stage 2F](STAGE2F_TD4183_RECORD_PROBE.md). | Both record-part frames passed envelope/checksum/command validation. It does not expose or validate field positions. |
-| Current protocol and synthetic tests | `custom_components/fora6_connect/protocol.py` and `tests/test_protocol.py`. | Eight-byte envelope and checksum, record request constructors, slot count, and contextual uric-acid scaling only. No record-part decoder exists. |
+| 0 | `0x51` prefix | **LIVE-CORROBORATED** envelope |
+| 1 | `0x25` command echo | **LIVE-CORROBORATED** |
+| 2 bits 0–4 | Day of month | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 2 bits 5–7; 3 bit 0 | Month, low three bits plus high bit | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 3 bits 1–7 | Year offset from 2000 | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 4 bits 0–5 | Minute | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 4 bits 6–7 | Uninterpreted; retained in raw payload | **UNRESOLVED** |
+| 5 bits 0–4 | Hour, 24-hour field in app calendar | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 5 bit 5 | Uninterpreted; retained | **UNRESOLVED** |
+| 5 bit 6 | Reading transmitted flag in the app parser | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 5 bit 7 | Uninterpreted; retained | **UNRESOLVED** |
+| 6–7 | `0xA5` response marker; sum of bytes 0–6 modulo 256 | **LIVE-CORROBORATED** envelope |
 
-The prior notes establish cross-version agreement for the **request path**. They do not establish agreement or disagreement about the exact `0x25`/`0x26` **response parser**. The retained HCI capture was inspected privately, but no separate known-result value/timestamp specimen path was recorded, so exact semantic decoding could not be validated against the displayed result in this environment. No private specimen bytes, value, or timestamp were copied into Git.
+The app uses `Calendar.getInstance()` on the phone to turn these fields into a Java `Date`; that does **not** establish a timezone stored by the meter. `MeterLocalTimestamp` retains year/month/day/hour/minute without timezone or invented seconds. Its optional conversion returns a naive Python `datetime`. Java Calendar is lenient; the Python parser rejects invalid month/day/hour/minute encodings rather than silently normalizing them. No distinct time sentinel was found in this TD4183 call path. The private capture's three decoded date/time field sets were calendar-valid; the actual timestamp was not published or independently checked against a displayed time.
 
-## Response byte-field map supported now
+## `0x26` response byte map
 
-The maps below are for already validated eight-byte response frames. They identify only the common envelope and opaque command-specific payload. Byte numbering is zero based. A valid frame does not imply a valid semantic record.
-
-| Offset | `0x25` response | `0x26` response | Evidence class |
-| --- | --- | --- | --- |
-| 0 | `0x51` frame prefix | `0x51` frame prefix | **LIVE-CORROBORATED** by captured framing and successful Stage 2F validation. |
-| 1 | `0x25` command echo | `0x26` command echo | **LIVE-CORROBORATED** by command-matched Stage 2F frames. |
-| 2–5 | Four opaque payload bytes; prior summary calls them time related. All three observed payloads were identical. Exact year/month/day/hour/minute/second bits, status, and sentinels are **UNRESOLVED**. | Four opaque payload bytes; prior summary calls them measurement/analyte related. The two index-one payloads matched; index zero differed at offsets 2, 3, and 5. Exact numeric, analyte, subtype, status, and control fields are **UNRESOLVED**. | Payload presence and byte-comparison pattern are **LIVE-CORROBORATED**; broad purpose is **STATIC-ANALYSIS-SUPPORTED** by earlier notes and the private app import. Assigning meanings to changed positions would be **INFERRED** and is not implemented. |
-| 6 | `0xA5` response marker | `0xA5` response marker | **LIVE-CORROBORATED** by the captured envelope and Stage 2F frame validation. |
-| 7 | Sum of bytes 0–6 modulo 256 | Same | **LIVE-CORROBORATED** by captured framing and Stage 2F validation. |
-
-### Semantic decisions
-
-| Question | Current result | Classification |
+| Offset/bits | Meaning | Evidence class |
 | --- | --- | --- |
-| Exact date and time packing; seconds; invalid/sentinel values | Undetermined. No timestamp parser or invented UTC conversion. Meter-local time and later ingestion time must remain separate. `timezone_unknown = true` is the required future design stance unless evidence resolves it. | **UNRESOLVED** |
-| Raw numeric location, byte order, and invalid values in `0x26` | Undetermined. No raw-value extraction. | **UNRESOLVED** |
-| Analyte/type code and analyte-specific variation | Undetermined from `0x25`/`0x26` alone. The known physical record and the user's measurement history cannot establish a payload code. No analyte enum/dispatch. | **UNRESOLVED** |
-| Control-solution and other status flags | Neither positions nor meanings established. Keep future status opaque until traced. | **UNRESOLVED** |
-| Uric-acid scaling | Once a record is independently identified as uric acid and its raw numeric value extracted, the app/private capture supports displayed value = raw / 10. Existing contextual helper implements this; the unit string is not established by this fact. | **LIVE-CORROBORATED** scaling relation, conditional on identity and extraction. |
-| `0x2F` dependency | Earlier static notes show an analyte-range/category query separate from the direct indexed pair. The Stage 2F read succeeded without it, proving it is unnecessary for **retrieval** in the tested state. Whether it supplies context necessary for **reliable interpretation** cannot be decided from sanitized notes. No live `0x2F` query is authorized here. | **UNRESOLVED** for interpretation. |
+| 0–1 | `0x51` prefix; `0x26` command echo | **LIVE-CORROBORATED** envelope |
+| 2–3 | Raw unsigned 16-bit measurement, little endian | **STATIC-ANALYSIS-SUPPORTED**, both versions; private specimen was parsed but not compared to a separately available displayed number |
+| 4 | App labels this an ambient value; unit/physical meaning unresolved. Parser preserves it as auxiliary byte. | Byte position **STATIC-ANALYSIS-SUPPORTED**; physical meaning **UNRESOLVED** |
+| 5 bits 0–5 | App's code number; overlaps the analyte selector. Parser preserves the numeric field without assigning a separate meaning. | **STATIC-ANALYSIS-SUPPORTED**, both versions |
+| 5 bits 2–5 | Analyte selector. Known wire codes: `0` General, `6` hematocrit, `7` ketone, `8` uric acid, `9` cholesterol, `11` haemoglobin, `12` lactate, `13` triglyceride. Other codes stay unidentified. `General` is not labeled glucose without further context. | **STATIC-ANALYSIS-SUPPORTED**, both versions; uric-acid branch **LIVE-CORROBORATED** privately at index zero |
+| 5 bits 6–7 | Record category: `0` General, `1` AC, `2` PC, `3` QC. QC is retained distinctly as control-solution status. Expansion/clinical meaning of AC/PC is not assigned here. | **STATIC-ANALYSIS-SUPPORTED**, clearest in 1.7.9; QC branch **LIVE-CORROBORATED** privately at index one |
+| 6–7 | `0xA5` response marker; checksum | **LIVE-CORROBORATED** envelope |
 
-## Implementation gate and next evidence
+Raw `0xFFFF` is the app's invalid-value sentinel, confirmed in both record base classes. The parser flags it and the uric-acid scaling helper rejects it. The private index-zero pair decodes as uric acid, General category, non-sentinel raw value, and a valid meter-local time. The repeated index-one pair decodes as hematocrit, QC category, and invalid sentinel, consistent with the app's multi-parameter last-slot probe. These private checks publish classifications only, never the numeric value or time. The index-one QC/sentinel is not treated as a second valid health measurement.
 
-Only the common frame envelope is sufficiently mapped here, and `protocol.py` already validates it. Adding a record-part wrapper that merely renames `ProtocolFrame.opaque_data` would not establish a new semantic field. No parser code or new fixture is justified at this checkpoint. Existing synthetic tests cover the known envelope, command roles, request frames, slot count, and contextual uric-acid scaling; they do not imply a real record decode. The user explicitly paused Stage 2G parser implementation until the decompilation directories are located.
+## Semantics and remaining limits
 
-**Exact next gate:** locate the actual retained private 1.7.6 and 1.7.9 decompilation directories and resume Stage 2G only on the user's direction. Trace the response parser and TD4183 call sites for both versions, and privately compare the resulting interpretation with the known record if its displayed value/time are available without publishing them. Then implement and test only fields classified **STATIC-ANALYSIS-SUPPORTED** or **LIVE-CORROBORATED**. If static evidence shows `0x2F` is necessary for analyte interpretation, propose its physical evaluation as a separately authorized later gate; do not send it under Stage 2G.
+| Question | Result |
+| --- | --- |
+| Can `0x25`/`0x26` identify a record without `0x2F`? | **Yes for the app-mapped analyte selector and raw value in this TD4183 path.** The private index-zero frame selects uric acid directly from `0x26` byte 5. `0x2F` supplies category-specific range metadata in the shared handler and is not needed to extract this pair or identify that type. It remains physically untested from Home Assistant. |
+| Uric-acid scaling/unit | Prior Stage 2C private import corroborates displayed value = raw / 10 for uric acid; no other analyte scaling or unit is assigned. The parser returns raw integer and identity separately; scaling remains contextual. |
+| Control/status | QC category and transmitted flag are decoded. Other reserved bits, low code bits, control-solution value policy, and AC/PC clinical interpretation remain unresolved. |
+| Invalid data | `0xFFFF` raw value is flagged invalid. Invalid time fields are rejected by a deliberate strict parser policy. Unsupported analyte codes remain numeric with `analyte=None`. |
+| Multi-parameter behavior | The private `1 → 0 → 1` sequence and app branch support an index-one hematocrit QC/sentinel companion and index-zero uric-acid record for this capture. General pairing/count behavior across other meter states remains unresolved. |
+| Timestamp and timezone | Meter-local fields are preserved at minute precision. `timezone_unknown = true` in design terms; no UTC conversion or ingestion-time substitution occurs. |
+
+The offline implementation adds only immutable parser structures to Home Assistant/Bleak-independent `protocol.py`; it does not change BLE requests, the privacy-safe development action, or production behavior. All tracked fixtures are synthetic (including a future date and artificial values). Private validation ran only in memory and reported classifications, not raw bytes or the real measurement.
+
+**Exact next gate:** review Stage 2G evidence and parser, then separately authorize Stage 3's wider sanitized fixture/record-model work or a focused evidence follow-up for the unresolved units, reserved flags, and multi-parameter semantics. Any physical `0x2F` query, real decoded-result exposure, or production synchronization needs its own authorization.
