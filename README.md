@@ -2,13 +2,13 @@
 
 An early-stage custom integration project for the **FORA 6 Connect** blood-testing meter, model **GD82**. The goal is to use Home Assistant's Bluetooth stack, including a local adapter or an ESPHome Bluetooth Proxy, to communicate with the meter. ESPHome will remain a generic proxy.
 
-**Status:** Stages 0, 1, 2A–2G, 3, 4, and the Stage 5 evidence-bounded product/entity model are complete for their authorized scopes. Stage 4's reusable Home Assistant Bluetooth transport passed user-run real-GD82 identity and bounded record regressions with the meter ON. Uric-acid `/10` scaling is supported, but its displayed unit is not established, so no numeric Home Assistant sensor is exposed. Unresolved protocol semantics remain open. Production discovery and record synchronization remain unimplemented; this project is not ready for health monitoring.
+**Status:** Stages 0, 1, 2A–2G, 3, 4, 5, 5A, and the focused Stage 6A discovery/identity review are complete for their authorized scopes. Stage 4's reusable Home Assistant Bluetooth transport passed user-run real-GD82 identity and bounded record regressions with the meter ON. Stage 5A established mg/dL as the app's uric-acid raw/10 base unit. Stage 6A found no proven stable per-meter ID, so no Config Flow, Home Assistant device, or numeric sensor is registered. Unresolved protocol semantics and production synchronization remain open; this project is not ready for health monitoring.
 
 The documented BLE service and characteristic UUIDs are recorded in [the protocol evidence register](docs/PROTOCOL.md). They do not by themselves prove an observed device is a FORA 6 Connect.
 
 ## Project plan
 
-[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and physical regression closure. [The Stage 5 model record](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md) documents product mapping and why numeric sensor exposure is deferred. **Exact next gate:** separately authorize Stage 6 device discovery and identity policy, or a focused evidence follow-up for the uric-acid display unit before adding a numeric sensor. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
+[FORA6_MASTER_ROADMAP.md](FORA6_MASTER_ROADMAP.md) is the authoritative stage plan. The [Stage 4 transport record](docs/STAGE4_BLUETOOTH_TRANSPORT.md) describes the reusable session and physical regression closure. The [Stage 5 model](docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md), [Stage 5A unit evidence](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md), and [Stage 6A identity policy](docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md) document the current product and discovery boundaries. **Exact next gate:** separately authorize a private passive address/advertisement comparison and/or a bounded Stage 6A1 Serial Number String read before full Config Flow. [CURRENT_STATUS.md](CURRENT_STATUS.md) and [CODEX_HANDOVER.md](CODEX_HANDOVER.md) record the current state.
 
 ## Development
 

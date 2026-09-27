@@ -2,55 +2,49 @@
 
 ## Stage and checkpoint
 
-Stages 0, 1, 2A–2G, 3, 4, 5, and the focused Stage 5A uric-acid unit review
-are complete for their authorized scopes. Stage 4 includes user-run real-GD82
-identity and bounded record regressions with the meter ON. Stage 6 has not
-started. Unresolved protocol semantics and production discovery/sync remain
-open.
+Stages 0, 1, 2A–2G, 3, 4, 5, 5A, and the focused Stage 6A discovery and
+identity-policy review are complete for their authorized scopes. Full Stage 6
+Config Flow and device registration have not started. Production sync,
+polling, and HA measurement entities remain inactive.
 
 - **Branch:** `main`.
-- **Last completed checkpoint:** `8de037a10e723a9e2a7afdf325bee204ec9b4221` — `feat: add evidence-bounded measurement model`.
-- **Starting tree:** clean, verified with `git status --short` before Stage 5A edits.
-- **Changes after checkpoint:** yes; this pre-commit task changed the product measurement model, inert sensor mapping, synthetic tests, and Stage 5A documentation. Report the task commit SHA and post-commit tree status separately.
-- **Files changed:** `custom_components/fora6_connect/measurement.py`, `custom_components/fora6_connect/sensor.py`, `tests/test_measurement.py`, `docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md`, `docs/STAGE5_MEASUREMENT_ENTITY_MODEL.md`, `docs/PROTOCOL.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `CHANGELOG.md`.
-- **Live actions:** none. Stage 5A used retained private static material in place and performed no physical test, BLE action, deployment, push, tag, or release.
+- **Last completed checkpoint:** `b073f68da858404624b68d311e5a9301d5df4df8` — `feat: expose evidence-backed uric-acid measurement`.
+- **Starting tree:** clean, verified with `git status --short` before Stage 6A edits.
+- **Changes after checkpoint:** yes; documentation/status only at this pre-commit observation. Report the task commit SHA and post-commit status separately.
+- **Files changed:** `docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, `docs/PROTOCOL.md`, `docs/DECISIONS.md`.
+- **Live actions:** none. No physical observation, GATT value read, application command, automatic discovery, deployment, push, tag, or release.
 
-## Evidence result
+## Discovery and identity result
 
-[The Stage 5A evidence record](docs/STAGE5A_URIC_ACID_UNIT_EVIDENCE.md) gives
-relative app class/resource paths, cross-version findings, and evidence
-classes. In iFORA HM 1.7.6 the TD4183 uric-acid import divides the raw value
-by ten before storage. Both app versions use mg/dL for that unconverted base
-number and apply display conversion when the `UA_UNIT` preference selects
-µmol/L or mmol/L. Their UI has three unit choices and a first-login South
-Africa rule can choose µmol/L. The actual active preference during the
-private physical import was not recorded. The traced app formatter does not
-use the `0x26` auxiliary byte for unit selection; that byte's physical
-meaning and meter-native unit modes remain unresolved. The bundled meter
-manual gives no uric-acid unit specification. No private specimen details or
-proprietary source were added to Git.
+[The Stage 6A policy record](docs/STAGE6A_DISCOVERY_IDENTITY_POLICY.md)
+separates a passive candidate, a project-confirmed TD4183/GD82, and a
+uniquely identified physical meter. The observed exact normalized name,
+advertised `0x1808` and `0x180A`, and connectability support the candidate
+shape only. Custom `0x1523` was absent from that advertisement, although
+present in connected GATT. The existing `0x22`/`0x24` project `0x4183`
+exchange confirms the model/protocol path but is shared by that model and
+cannot distinguish two meters.
 
-## Implementation boundary
+No retained address series proves stability. Address remains a runtime
+locator, never a permanent config-entry or device identifier. Manufacturer
+data was present in one advertisement; no company ID, payload length, stable
+bytes, or identity meaning was retained. The real Stage 1B GATT metadata
+lists readable Device Information Serial Number String `0x2A25` and System
+ID `0x2A23`, but the probe read no values. The reviewed app transport uses
+Bluetooth addresses for connection; it provides no proof of persistence,
+and the bounded source search found no manufacturer-data parsing call.
+Current HA Bluetooth documentation supports callback and manifest candidate
+matching and connectable device resolution, but does not supply per-meter
+identity. No Config Flow or duplicate-device policy can safely be finalized.
 
-`Fora6Measurement` now carries the evidenced mg/dL base unit only for valid
-identified uric acid. Its raw `/10` `Decimal` remains unchanged; no locale
-selection or app-style conversion is implemented. Unsupported/unknown
-analytes and `0xFFFF` remain without a numeric value or unit. The inert
-`sensor.py` mapper admits only General-category valid uric acid and returns
-`None` for QC, AC, PC, invalid, or unsupported inputs. Replacement of the
-latest state clears a prior numeric state when the new record is unusable.
-Meter-local time remains naive and separate from any ingestion time.
+## Implementation boundary and checks
 
-The integration still registers no `SensorEntity`, device, or config entry.
-Stage 6 owns stable meter identity and setup; later synchronization owns BLE
-record feeding. `bluetooth.py`, `protocol_probe.py`, `protocol.py`,
-`models.py`, service/action schemas, fixtures, and command sequences are
-unchanged. The development record action still returns no decoded result.
+This Stage 6A task changed documentation only. `manifest.json` still has no
+Bluetooth matcher or `config_flow` flag; `config_flow.py` remains a scaffold.
+No callback, connection, sensor, `DeviceInfo`, unique ID, persistence, or
+Stage 4/5/5A runtime behavior was added. Private source was read in place;
+no private address, payload, serial, capture, or proprietary source is in Git.
 
-## Checks and next gate
-
-- Final full suite: 179 tests passed, including one new Stage 5A QC state test; the targeted measurement suite passed 15 tests before that addition.
-- `compileall`, `tabnanny`, integration JSON/YAML parsing, and `git diff --check` passed. `git diff --cached --check` follows staging.
-- A checkpoint diff shows no changes to Stage 4 transport/probe, protocol/wire model, service/action schema, or integration entry point. The Stage 5A product/state code has no Bluetooth I/O or new command ID.
-- No private value, timestamp, address, identifier, raw frame, capture, app package, decompiled source, or private absolute path is introduced in tracked files.
-- **Exact next gate:** separately authorize Stage 6 discovery and identity policy before registering an mg/dL uric-acid entity or device. A separate evidence task would be needed for meter-native UA unit modes. Stage 6 has not started.
+- Full existing unit suite: 179 tests passed.
+- `compileall`, `tabnanny`, integration JSON/YAML parsing, `git diff --check`, and `git diff --cached --check` passed. Staged privacy/artifact audits found no private path, address, raw response, capture/package artifact, or prohibited tracked file. The staged diff contains no runtime or test file.
+- **Exact next gate:** separately authorize private passive address/advertisement comparison and/or a bounded Stage 6A1 read of observed `0x2A25`. Review sanitized evidence before full Stage 6 Config Flow or device registration. Stage 6B/full Config Flow has not started.
