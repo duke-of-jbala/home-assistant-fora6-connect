@@ -16,6 +16,11 @@ venv/
 .env.*
 .idea/
 .vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
 
 # BLE captures and private health data: sanitize before creating public fixtures.
 *.pcap
@@ -30,5 +35,8 @@ private/
 *.apk
 *.xapk
 *.apks
+*.dex
 *.keystore
 *.jks
+*.p12
+*.pfx
