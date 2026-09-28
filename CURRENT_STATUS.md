@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P4 — normal-ON physical control recorded; comparison pending
+
+- **Branch/date and checkpoint:** observed clean `main` on 2026-09-28 (Europe/London) at `0c23054f1112f1cc218116c2577437108671087e` — `feat: add bounded transaction readiness probe`. This task began with no tracked or untracked working-tree changes. No upstream or deployment state was checked.
+- **User-supplied physical result:** the normal manual ON `fora6_connect.probe_transaction_readiness` action reported `probe_performed`, connectable resolution, connection attempted/successful, custom service/characteristic found, notification subscription attempted/successful, and cleanup successful as `true`; `cleanup_errors=[]`; `failure_stage`, `failure_code`, and `exception_type` were `null`. [The Stage 13A-P4 observation](docs/STAGE13A_P4_TRANSACTION_READINESS_OBSERVATION.md) records the complete sanitized result and provenance. This physically validates custom-notification subscription in the sampled normal-ON state. It does not establish a specific connection route or post-measurement readiness.
+- **Gate status:** P4 remains open. A naturally occurring post-measurement flashing-state probe has not been reported. Production remains manual-only; Stage 13B has not started.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_P4_TRANSACTION_READINESS_OBSERVATION.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. At the pre-commit observation, the working tree is modified by this documentation task; verify and report post-commit status separately.
+- **Checks actually run:** repository branch, HEAD, and initial clean status inspected; sanitized result matched against the probe's response fields; documentation diff and `git diff --check` reviewed. No runtime code changed, and no unit test or physical probe was run by Codex for this documentation task.
+
+**Exact next gate:** await a naturally occurring measurement, then run the single Stage 13A-P4 readiness probe during immediate post-measurement flashing and share the sanitized action result plus approximate relative delay. Review that comparison before closing P4 or considering separately authorized Stage 13B work.
+
 ## Stage 13A-P4 — development-only transaction-readiness probe, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `dc81954b6fa0d1f38f7fb33a66ecfb2a5692809e` — `docs: assess GD82 absence return trigger`; `origin/main` matched. Released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

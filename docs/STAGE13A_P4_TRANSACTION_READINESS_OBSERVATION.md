@@ -1,6 +1,6 @@
 # Stage 13A-P4 — bounded transaction-readiness observation
 
-**Status:** development-only probe implemented and synthetically validated; physical comparison pending. Production remains explicit manual refresh only. Stable `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+**Status:** development-only probe implemented and synthetically validated; user-supplied normal-ON physical control succeeded. The post-measurement comparison remains pending, so P4 is open. Production remains explicit manual refresh only. Stable `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
 
 ## Why test subscription readiness
 
@@ -25,7 +25,25 @@ The private action response contains only booleans for resolution, connection, c
 3. Run `fora6_connect.probe_transaction_readiness` once against the existing config entry in Developer Tools → Actions.
 4. Share only the sanitized operational response: resolution/connection/service/characteristic/subscription booleans, cleanup result, and failure stage/code or exception type. Confirm the FORA connection disappears after completion if visible in Bluetooth Connections. Do not share a screenshot, address, health reading, or measurement time.
 
-Expected from earlier manual refreshes, but **not yet validated for this new probe**: connection and custom notification subscription succeed with clean cleanup. If the control fails, investigate that specific stage before interpreting a post-measurement run.
+The user reported that this normal-ON control succeeded on 2026-09-28. This is a user-supplied sanitized action result; no raw BLE capture, source route, or independent log was provided. All reported fields were:
+
+```text
+probe_performed: true
+connectable_device_resolved: true
+connection_attempted: true
+connection_successful: true
+custom_service_found: true
+custom_characteristic_found: true
+notification_subscription_attempted: true
+notification_subscription_successful: true
+cleanup_successful: true
+cleanup_errors: []
+failure_stage: null
+failure_code: null
+exception_type: null
+```
+
+This physically validates the probe's custom-notification subscription prerequisite in the reported normal manual ON state, with clean reported cleanup. It does not establish a specific local/proxy route or predict readiness in another meter state.
 
 ### Comparison: naturally occurring post-measurement flashing
 
@@ -40,8 +58,8 @@ If the post-measurement subscription fails, a later separate normal manual-ON ru
 | Normal ON subscribes; post-measurement connects but subscription fails | Bounded live support that custom-notification subscription distinguishes these two observed states. It still supplies **no automatic trigger**. |
 | Both subscribe | The prior post-measurement failure was not reproduced; subscription alone does not distinguish the sampled states. |
 | Both fail | Probe/environment inconsistency needs a narrowly scoped diagnosis against the validated manual path. |
-| Natural post-measurement test unavailable | Keep P4 physical comparison pending; do not infer it from the normal-ON control. |
+| Natural post-measurement test unavailable | Keep P4 physical comparison pending; do not infer it from the successful normal-ON control. |
 
 Even if subscription discriminates these states, **readiness is not a trigger**. A future production design would still need an independently justified bounded attempt rule, per-entry manual/automatic exclusion, no retry loop, and an episode or cooldown guard that cannot create a connection storm. This gate implements none of those. It does not claim advertisement visibility or BLE connection proves readiness.
 
-The task started from clean `main` at `dc81954b6fa0d1f38f7fb33a66ecfb2a5692809e` (`docs: assess GD82 absence return trigger`), with matching `origin/main` and released tag unchanged. Synthetic tests cover one-attempt transport, result sanitation, stage-specific failure and cleanup, cancellation/unload, entry isolation, and no FORA I/O. **Exact next gate:** user-run normal-ON readiness control first; after it succeeds, wait for a naturally occurring post-measurement comparison. Review both physical results before considering any Stage 13B architecture.
+The probe implementation task started from clean `main` at `dc81954b6fa0d1f38f7fb33a66ecfb2a5692809e` (`docs: assess GD82 absence return trigger`), with matching `origin/main` and released tag unchanged. Synthetic tests cover one-attempt transport, result sanitation, stage-specific failure and cleanup, cancellation/unload, entry isolation, and no FORA I/O. The later normal-ON physical control above passed; no post-measurement probe result has been supplied. **Exact next gate:** await a naturally occurring measurement, then run the single post-measurement flashing-state probe as described above and review its sanitized result and relative delay. Keep P4 open and do not begin Stage 13B.
