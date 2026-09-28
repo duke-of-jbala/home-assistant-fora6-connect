@@ -1,5 +1,9 @@
 # Architecture decisions
 
+## Stage 8H-B — implement the manual private bounded history response
+
+**Status:** Synthetically implemented, physical validation deferred. [The Stage 8H-B record](STAGE8H_B_BOUNDED_HISTORY_IMPLEMENTATION.md) uses one configured-entry action and the existing count-two/four read and semantic gates. It returns both valid count-four primaries in meter-local newest-first order, flags equal-minute ambiguity, and fails without a partial list on any required read or cleanup failure. The existing sensor and P4 probe semantics remain separate. There is no imported history, persistent dedup/cursor, new entity, event, Recorder/statistics backfill, deployment, tag, or release. Stage 13A-P4 is physically open.
+
 ## Stage 8H-A — expose bounded history through one manual response action
 
 **Status:** Architecture accepted for a separately gated implementation. [The Stage 8H-A review](STAGE8H_A_BOUNDED_HISTORY_ARCHITECTURE.md) treats each valid General uric-acid primary in a complete count-two/four snapshot as a discrete historical measurement. Return one or two in a configured-entry private response, sorted by meter-local minute with unknown timezone; retain both equal-minute primaries and disclose the order ambiguity. Validate all fixed slots and cleanup before returning any list. Keep QC-invalid companions internal, and keep the existing current-state winner/sensor policy separate. No event, history entity, Recorder/statistics backfill, persistence, automatic trigger, runtime code, or deployment follows from this decision. Stage 13A-P4 remains physically open.

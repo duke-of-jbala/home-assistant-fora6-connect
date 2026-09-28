@@ -6,41 +6,22 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .bluetooth import Fora6BluetoothTransport, TransportError
+from .bounded_records import (
+    RESPONSE_TIMEOUT,
+    REQUEST_PAIRS,
+    BoundedReadError,
+    BoundedReadProgress,
+    async_read_bounded_records,
+    eligible_primary,
+    validate_companions,
+)
 from .mac_identity import canonical_bluetooth_mac, is_mac_identity
 from .measurement import Fora6Measurement, measurement_from_record
-from .models import TD4183Record, combine_td4183_record
-from .protocol import (
-    FrameError,
-    ProtocolFrame,
-    TD4183Analyte,
-    TD4183RecordCategory,
-    build_first_record_part_one_request,
-    build_first_record_part_two_request,
-    build_second_record_part_one_request,
-    build_second_record_part_two_request,
-    build_third_record_part_one_request,
-    build_third_record_part_two_request,
-    build_fourth_record_part_one_request,
-    build_fourth_record_part_two_request,
-    build_project_query_request,
-    build_record_slot_count_request,
-    build_wake_request,
-    parse_project_id,
-    parse_record_newest_index,
-    parse_record_slot_count,
-    parse_td4183_record_part_one,
-    parse_td4183_record_part_two,
-)
+from .models import TD4183Record
 from .sensor_state import MeterRuntime, measurement_native_value
 
-PROJECT_ID = 0x4183
-RESPONSE_TIMEOUT = 15.0
-_REQUEST_PAIRS = (
-    (build_first_record_part_one_request, build_first_record_part_two_request),
-    (build_second_record_part_one_request, build_second_record_part_two_request),
-    (build_third_record_part_one_request, build_third_record_part_two_request),
-    (build_fourth_record_part_one_request, build_fourth_record_part_two_request),
-)
+_REQUEST_PAIRS = REQUEST_PAIRS
+_eligible = eligible_primary
 
 
 class _RefreshFailure(Exception):
@@ -50,23 +31,11 @@ class _RefreshFailure(Exception):
         self.code = code
 
 
-def _eligible(record: TD4183Record) -> bool:
-    return (
-        record.analyte is TD4183Analyte.URIC_ACID
-        and record.category is TD4183RecordCategory.GENERAL
-        and record.is_valid_value
-        and not record.is_qc
-    )
-
-
 def _select_primary(records: tuple[TD4183Record, ...]) -> tuple[int, Fora6Measurement, int]:
     """Select only within this complete two- or four-slot snapshot."""
     if len(records) not in (2, 4):
         raise _RefreshFailure("metadata", "unsupported_history_count")
-    for index in range(1, len(records), 2):
-        companion = records[index]
-        if companion.category is not TD4183RecordCategory.QC or companion.is_valid_value:
-            raise _RefreshFailure("record", "unexpected_companion")
+    validate_companions(records)
     candidates = [(index, records[index]) for index in range(0, len(records), 2) if _eligible(records[index])]
     if not candidates:
         raise _RefreshFailure("selection", "no_valid_uric_acid_primary")
@@ -120,60 +89,25 @@ class Fora6CurrentRefreshCoordinator:
                 self._hass, self._runtime.address, response_timeout=RESPONSE_TIMEOUT
             )
             selected: tuple[int, Fora6Measurement, int] | None = None
-
-            async def exchange(request: ProtocolFrame, stage: str) -> ProtocolFrame:
-                try:
-                    return await transport.async_exchange(request)
-                except TransportError as failure:
-                    raise _RefreshFailure(stage, failure.code) from None
-
-            async def read_pair(index: int) -> TD4183Record:
-                first_builder, second_builder = _REQUEST_PAIRS[index]
-                first = await exchange(first_builder(), "record_part_1")
-                try:
-                    part_one = parse_td4183_record_part_one(first)
-                except FrameError:
-                    raise _RefreshFailure("record_part_1", "invalid_response") from None
-                second = await exchange(second_builder(), "record_part_2")
-                try:
-                    part_two = parse_td4183_record_part_two(second)
-                except FrameError:
-                    raise _RefreshFailure("record_part_2", "invalid_response") from None
-                return combine_td4183_record(part_one, part_two)
+            progress = BoundedReadProgress()
 
             try:
                 await transport.async_connect()
                 await transport.async_subscribe()
-                await exchange(build_wake_request(), "wake")
-                project_frame = await exchange(build_project_query_request(), "project")
-                try:
-                    project = parse_project_id(project_frame)
-                except FrameError:
-                    raise _RefreshFailure("project", "invalid_response") from None
-                if project != PROJECT_ID:
-                    raise _RefreshFailure("project", "unexpected_project_id")
-                result["refresh_performed"] = True
-                metadata = await exchange(build_record_slot_count_request(), "metadata")
-                try:
-                    count = parse_record_slot_count(metadata)
-                    parse_record_newest_index(metadata)
-                except FrameError:
-                    raise _RefreshFailure("metadata", "invalid_response") from None
-                result["raw_slot_count"] = count
-                if count not in (2, 4):
-                    raise _RefreshFailure("metadata", "unsupported_history_count")
-                result["supported_raw_slot_count"] = True
-                indexes = (0, 1) if count == 2 else (0, 1, 2, 3)
-                records = tuple([await read_pair(index) for index in indexes])
+                records = await async_read_bounded_records(transport, progress)
                 selected = _select_primary(records)
             except TransportError as failure:
                 result.update(error_stage=failure.stage, error_code=failure.code)
-            except _RefreshFailure as failure:
+            except (BoundedReadError, _RefreshFailure) as failure:
                 result.update(error_stage=failure.stage, error_code=failure.code)
                 result["ambiguity_detected"] = failure.code == "ambiguous_meter_local_time"
             except Exception:
                 result.update(error_stage="refresh", error_code="unexpected_failure")
             finally:
+                result["refresh_performed"] = progress.project_confirmed
+                result["supported_raw_slot_count"] = progress.supported_raw_slot_count
+                if progress.raw_slot_count is not None:
+                    result["raw_slot_count"] = progress.raw_slot_count
                 try:
                     cleanup = await transport.async_close()
                     result["cleanup_errors"] = list(cleanup.errors)

@@ -1,4 +1,16 @@
 {
+  "services": {
+    "read_uric_acid_history": {
+      "name": "Read uric acid history",
+      "description": "Explicitly read the supported GD82 record store. The response contains PRIVATE HEALTH DATA: uric-acid values and meter-local measurement times with unknown timezone. Do not share it or use it in automation traces. No sensor update or history persistence occurs.",
+      "fields": {
+        "config_entry_id": {
+          "name": "FORA 6 Connect entry",
+          "description": "Choose the configured meter whose bounded history to read."
+        }
+      }
+    }
+  },
   "config": {
     "step": {
       "confirm": {

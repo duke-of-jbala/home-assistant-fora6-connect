@@ -80,6 +80,16 @@
         }
       }
     },
+    "read_uric_acid_history": {
+      "name": "Read uric acid history",
+      "description": "Explicitly read the supported GD82 record store. The response contains PRIVATE HEALTH DATA: uric-acid values and meter-local measurement times with unknown timezone. Do not share it or use it in automation traces. No sensor update or history persistence occurs.",
+      "fields": {
+        "config_entry_id": {
+          "name": "FORA 6 Connect entry",
+          "description": "Choose the configured meter whose bounded history to read."
+        }
+      }
+    },
     "probe_history_chronology": {
       "name": "Inspect two primary records (private development action)",
       "description": "Stage 7G only. At exactly four User1 raw slots, read only indexes 0 and 2. Validated General uric-acid primaries return private mg/dL values and timezone-unknown meter-local times alongside semantic and relative-order results. Do not share this health-data response publicly. No identifiers, persistence, entity update, or production synchronization.",

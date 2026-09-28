@@ -1,9 +1,11 @@
 """FORA 6 Connect setup, manual refresh, and bounded development actions."""
 
 import asyncio
+import re
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
 from .advertisement_observer import (
@@ -15,6 +17,7 @@ from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .coordinator import Fora6CurrentRefreshCoordinator
 from .gatt_probe import ProbeError, async_probe_gatt
 from .history_chronology_probe import async_probe_history_chronology
+from .history_reader import Fora6HistoryReader
 from .history_probe import async_probe_history_window
 from .history_semantics_probe import async_probe_history_semantics
 from .history_window_four import async_probe_history_window_four
@@ -41,6 +44,7 @@ SERVICE_PROBE_SERIAL_STABILITY = "probe_serial_stability"
 SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
 SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
 SERVICE_REFRESH_CURRENT_URIC_ACID = "refresh_current_uric_acid"
+SERVICE_READ_URIC_ACID_HISTORY = "read_uric_acid_history"
 SERVICE_OBSERVE_ADVERTISEMENTS = "observe_advertisements"
 SERVICE_OBSERVE_ADVERTISEMENT_REARM = "observe_advertisement_rearm"
 SERVICE_PROBE_TRANSACTION_READINESS = "probe_transaction_readiness"
@@ -391,6 +395,64 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         supports_response=SupportsResponse.ONLY,
     )
 
+    async def async_handle_read_uric_acid_history(call: ServiceCall) -> dict:
+        """Return one private, complete snapshot for a configured meter."""
+        entry_id = call.data.get("config_entry_id")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ServiceValidationError("Select a configured FORA 6 Connect entry.")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError("The selected FORA entry is unavailable.")
+        if entry.state is not ConfigEntryState.LOADED:
+            raise ServiceValidationError(
+                "Load the selected FORA entry before reading history."
+            )
+        runtime = getattr(entry, "runtime_data", None)
+        reader = getattr(runtime, "history_reader", None)
+        if reader is None:
+            raise ServiceValidationError(
+                "Load the selected FORA entry before reading history."
+            )
+        if runtime.history_read_task is not None or runtime.gatt_lock.locked():
+            raise ServiceValidationError(
+                "A FORA GATT operation is already running for this entry."
+            )
+        current_task = asyncio.current_task()
+        runtime.history_read_task = current_task
+        try:
+            result = await reader.async_read()
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            raise HomeAssistantError(
+                "FORA history read failed: stage=action, code=unexpected_failure"
+            ) from None
+        finally:
+            if runtime.history_read_task is current_task:
+                runtime.history_read_task = None
+        if not result["history_read_successful"]:
+            def safe_label(value: object) -> str:
+                if isinstance(value, str) and re.fullmatch(r"[a-z_]{1,64}", value):
+                    return value
+                return "unknown"
+
+            stage = safe_label(result.get("error_stage"))
+            code = safe_label(result.get("error_code"))
+            cleanup = ",".join(
+                safe_label(item) for item in result.get("cleanup_errors", [])
+            ) or "none"
+            raise HomeAssistantError(
+                f"FORA history read failed: stage={stage}, code={code}, cleanup={cleanup}"
+            )
+        return result
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_READ_URIC_ACID_HISTORY,
+        async_handle_read_uric_acid_history,
+        supports_response=SupportsResponse.ONLY,
+    )
+
     async def async_handle_observe_advertisements(call: ServiceCall) -> dict:
         """Observe only HA Bluetooth callbacks during one manual time window."""
         entry_id = call.data.get("config_entry_id")
@@ -531,6 +593,7 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
     entry.runtime_data.refresh_coordinator = Fora6CurrentRefreshCoordinator(
         hass, entry, entry.runtime_data
     )
+    entry.runtime_data.history_reader = Fora6HistoryReader(hass, entry, entry.runtime_data)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     # Refresh retained registry metadata for existing entries without a BLE read.
     from .device_metadata import async_reconcile_device_metadata
@@ -556,7 +619,17 @@ async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
             pass
         except Exception:
             pass
+    history_task = getattr(runtime, "history_read_task", None)
+    if history_task is not None and not history_task.done():
+        history_task.cancel()
+        try:
+            await history_task
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            pass
     unloaded = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
     if unloaded and getattr(entry, "runtime_data", None) is not None:
         entry.runtime_data.refresh_coordinator = None
+        entry.runtime_data.history_reader = None
     return unloaded

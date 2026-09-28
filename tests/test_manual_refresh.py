@@ -32,7 +32,7 @@ def load_refresh():
     bluetooth.Fora6BluetoothTransport = object
     modules[bluetooth.__name__] = bluetooth
     loaded = {}
-    for short in ("const", "protocol", "models", "measurement", "mac_identity", "sensor_state", "coordinator"):
+    for short in ("const", "protocol", "models", "measurement", "mac_identity", "sensor_state", "bounded_records", "coordinator", "history_reader"):
         spec = importlib.util.spec_from_file_location(f"{name}.{short}", ROOT / f"{short}.py")
         module = importlib.util.module_from_spec(spec)
         modules[spec.name] = module

@@ -20,6 +20,13 @@ This integration currently exposes uric acid only, in mg/dL. It does not poll,
 import history, or synchronize automatically. Raw slot counts six and above
 are unsupported; the printed proprietary serial is not retrieved.
 
+The unreleased development branch also contains a bounded, explicitly invoked
+history response action for counts two and four. It has synthetic validation
+only. Keep the currently deployed Stage 13A-P4 readiness build in place until
+its pending post-measurement comparison; do not deploy the development branch
+for this history action yet. The released `v1.0.0` behavior remains as described
+below.
+
 ## Install with HACS
 
 1. In HACS, open the menu (three dots) and choose **Custom repositories**.

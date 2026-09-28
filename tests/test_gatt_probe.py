@@ -73,8 +73,11 @@ def _load_setup(probe_module):
     core.HomeAssistant = object
     core.ServiceCall = object
     core.SupportsResponse = types.SimpleNamespace(ONLY="response_only")
+    config_entries = types.ModuleType("homeassistant.config_entries")
+    config_entries.ConfigEntryState = types.SimpleNamespace(LOADED="loaded")
     exceptions = types.ModuleType("homeassistant.exceptions")
     exceptions.ServiceValidationError = type("ServiceValidationError", (Exception,), {})
+    exceptions.HomeAssistantError = type("HomeAssistantError", (Exception,), {})
     helpers = types.ModuleType("homeassistant.helpers")
     config_validation = types.ModuleType("homeassistant.helpers.config_validation")
     config_validation.config_entry_only_config_schema = Mock(
@@ -130,6 +133,8 @@ def _load_setup(probe_module):
     )
     coordinator = types.ModuleType("_fora6_setup_test.coordinator")
     coordinator.Fora6CurrentRefreshCoordinator = Mock()
+    history_reader = types.ModuleType("_fora6_setup_test.history_reader")
+    history_reader.Fora6HistoryReader = Mock()
     serial = types.ModuleType("_fora6_setup_test.serial_probe")
     serial.async_probe_serial_identity = AsyncMock(
         return_value={"serial_read_successful": True}
@@ -157,6 +162,7 @@ def _load_setup(probe_module):
         sys.modules,
         {
             "homeassistant.core": core,
+            "homeassistant.config_entries": config_entries,
             "homeassistant.exceptions": exceptions,
             "homeassistant.helpers": helpers,
             "homeassistant.helpers.config_validation": config_validation,
@@ -173,6 +179,7 @@ def _load_setup(probe_module):
             "_fora6_setup_test.history_window_four": four_slot,
             "_fora6_setup_test.history_chronology_probe": chronology,
             "_fora6_setup_test.coordinator": coordinator,
+            "_fora6_setup_test.history_reader": history_reader,
             "_fora6_setup_test.serial_probe": serial,
             "_fora6_setup_test.serial_stability": stability,
             "_fora6_setup_test.system_id_probe": system_id,

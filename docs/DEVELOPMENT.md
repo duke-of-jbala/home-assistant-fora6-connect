@@ -1,5 +1,7 @@
 # Development
 
+**Stage 8H-B:** [The bounded implementation record](STAGE8H_B_BOUNDED_HISTORY_IMPLEMENTATION.md) documents the new explicit `read_uric_acid_history` action, shared fixed count-two/four read, private response, equal-minute history handling, synthetic tests, and all-or-nothing errors. It is unreleased source work; **do not deploy it** while the currently deployed P4 readiness build is needed for a naturally occurring post-measurement comparison. No physical history test has been run. There is no Recorder/statistics backfill, persistence, sensor mutation, or auto-sync.
+
 **Stage 8H-A:** [The bounded history review](STAGE8H_A_BOUNDED_HISTORY_ARCHITECTURE.md) selects a future manual configured-entry response action returning the complete count-two/four list of discrete General uric-acid primaries with timezone-unknown meter-local minute labels. No code, sensor/Recorder mutation, or Home Assistant deployment is added by this review; the P4 post-measurement comparison remains pending.
 
 **Post-v1 Stage 13A:** [The automatic-trigger review](STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md) audits HA Bluetooth callback, unavailable, replay, per-scanner, and ESPHome connection-slot guidance against the current manual coordinator. It proposes a later privacy-safe advertisement-state observation; no runtime callback, physical meter operation, or automatic refresh is added. `v1.0.0` remains released and unchanged.

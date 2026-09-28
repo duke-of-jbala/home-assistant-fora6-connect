@@ -131,6 +131,23 @@ refresh_current_uric_acid:
       selector:
         config_entry:
           integration: fora6_connect
+read_uric_acid_history:
+  name: Read uric acid history
+  description: >-
+    Turn the FORA 6 Connect GD82 on normally without browsing records with its
+    arrow keys. Explicitly read the complete supported two- or four-slot store
+    and return one or two discrete uric-acid measurements. Their timestamps
+    are meter-local with unknown timezone. The response contains PRIVATE HEALTH
+    DATA, including values and measurement times; do not share it or use it in
+    automation traces. This action does not update the sensor or persist history.
+  fields:
+    config_entry_id:
+      name: FORA 6 Connect entry
+      description: Choose the configured meter whose bounded history to read.
+      required: true
+      selector:
+        config_entry:
+          integration: fora6_connect
 observe_advertisements:
   name: Observe Bluetooth advertisements (development only)
   description: >-

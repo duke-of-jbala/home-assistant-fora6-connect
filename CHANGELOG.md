@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
+- Explicit configured-entry `read_uric_acid_history` action for complete GD82 raw counts two/four. It returns one or two private General uric-acid measurements with timezone-unknown meter-local minutes, newest-first ordering and equal-minute ambiguity. It does not update the sensor, import Recorder history, or persist data; synthetic validation only and no Home Assistant deployment yet.
 - Development-only configured-entry `probe_transaction_readiness` action that makes one HA-selected connection and custom notification-subscription attempt, then cleans up before any FORA command. It adds no automatic sync or sensor update; physical state comparison remains pending.
 - Development-only `observe_advertisement_rearm` action for a single callback-gated Home Assistant advertisement-history clear and bounded changed-data observation. Its physical test later found false re-dispatch during one continuous ON episode; production refresh stays manual-only.
 - Development-only, manually invoked 60-second Bluetooth callback observer for one configured FORA entry. It compares repeated advertisement receipt with live changed-data callbacks using bounded, privacy-safe structural results. No GATT connection, protocol command, sensor update, or automatic synchronization is performed.
