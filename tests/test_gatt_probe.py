@@ -97,6 +97,10 @@ def _load_setup(probe_module):
     advertisement_observer.async_observe_advertisements = AsyncMock(
         return_value={"packet_callback_count": 0}
     )
+    advertisement_rearm = types.ModuleType("_fora6_setup_test.advertisement_rearm_observer")
+    advertisement_rearm.async_observe_advertisement_rearm = AsyncMock(
+        return_value={"clear_performed": False}
+    )
     identity = types.ModuleType("_fora6_setup_test.protocol_probe")
     identity.async_probe_protocol_identity = AsyncMock(
         return_value={"identity_confirmed": True}
@@ -157,6 +161,7 @@ def _load_setup(probe_module):
             "_fora6_setup_test.gatt_probe": gatt,
             "_fora6_setup_test.notification_observer": observer,
             "_fora6_setup_test.advertisement_observer": advertisement_observer,
+            "_fora6_setup_test.advertisement_rearm_observer": advertisement_rearm,
             "_fora6_setup_test.protocol_probe": identity,
             "_fora6_setup_test.history_probe": history,
             "_fora6_setup_test.history_semantics_probe": semantics,

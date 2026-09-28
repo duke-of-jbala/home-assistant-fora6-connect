@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P2 — one-clear development observer, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `64ade3c7667648fefcebd8b3624de570bc895501` — `docs: record bounded GD82 callback observation`; `origin/main` matched. Released `v1.0.0` still resolves to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **Implementation:** [Stage 13A-P2](docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md) adds manually invoked `observe_advertisement_rearm` for a configured entry. On Core 2026.9.4's supported changed-data callback, it clears HA advertisement history exactly once after a first live callback, or not at all if none arrives. The 60-second observation returns bounded structural/relative-time evidence and sanitized failure stage/type. The existing no-clear observer handles a separate later OFF → ON comparison. No GATT, FORA command, active scan, sensor update, production callback, or automatic sync was added.
+- **Evidence status:** synthetic-only. The user has not yet physically tested re-arm behavior. A callback after clear can be called a same-ON callback only if the user verifies the meter stayed continuously ON. Without Core 2026.9.4 per-packet telemetry, no callback does not prove packets were absent.
+- **Changes after checkpoint:** yes; `custom_components/fora6_connect/advertisement_rearm_observer.py`, `__init__.py`, `services.yaml`, `tests/test_advertisement_rearm_observer.py`, `tests/test_gatt_probe.py`, `docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. The working tree is modified at this pre-commit observation; report post-commit state separately. The stable release ref remains unchanged.
+- **Checks actually run on the modified tree:** 24/24 targeted advertisement tests and 399/399 full tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; staged and unstaged diff checks passed. Added-line privacy, credential, identifier, health-value/time, private-path, no-GATT, no-auto-sync, and artifact audits passed across 11 staged files. Pushed HACS/hassfest remain to be verified after commit.
+
+**Exact next gate:** user-run Stage 13A-P2 continuous-ON one-clear test and, if needed, separate later OFF → ON changed-callback observation. Classify the physical result before any Stage 13B authorization. Production remains manual-only.
+
 ## Stage 13A-P1 — physical changed-callback evidence, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `56fec412a2d39ac1cf9ee24ff269dd0a70894e61` — `fix: support older Home Assistant Bluetooth callbacks`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

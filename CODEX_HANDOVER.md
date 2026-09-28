@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P2 — development one-clear re-arm observer, pre-commit
+
+Started from clean `main` at `64ade3c7667648fefcebd8b3624de570bc895501` (`docs: record bounded GD82 callback observation`) on 2026-09-28 (Europe/London), with `origin/main` matching; `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The new configured-entry action `fora6_connect.observe_advertisement_rearm` listens to Core 2026.9.4-compatible changed-data callbacks, clears HA advertisement history once only after the first live callback, and observes until the bounded 60-second window ends. If no callback arrives, no clear occurs. It is exclusive with the existing observer for that entry and unload stops either observation. No GATT, active scan, FORA command, sensor update, or production automatic sync is involved.
+
+The separate existing `observe_advertisements` action is used for the later physical OFF → ON comparison and performs no clear. The first action's result alone cannot tell whether the GD82 remained ON; user physical confirmation is essential. [Stage 13A-P2 instructions and interpretation](docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md) distinguish a false same-ON re-dispatch from bounded later-wake evidence and Core 2026.9.4's lack of per-packet visibility. Physical re-arm semantics remain **pending**.
+
+Changed files are listed in `CURRENT_STATUS.md`; the tree is modified at this pre-commit observation. At this point 24/24 targeted observer tests and 399/399 full tests passed. Compileall, tabnanny, four JSON/two YAML/one TOML parses, staged and unstaged diff checks, and added-line privacy/credential/identifier/health-data/private-path/no-GATT/no-auto/artifact audits passed. Pushed HACS/hassfest must be reported after completion. Report actual commit, remote, and clean-tree status separately. Released `v1.0.0` is untouched.
+
+**Exact next gate:** user deploys this development build, restarts HA, performs one continuous-ON cache-clear observation, and if needed a separate no-clear later OFF → ON observation; only then classify the result. No Stage 13B implementation.
+
 ## Stage 13A-P1 — physical callback evidence and re-arm assessment, pre-commit
 
 Starting state was clean `main` at `56fec412a2d39ac1cf9ee24ff269dd0a70894e61` (`fix: support older Home Assistant Bluetooth callbacks`) on 2026-09-28 (Europe/London), with matching `origin/main`; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user ran the 60-second observer on Core 2026.9.4. It reported no supported per-packet callback, one changed-data callback at relative `T+17.7 s`, one sanitized source, successful cleanup, and no unload stop. The intended OFF → ON → OFF → ON sequence did not produce a demonstrated callback per wake. This does not prove the second episode emitted no packets or that Home Assistant received none.

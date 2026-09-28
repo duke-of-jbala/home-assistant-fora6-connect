@@ -10,6 +10,7 @@ from .advertisement_observer import (
     AdvertisementObservationError,
     async_observe_advertisements,
 )
+from .advertisement_rearm_observer import async_observe_advertisement_rearm
 from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .coordinator import Fora6CurrentRefreshCoordinator
 from .gatt_probe import ProbeError, async_probe_gatt
@@ -40,6 +41,7 @@ SERVICE_PROBE_SYSTEM_ID = "probe_system_id"
 SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
 SERVICE_REFRESH_CURRENT_URIC_ACID = "refresh_current_uric_acid"
 SERVICE_OBSERVE_ADVERTISEMENTS = "observe_advertisements"
+SERVICE_OBSERVE_ADVERTISEMENT_REARM = "observe_advertisement_rearm"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -424,6 +426,46 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_OBSERVE_ADVERTISEMENTS,
         async_handle_observe_advertisements,
+        supports_response=SupportsResponse.ONLY,
+    )
+
+    async def async_handle_observe_advertisement_rearm(call: ServiceCall) -> dict:
+        """Observe one callback-gated cache clear for a configured entry."""
+        entry_id = call.data.get("config_entry_id")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ServiceValidationError("Select a configured FORA 6 Connect entry.")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError("The selected FORA entry is unavailable.")
+        runtime = getattr(entry, "runtime_data", None)
+        if runtime is None or not isinstance(runtime.address, str):
+            raise ServiceValidationError("Load the selected FORA entry before observing.")
+        if runtime.advertisement_observation_stop is not None:
+            raise ServiceValidationError("A FORA advertisement observation is already running.")
+        stop_event = asyncio.Event()
+        runtime.advertisement_observation_stop = stop_event
+        try:
+            return await async_observe_advertisement_rearm(hass, runtime.address, stop_event)
+        except asyncio.CancelledError:
+            raise
+        except AdvertisementObservationError as err:
+            raise ServiceValidationError(
+                f"FORA advertisement re-arm observation failed: {err}"
+            ) from None
+        except Exception as err:
+            name = type(err).__name__
+            if not name.isidentifier() or len(name) > 64:
+                name = "Exception"
+            raise ServiceValidationError(
+                f"FORA advertisement re-arm observation failed: stage=action, type={name}"
+            ) from None
+        finally:
+            runtime.advertisement_observation_stop = None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_OBSERVE_ADVERTISEMENT_REARM,
+        async_handle_observe_advertisement_rearm,
         supports_response=SupportsResponse.ONLY,
     )
     return True

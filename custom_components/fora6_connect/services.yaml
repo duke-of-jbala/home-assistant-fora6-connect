@@ -148,6 +148,24 @@ observe_advertisements:
       selector:
         config_entry:
           integration: fora6_connect
+observe_advertisement_rearm:
+  name: Observe advertisement re-arm (development only)
+  description: >-
+    Development-only 60-second callback observation. Start with the meter OFF,
+    run this action, then turn it ON normally and keep it continuously ON.
+    After the first changed-data callback, the action clears Home Assistant's
+    advertisement history exactly once and watches for another callback.
+    It does not connect to the meter or refresh the sensor. A later OFF-to-ON
+    episode can be checked with the separate Observe Bluetooth advertisements
+    action. Return data contains only structural and relative-time evidence.
+  fields:
+    config_entry_id:
+      name: FORA 6 Connect entry
+      description: Choose the configured meter to observe.
+      required: true
+      selector:
+        config_entry:
+          integration: fora6_connect
 probe_history_chronology:
   name: Inspect two primary records (private development action)
   description: >-
