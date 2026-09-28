@@ -1,6 +1,7 @@
 # Stage 13A-P1 — read-only Bluetooth callback observer
 
-**Status: development action implemented; physical evidence pending.** This is
+**Status: bounded Core 2026.9.4 changed-callback run physically observed;
+episode semantics unresolved.** This is
 post-`v1.0.0` development. The stable release and production manual refresh
 are unchanged. The starting clean `main` checkpoint was
 `84f6362d0cabca5e9e45905e6fffe75a9b69556d` (`docs: assess GD82
@@ -96,6 +97,30 @@ On Core 2026.9.4, `packet_callback_supported: false` is expected; its packet
 fields are `null`, not evidence of zero packets. Only changed-data delivery
 can be physically tested there through the supported callback API.
 
+## User-run Core 2026.9.4 result
+
+The user completed one 60-second action during an intended normal
+OFF → ON → OFF → ON observation. It reported **one** changed-data callback at
+session-relative `T+17.7 s`, from one sanitized source alias. Callback
+unsubscription succeeded; the action ended by its time bound, not entry
+unload. Per-packet support was unavailable. This is **LIVE-CORROBORATED**
+callback delivery for one event, not proof that only one advertisement was
+received or that the second wake emitted no advertisement. The event's
+structural view had two service UUIDs, `connectable: true`, zero manufacturer
+entries, zero service-data entries, and no exact `FORA 6 CONNECT` name match.
+The Advertisement Monitor previously displayed the FORA name and one
+manufacturer entry. These surfaces need not expose the same complete or
+merged representation; an absent field in this callback is **not** proof of
+absence from a physical advertisement. No address, raw bytes, health value,
+or measurement timestamp is recorded here.
+
+Across the intended two wake episodes, the supported changed-data callback
+did **not demonstrate reliable re-dispatch for each episode** when data stayed
+effectively unchanged. That observation does not identify whether the second
+episode's packets were received, deduplicated, missed by scanning, or outside
+the effective observation window. A production trigger based solely on this
+callback is not justified.
+
 ## `async_clear_advertisement_history()` assessment
 
 Home Assistant documents this as clearing the cached advertisement data for
@@ -108,6 +133,39 @@ inside this observer would disturb the comparison and could make repeated
 identical packets look like new episodes. **Stage 13A-P1 never calls it.**
 Any production use needs separate evidence and guards against repeated
 callback-triggered connections.
+
+### Proposed Stage 13A-P2 — one-time re-arm semantics test
+
+The next smallest physical gate is a separately authorized, development-only
+test of `async_clear_advertisement_history()` for the configured address.
+Its purpose is to determine whether a **single** clear while the GD82 remains
+visibly ON permits another changed-data callback in that same continuous ON
+episode, rather than only after a later OFF → ON. It must not connect, issue
+FORA commands, refresh the sensor, change integration matcher history, or
+install a production callback.
+
+The test needs two clearly marked phases within one bounded observation:
+
+1. Start with the meter OFF, live callback registered with cached replay
+   disabled. Turn it ON normally and require an observed first callback;
+   otherwise mark the run inconclusive and do not clear anything.
+2. While the meter **remains ON** and before any OFF transition, invoke one
+   explicit user-controlled re-arm. Record its relative time and call the
+   public `async_clear_advertisement_history()` **once**. Keep observing
+   without an automatic re-arm or callback-triggered clear.
+3. Separately mark a later normal OFF → ON and observe whether a callback
+   follows. Stop and unregister cleanly; return only phase-relative callback
+   counts/times and boolean cleanup status. The user reports meter-state
+   transitions without addresses, packet bytes, or health information.
+
+A callback after the clear **while still ON** proves that re-arming can
+re-dispatch within one continuous episode in this state; production
+one-attempt-per-wake logic must not treat such a callback as a new wake. If
+there is no callback until OFF → ON, that is only bounded evidence: Core
+2026.9.4 cannot confirm whether advertisements arrived during the ON phase.
+If no callback follows either phase, the run is inconclusive. No timing or
+cooldown constant for production should be chosen from this one experiment.
+Stage 13A-P2 is proposed only; no cache clear is implemented or run here.
 
 ## User-run physical procedure
 
@@ -126,7 +184,7 @@ callback-triggered connections.
 4. A separate safe history-arrow observation may be run later. Observe
    post-measurement flashing only during naturally occurring meter use.
 
-No callback result has yet been observed on the real meter. The exact next
-gate is user-run Stage 13A-P1 physical callback observation and evidence
-review. Do not authorize or implement Stage 13B automatic sync from synthetic
-tests alone.
+The procedure above documents the completed Stage 13A-P1 run. The **exact
+next gate** is separate authorization for Stage 13A-P2's bounded one-time
+re-arm test. Do not implement Stage 13B automatic sync from one changed-data
+callback or from the Advertisement Monitor view.

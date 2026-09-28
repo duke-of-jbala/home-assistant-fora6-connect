@@ -1,5 +1,16 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P1 — physical changed-callback evidence, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `56fec412a2d39ac1cf9ee24ff269dd0a70894e61` — `fix: support older Home Assistant Bluetooth callbacks`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **User-run physical result:** on Core 2026.9.4 the 60-second observer completed with `packet_callback_supported: false`, one changed-data callback at relative `T+17.7 s`, one sanitized source, successful callback cleanup, and no unload stop. In the intended OFF → ON → OFF → ON sequence this did not demonstrate a changed callback for each wake. Packet receipt, second-episode delivery, and exact episode boundary remain unknown.
+- **Structural caveat:** the changed-callback object exposed two service UUIDs, connectable true, zero manufacturer/service-data entries, and no exact public-name match. The Advertisement Monitor had displayed the public name and a manufacturer entry. Treat these as different/possibly partial surfaces, not proof that the physical advertisement dropped fields. No private identifier, health value, or measurement time is recorded.
+- **Decision:** [Stage 13A-P1](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) records the physical evidence and proposes a separately authorized Stage 13A-P2 one-time `async_clear_advertisement_history()` re-arm experiment. It must compare callback behavior while the meter stays ON against a later OFF → ON, without GATT or automatic sync. A callback while continuously ON would show a false episode signal; no callback before OFF would still be limited by unavailable per-packet telemetry.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, and `ROADMAP.md`. The working tree is modified at this pre-commit observation; report post-commit state separately. No runtime code or released ref changed.
+- **Checks actually run on the modified tree:** baseline refs and current official HA Bluetooth API semantics reviewed; full suite **388/388** passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; unstaged diff check passed. Five changed Markdown files passed added-line health/identifier/credential/private-path/artifact and no-runtime-diff audits. Staged check and pushed validators remain pending at this writing.
+
+**Exact next gate:** separately authorize Stage 13A-P2 bounded development-only single re-arm semantics test, then user-run physical evidence review. Stage 13B production automatic sync remains unauthorized.
+
 ## Stage 13A-P1 — Core 2026.9.x callback compatibility fix, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `068a6fa8d7ac2926cad349fda7efb3ea646a2d2b` — `feat: add bounded Bluetooth callback observer`; `origin/main` matched. Released `v1.0.0` still resolves to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

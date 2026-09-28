@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P1 — physical callback evidence and re-arm assessment, pre-commit
+
+Starting state was clean `main` at `56fec412a2d39ac1cf9ee24ff269dd0a70894e61` (`fix: support older Home Assistant Bluetooth callbacks`) on 2026-09-28 (Europe/London), with matching `origin/main`; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user ran the 60-second observer on Core 2026.9.4. It reported no supported per-packet callback, one changed-data callback at relative `T+17.7 s`, one sanitized source, successful cleanup, and no unload stop. The intended OFF → ON → OFF → ON sequence did not produce a demonstrated callback per wake. This does not prove the second episode emitted no packets or that Home Assistant received none.
+
+The event's shape had two service UUIDs and connectable true but zero manufacturer/service-data entries and no exact name match. Earlier Advertisement Monitor detail showed the public name and one manufacturer entry. The callback's partial/merged representation cannot be equated to the UI or raw radio packet. [The Stage 13A-P1 document](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) records these **LIVE-CORROBORATED** facts and proposes Stage 13A-P2: one explicitly user-controlled `async_clear_advertisement_history()` while the meter remains ON, then a separate later OFF → ON observation. A same-ON callback after clear would show a false wake signal; silence before OFF is inconclusive without per-packet receipt telemetry. No cache clear or automatic sync is implemented in this task.
+
+This documentation task changes the five Markdown files listed in `CURRENT_STATUS.md`; the tree is modified at this pre-commit observation. No private measurement, timestamp, identifier, payload, screenshot, or raw log is included. Full **388/388** tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and five-file added-line privacy/artifact/no-runtime-diff audit passed. Staged check and any pushed CI remain to be verified. Report actual commit, remote and clean-tree status after commit/push.
+
+**Exact next gate:** separate authorization for Stage 13A-P2 bounded development-only one-time re-arm semantics test. Stage 13B production auto-sync remains unauthorized.
+
 ## Stage 13A-P1 — 2026.9.x callback compatibility follow-up, pre-commit
 
 The task began on clean `main` at `068a6fa8d7ac2926cad349fda7efb3ea646a2d2b` (`feat: add bounded Bluetooth callback observer`) on 2026-09-28 (Europe/London), with matching `origin/main`; `v1.0.0` still targets `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user's first physical observer invocation failed immediately with a generic action error and no callback result. Core 2026.9.4's released Bluetooth module does not export the observer's first-call `async_register_advertisement_callback`; that call necessarily raises a missing-attribute `AttributeError`. The wrapper erased the traceback, so the exact physical traceback itself is unavailable. `async_register_callback`, replay-disable support, and `async_clear_advertisement_history` do exist in that release.
