@@ -1,5 +1,7 @@
 # Development
 
+**Post-v1 action surface audit:** [The registration inventory](POST_V1_ACTION_SURFACE_AUDIT.md) identifies 17 actions and the direct action-level tests that a later cleanup must adjust. The audit changes documentation only. Keep the currently deployed P4 probe build for the pending natural post-measurement comparison; do not deploy synthetic Stage 8H-B yet. Product-only action registration is a separately authorized gate immediately before the next public release, after P4 closure and physical history validation.
+
 **Stage 8H-B:** [The bounded implementation record](STAGE8H_B_BOUNDED_HISTORY_IMPLEMENTATION.md) documents the new explicit `read_uric_acid_history` action, shared fixed count-two/four read, private response, equal-minute history handling, synthetic tests, and all-or-nothing errors. It is unreleased source work; **do not deploy it** while the currently deployed P4 readiness build is needed for a naturally occurring post-measurement comparison. No physical history test has been run. There is no Recorder/statistics backfill, persistence, sensor mutation, or auto-sync.
 
 **Stage 8H-A:** [The bounded history review](STAGE8H_A_BOUNDED_HISTORY_ARCHITECTURE.md) selects a future manual configured-entry response action returning the complete count-two/four list of discrete General uric-acid primaries with timezone-unknown meter-local minute labels. No code, sensor/Recorder mutation, or Home Assistant deployment is added by this review; the P4 post-measurement comparison remains pending.

@@ -1,5 +1,9 @@
 # Architecture decisions
 
+## Post-v1 action surface — future product-only registration
+
+**Status:** Audit decision only; implementation separately gated. [The 17-action inventory](POST_V1_ACTION_SURFACE_AUDIT.md) retains current refresh and bounded history as normal product actions and the readiness probe temporarily while Stage 13A-P4 is physically open. Before the next public release, after P4 closure and physical history validation, remove closed development-probe registrations from the user-facing action list while retaining useful lower-level helpers/tests and historical stage evidence. No undocumented hidden-action mechanism or runtime change is part of this decision.
+
 ## Stage 8H-B — implement the manual private bounded history response
 
 **Status:** Synthetically implemented, physical validation deferred. [The Stage 8H-B record](STAGE8H_B_BOUNDED_HISTORY_IMPLEMENTATION.md) uses one configured-entry action and the existing count-two/four read and semantic gates. It returns both valid count-four primaries in meter-local newest-first order, flags equal-minute ambiguity, and fails without a partial list on any required read or cleanup failure. The existing sensor and P4 probe semantics remain separate. There is no imported history, persistent dedup/cursor, new entity, event, Recorder/statistics backfill, deployment, tag, or release. Stage 13A-P4 is physically open.

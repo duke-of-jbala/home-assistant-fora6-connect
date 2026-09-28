@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Post-v1 action surface audit — documentation checkpoint, pre-commit
+
+- **Branch/date and baseline:** observed clean `main` on 2026-09-28 (Europe/London) at `49bd7b74353678dd8558448c938ef14352e66e3d` — `feat: add bounded uric-acid history action`; local `origin/main` matched. `v1.0.0` still resolved to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **Decision:** [the action surface audit](docs/POST_V1_ACTION_SURFACE_AUDIT.md) inventories all 17 registered actions: two normal product actions, the temporarily required Stage 13A-P4 readiness action, three useful developer diagnostics, and eleven closed-stage removal candidates. A future, separately authorized cleanup should register only the two product actions after P4 physical closure and Stage 8H physical history validation, immediately before the next public release. This audit leaves every action unchanged.
+- **Parallel gates:** Stage 13A-P4 remains physically **open**; normal-ON control passed and a naturally occurring post-measurement flashing-state comparison is pending. Stage 8H-B remains synthetic-only and undeployed. Keep the currently deployed P4 build in Home Assistant; do not start Stage 13B. No runtime code, service metadata, tests, v1 release notes, tag, release, or deployment changed in this gate.
+- **Changes after checkpoint:** yes; `docs/POST_V1_ACTION_SURFACE_AUDIT.md`, `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/DEVELOPMENT.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. This is a modified pre-commit working-tree observation; verify and report final Git state separately.
+- **Checks actually run:** baseline refs and clean status; AST-based registration/description comparison found 17 unique registrations and 17 matching descriptions; implementation and action-level test dependency review; current official Home Assistant service-action guidance. `git diff --check` passed; 170 local Markdown links across changed files resolved; added-line privacy scan found no MAC, private path, credential assignment, health value, measurement timestamp, or NUL; all nine changed paths are text Markdown with no binary artifact. No runtime suite, HACS/hassfest, or physical meter test was run for this documentation-only gate.
+
+**Exact proposed future cleanup gate:** separately authorize post-v1 action-surface cleanup implementation after P4 physical closure and Stage 8H physical history validation, immediately before the next public release. Independently await the naturally occurring P4 post-measurement comparison. No Stage 13B or Home Assistant deployment now.
+
 ## Stage 8H-B — bounded manual history action, synthetic implementation pre-commit
 
 - **Branch/date and checkpoint:** observed clean `main` on 2026-09-28 (Europe/London) at `33aaca6a378b41e2a0b24c75856f6c90aa8f65af` — `docs: design bounded uric-acid history exposure`; local `origin/main` matched. `v1.0.0` still resolved to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
