@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P3 — Core absence/return review, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `6d223aa6999c53764dacad8f3991357f5263b123` — `docs: close Stage 13A-P2 re-arm validation`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **STATIC-CONFIRMED finding:** Core 2026.9.4 pins `habluetooth==6.26.11`. Connectable unavailable tracking is address-wide across scanners. A remote scanner retains a stale entry past 195 seconds, checked every 30 seconds, and the manager checks unavailable every 300 seconds. A true manager-unavailable → return can dispatch an unchanged advertisement through the changed callback without manual cache clearing. There is no dedicated return callback. `async_address_present` reads cached connectable history, not physical power state.
+- **Architecture conclusion:** [Stage 13A-P3](docs/STAGE13A_P3_ABSENCE_RETURN_ASSESSMENT.md) is complete offline with **ABSENCE/RETURN UNSUITABLE as the primary automatic trigger**. Minutes-scale lag can miss short OFF → ON cycles, while loss of all proxy coverage can mimic meter OFF. No physical Stage 13A-P3 timing, return, or source-switch result is claimed. The source findings made a development observer unnecessary. Production remains manual-only; no cache clear, GATT, or auto-sync was added.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_P3_ABSENCE_RETURN_ASSESSMENT.md`, `docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md`, `docs/DECISIONS.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. The tree is modified at this pre-commit observation; verify post-commit state separately. Stable release ref remains unchanged.
+- **Checks actually run on the modified tree:** baseline/ref/tree checks, exact Core 2026.9.4 Bluetooth API/manager and pinned habluetooth 6.26.11 manager/scanner/constants source review; 399/399 unit tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; staged and unstaged diff checks passed. Eight changed Markdown files passed added-line privacy, credential, identifier, health-data, private-path, proprietary-source, no-GATT, no-cache-clear, no-auto-sync, and artifact audits. Pushed HACS/hassfest remain to be verified.
+
+**Exact next gate:** separately authorize Stage 13A-P4 offline design of a bounded normal-ON/post-measurement transaction-readiness observation during naturally occurring meter use. Do not begin Stage 13B.
+
 ## Stage 13A-P2 — physical re-arm closure, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `fb1d9278834084786484b5b194a6b1cfd6e6efd1` — `feat: add bounded advertisement re-arm observer`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

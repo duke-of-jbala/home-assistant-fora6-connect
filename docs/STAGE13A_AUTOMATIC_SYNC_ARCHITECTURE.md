@@ -60,10 +60,14 @@ treated as meter-state semantics without physical evidence.
 **Stage 13A-P2 physical update:** a single history clear at the first callback
 was followed by another changed callback while the GD82 remained continuously
 ON. The predicted false-rearm risk is now live-corroborated. Cache clearing
-must not be used alone as a production new-episode signal. The next proposed
-gate examines a genuine observed unavailable → present transition without a
-cache clear; Home Assistant's delayed, multi-controller unavailability semantics
-must be measured before any automatic-trigger design.
+must not be used alone as a production new-episode signal.
+
+**Stage 13A-P3 offline update:** [the pinned Core 2026.9.4 stack](STAGE13A_P3_ABSENCE_RETURN_ASSESSMENT.md)
+aggregates connectable scanners, waits for stale scanner entries and a periodic
+unavailable check, and cannot distinguish meter OFF from all-proxy coverage
+loss. A true unavailable → return can re-dispatch an unchanged advertisement,
+but short physical OFF → ON cycles may never cross that boundary. This is
+unsuitable as the primary automatic trigger, so no presence observer was added.
 
 ## Trigger candidates
 

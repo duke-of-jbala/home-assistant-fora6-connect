@@ -1,5 +1,16 @@
 # Architecture decisions
 
+## Stage 13A-P3 — do not use delayed reachability as a physical wake boundary
+
+**Status:** Accepted for Core 2026.9.4. Its pinned Bluetooth manager tracks
+connectable presence across scanners, but remote stale-entry expiry and the
+periodic unavailable check can take several minutes. A later unchanged
+advertisement can dispatch after genuine manager-unavailability without cache
+clearing; that does not make short meter OFF → ON cycles observable. Loss of all
+proxy coverage can mimic physical OFF. [The source-derived assessment](STAGE13A_P3_ABSENCE_RETURN_ASSESSMENT.md)
+therefore rejects absence/return as the primary GD82 automatic trigger. No
+observer or production sync was added; manual refresh remains the supported path.
+
 ## Stage 13A — physical evidence before an automatic trigger
 
 **Status:** Design review accepted; trigger implementation deferred. The
