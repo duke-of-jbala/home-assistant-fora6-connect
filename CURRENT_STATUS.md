@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P1 — Core 2026.9.x callback compatibility fix, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `068a6fa8d7ac2926cad349fda7efb3ea646a2d2b` — `feat: add bounded Bluetooth callback observer`; `origin/main` matched. Released `v1.0.0` still resolves to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **Physical result:** the first user-run `observe_advertisements` action failed immediately; its generic wrapper erased the underlying error. No physical callback result was obtained. Home Assistant Core 2026.9.4 release source does not export `async_register_advertisement_callback`, the observer's first call. That call necessarily raises `AttributeError` for the missing module attribute; the actual erased traceback cannot be recovered.
+- **Narrow fix:** feature-detect the per-packet API. On Core 2026.9.x, run only the supported changed-data callback and mark `packet_callback_supported: false`, with packet fields `null`. Registration/wait failures now preserve sanitized stage and exception type, never private exception text. No GATT, active scan, cache clearing, FORA command, sensor update, retry, or production auto-sync. [The Stage 13A-P1 record](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) explains the limited evidence value of a changed-only rerun.
+- **Changes after checkpoint:** yes; `custom_components/fora6_connect/advertisement_observer.py`, `__init__.py`, `services.yaml`, `tests/test_advertisement_observer.py`, `tests/test_gatt_probe.py`, `docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, and `CHANGELOG.md`. This is a modified pre-commit observation; verify final commit/push/tree separately.
+- **Checks actually run on the modified tree:** Core 2026.9.4 Bluetooth API source inspected; 13/13 targeted synthetic tests and **388/388** full tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; unstaged diff check and changed-line privacy/artifact/no-GATT/no-auto audit passed. Staged diff check and pushed HACS/hassfest remain pending at this writing.
+
+**Exact next gate:** user deploys the compatibility fix, restarts Home Assistant, reruns the bounded observer, and shares only sanitized changed-callback evidence and `packet_callback_supported`. A future supported per-packet API or separately authorized alternative is needed to prove repeated packet receipt on Core 2026.9.x. Stage 13B remains unstarted.
+
 ## Stage 13A-P1 — bounded development callback observer, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `84f6362d0cabca5e9e45905e6fffe75a9b69556d` — `docs: assess GD82 advertisement callback observation`; `origin/main` matched. The released `v1.0.0` target remains `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

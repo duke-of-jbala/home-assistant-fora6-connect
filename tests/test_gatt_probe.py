@@ -91,6 +91,9 @@ def _load_setup(probe_module):
         return_value={"notifications_observed": 0}
     )
     advertisement_observer = types.ModuleType("_fora6_setup_test.advertisement_observer")
+    advertisement_observer.AdvertisementObservationError = type(
+        "AdvertisementObservationError", (Exception,), {}
+    )
     advertisement_observer.async_observe_advertisements = AsyncMock(
         return_value={"packet_callback_count": 0}
     )

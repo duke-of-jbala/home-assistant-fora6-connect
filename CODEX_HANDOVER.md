@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P1 — 2026.9.x callback compatibility follow-up, pre-commit
+
+The task began on clean `main` at `068a6fa8d7ac2926cad349fda7efb3ea646a2d2b` (`feat: add bounded Bluetooth callback observer`) on 2026-09-28 (Europe/London), with matching `origin/main`; `v1.0.0` still targets `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user's first physical observer invocation failed immediately with a generic action error and no callback result. Core 2026.9.4's released Bluetooth module does not export the observer's first-call `async_register_advertisement_callback`; that call necessarily raises a missing-attribute `AttributeError`. The wrapper erased the traceback, so the exact physical traceback itself is unavailable. `async_register_callback`, replay-disable support, and `async_clear_advertisement_history` do exist in that release.
+
+The [Stage 13A-P1 record](docs/STAGE13A_P1_BLUETOOTH_CALLBACK_OBSERVER.md) now distinguishes old-Core changed-only mode from newer per-packet comparison. Missing per-packet support is explicit and packet counts are `null`, not zero. Other registration/wait failures preserve only sanitized `stage`/exception `type` in the action error. The cache-clear API is assessed but never called; no deprecated scanner callback, GATT operation, protocol command, active scan, sensor update, or auto-sync was introduced. Physical callback receipt remains unvalidated.
+
+Changed files are listed in `CURRENT_STATUS.md`; this is a modified pre-commit tree observation. Core 2026.9.4 source comparison and targeted **13/13** synthetic tests passed; full suite **388/388** passed. Compileall, tabnanny, four JSON/two YAML/one TOML parses, unstaged diff check, and changed-line privacy/artifact/no-GATT/no-auto audit passed. Staged check and pushed HACS/hassfest remain to be verified. Report actual final commit, remote and tree separately.
+
+**Exact next gate:** deploy compatibility fix and rerun bounded observer, sharing sanitized `packet_callback_supported` and changed-callback counts/relative samples only. Do not infer repeated packet receipt from a changed-only result or begin Stage 13B.
+
 ## Stage 13A-P1 — development-only callback observer, pre-commit
 
 Starting state was clean `main` at `84f6362d0cabca5e9e45905e6fffe75a9b69556d` (`docs: assess GD82 advertisement callback observation`) on 2026-09-28 (Europe/London), with `origin/main` matching; released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user reproduced the Advertisement Monitor issue in Chrome and found that navigation/hard refresh can show a more recent row than the live open view. This does not prove packet delivery, Home Assistant deduplication, or a frontend defect.

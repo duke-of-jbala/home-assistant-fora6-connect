@@ -157,9 +157,44 @@ class AdvertisementObserverTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_second_registration_failure_removes_first_callback(self):
         self.bluetooth.async_register_callback.side_effect = RuntimeError("synthetic")
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(self.observer.AdvertisementObservationError) as context:
             await self.observer.async_observe_advertisements(self.hass, ADDRESS, self.stop)
+        self.assertEqual(context.exception.stage, "changed_callback_registration")
+        self.assertEqual(context.exception.error_type, "RuntimeError")
         self.bluetooth.async_register_advertisement_callback.return_value.assert_called_once()
+
+    async def test_core_2026_9_missing_per_packet_api_reports_changed_only(self):
+        """Core 2026.9.4 exports only the changed-data registration API."""
+        del self.bluetooth.async_register_advertisement_callback
+        task = asyncio.create_task(self.observer.async_observe_advertisements(
+            self.hass, ADDRESS, self.stop
+        ))
+        await asyncio.sleep(0)
+        changed = self.bluetooth.async_register_callback.call_args.args[1]
+        changed(info("private-source-one"), "new")
+        self.stop.set()
+        result = await task
+        self.assertFalse(result["packet_callback_supported"])
+        self.assertIsNone(result["packet_callback_count"])
+        self.assertIsNone(result["packet_event_sample"])
+        self.assertEqual(result["changed_callback_count"], 1)
+        self.assertEqual(result["first_changed_shape"]["service_uuid_count"], 2)
+        self.assertEqual(result["changed_source_counts"], {"Source A": 1})
+        self.assertEqual(self.bluetooth.async_register_callback.call_args.kwargs,
+                         {"replay": "disabled"})
+        self.bluetooth.async_register_callback.return_value.assert_called_once()
+        self.bluetooth.async_clear_advertisement_history.assert_not_called()
+
+    async def test_packet_registration_failure_is_sanitized(self):
+        self.bluetooth.async_register_advertisement_callback.side_effect = AttributeError(
+            f"private address {ADDRESS}"
+        )
+        with self.assertRaises(self.observer.AdvertisementObservationError) as context:
+            await self.observer.async_observe_advertisements(self.hass, ADDRESS, self.stop)
+        self.assertEqual(context.exception.stage, "packet_callback_registration")
+        self.assertEqual(context.exception.error_type, "AttributeError")
+        self.assertNotIn(ADDRESS, str(context.exception))
+        self.bluetooth.async_register_callback.assert_not_called()
 
     async def test_one_cancel_error_still_attempts_other_cancel(self):
         self.bluetooth.async_register_callback.return_value.side_effect = RuntimeError(
@@ -204,6 +239,30 @@ class AdvertisementObserverTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(runtime.advertisement_observation_stop)
         integration.async_observe_advertisements.assert_awaited_once()
         self.assertEqual(integration.async_observe_advertisements.await_args.args[1], ADDRESS)
+
+    async def test_action_preserves_sanitized_failure_stage_and_type(self):
+        integration, _, _, errors = _load_setup(_load_probe()[0])
+        error = integration.AdvertisementObservationError(
+            "stage=changed_callback_registration, type=TypeError"
+        )
+        integration.async_observe_advertisements.side_effect = error
+        runtime = types.SimpleNamespace(
+            address=ADDRESS, advertisement_observation_stop=None
+        )
+        entry = types.SimpleNamespace(domain="fora6_connect", runtime_data=runtime)
+        hass = types.SimpleNamespace(
+            services=types.SimpleNamespace(async_register=Mock()),
+            config_entries=types.SimpleNamespace(async_get_entry=Mock(return_value=entry)),
+        )
+        await integration.async_setup(hass, {})
+        action = _registered_action(hass.services, "observe_advertisements")
+        with self.assertRaises(errors.ServiceValidationError) as context:
+            await action.args[2](types.SimpleNamespace(data={"config_entry_id": "entry"}))
+        message = str(context.exception)
+        self.assertIn("stage=changed_callback_registration", message)
+        self.assertIn("type=TypeError", message)
+        self.assertNotIn(ADDRESS, message)
+        self.assertIsNone(runtime.advertisement_observation_stop)
 
     def test_no_connection_command_cache_clear_or_logging_in_observer(self):
         source = (ROOT / "advertisement_observer.py").read_text()

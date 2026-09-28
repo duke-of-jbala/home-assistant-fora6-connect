@@ -7,6 +7,35 @@ are unchanged. The starting clean `main` checkpoint was
 advertisement callback observation`), with `origin/main` matching and the
 released tag still resolving to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
 
+## Core 2026.9.x compatibility correction
+
+The user's first physical action invocation failed immediately with a generic
+`ServiceValidationError`; no callback evidence was collected. The action
+wrapper had suppressed the underlying exception. An audit of the **Home
+Assistant Core 2026.9.4 [Bluetooth exports](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/components/bluetooth/__init__.py)
+and [API implementation](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/components/bluetooth/api.py)**, rather than only the current
+developer documentation, found that `bluetooth.async_register_callback`,
+`BluetoothCallbackReplay.DISABLED`, and
+`async_clear_advertisement_history` are exported, but
+`async_register_advertisement_callback` is **not**. The first registration
+expression therefore raises `AttributeError: module
+'homeassistant.components.bluetooth' has no attribute
+'async_register_advertisement_callback'`. This is source-deduced from the
+exact first call; the erased Home Assistant traceback cannot be recovered.
+
+The compatibility fix feature-detects the public per-advertisement callback.
+When unavailable, it registers the released changed-data callback only,
+reports `packet_callback_supported: false`, and returns `null` rather than a
+misleading zero for packet counts and samples. The live changed-data callback
+still uses passive matching and disabled cache replay. On an HA version with
+the per-advertisement API, both callbacks are compared as originally designed.
+Registration or wait failures now surface a sanitized action error containing
+only `stage` and exception `type`; private exception messages are never
+returned or logged. No deprecated shared-scanner detection callback or
+private manager API was added. On Core 2026.9.4, a changed-only result cannot
+settle whether identical packets were received; that limitation must remain
+explicit when reviewing the physical rerun.
+
 ## Reason and evidence boundary
 
 After Home Assistant Core 2026.9.4 and an HAOS restart, the first normal GD82
@@ -25,7 +54,7 @@ provides two useful mechanisms:
   default may replay cached data; this observer sets
   `BluetoothCallbackReplay.DISABLED` and uses a passive, address-scoped
   matcher. It does not request an active scan window.
-- `async_register_advertisement_callback` delivers repeated advertisements
+- Where present, `async_register_advertisement_callback` delivers repeated advertisements
   for one address, including identical ones, once per scanner. Thus packet
   callback counts can differ from changed-data callback counts. The API may
   merge name, service UUID, manufacturer data, and service data across packets;
@@ -42,7 +71,7 @@ observation. An overlapping observation for the same entry is rejected.
 
 ## Privacy-safe result
 
-The result contains packet/changed callback counts; counts by ephemeral
+The result contains packet/changed callback counts where supported; counts by ephemeral
 source aliases; up to 32 event samples for each callback type with source
 alias and elapsed time rounded to tenths of a second; sampled packet shapes;
 first and last structural shapes; a shape-change count; whether unload ended
@@ -62,6 +91,10 @@ and session timing must be considered. Multiple source aliases represent
 scanner delivery, not multiple meters or multiple GATT sessions. Neither
 callback proves notification subscription or current-state transaction
 readiness.
+
+On Core 2026.9.4, `packet_callback_supported: false` is expected; its packet
+fields are `null`, not evidence of zero packets. Only changed-data delivery
+can be physically tested there through the supported callback API.
 
 ## `async_clear_advertisement_history()` assessment
 

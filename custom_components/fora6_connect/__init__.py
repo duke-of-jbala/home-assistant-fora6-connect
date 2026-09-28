@@ -6,7 +6,10 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
-from .advertisement_observer import async_observe_advertisements
+from .advertisement_observer import (
+    AdvertisementObservationError,
+    async_observe_advertisements,
+)
 from .const import DOMAIN, PLACEHOLDER_SERIAL
 from .coordinator import Fora6CurrentRefreshCoordinator
 from .gatt_probe import ProbeError, async_probe_gatt
@@ -403,8 +406,17 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             return await async_observe_advertisements(hass, runtime.address, stop_event)
         except asyncio.CancelledError:
             raise
-        except Exception:
-            raise ServiceValidationError("FORA advertisement observation failed.") from None
+        except AdvertisementObservationError as err:
+            raise ServiceValidationError(
+                f"FORA advertisement observation failed: {err}"
+            ) from None
+        except Exception as err:
+            name = type(err).__name__
+            if not name.isidentifier() or len(name) > 64:
+                name = "Exception"
+            raise ServiceValidationError(
+                f"FORA advertisement observation failed: stage=action, type={name}"
+            ) from None
         finally:
             runtime.advertisement_observation_stop = None
 

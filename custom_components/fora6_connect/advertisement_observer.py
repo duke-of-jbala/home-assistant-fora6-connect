@@ -2,6 +2,7 @@
 
 import asyncio
 from collections import Counter
+import re
 from time import monotonic
 
 from homeassistant.components import bluetooth
@@ -12,6 +13,16 @@ OBSERVATION_SECONDS = 60
 MAX_EVENT_SAMPLES = 32
 MAX_SOURCE_ALIASES = 4
 MAX_COUNT = 100_000
+
+
+class AdvertisementObservationError(Exception):
+    """Private-free stage and exception type for development action failures."""
+
+    def __init__(self, stage: str, error: Exception) -> None:
+        self.stage = stage
+        name = type(error).__name__
+        self.error_type = name if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", name) else "Exception"
+        super().__init__(f"stage={stage}, type={self.error_type}")
 
 
 async def async_observe_advertisements(
@@ -33,8 +44,12 @@ async def async_observe_advertisements(
     first_shape: dict | None = None
     last_shape: dict | None = None
     shape_change_count = 0
+    first_changed_shape: dict | None = None
+    last_changed_shape: dict | None = None
     cancel_callbacks = []
     callback_cleanup_successful = True
+    packet_registration = getattr(bluetooth, "async_register_advertisement_callback", None)
+    packet_callback_supported = callable(packet_registration)
 
     def source_alias(source: str | None) -> str:
         if not source:
@@ -76,30 +91,43 @@ async def async_observe_advertisements(
             first_shape = last_shape
 
     def on_change(info, change) -> None:
-        nonlocal changed_count
+        nonlocal changed_count, first_changed_shape, last_changed_shape
         changed_count = min(changed_count + 1, MAX_COUNT)
         alias = source_alias(getattr(info, "source", None))
         changed_sources[alias] = min(changed_sources[alias] + 1, MAX_COUNT)
+        last_changed_shape = shape(info)
+        if first_changed_shape is None:
+            first_changed_shape = last_changed_shape
         if len(changed_samples) < MAX_EVENT_SAMPLES:
-            changed_samples.append({"elapsed_seconds": elapsed(), "source": alias})
+            changed_samples.append({
+                "elapsed_seconds": elapsed(), "source": alias,
+                "shape": last_changed_shape,
+            })
 
     try:
-        cancel_callbacks.append(
-            bluetooth.async_register_advertisement_callback(hass, on_packet, address)
-        )
-        cancel_callbacks.append(
-            bluetooth.async_register_callback(
+        if packet_callback_supported:
+            try:
+                cancel_callbacks.append(packet_registration(hass, on_packet, address))
+            except Exception as err:
+                raise AdvertisementObservationError("packet_callback_registration", err) from None
+        try:
+            cancel_callbacks.append(bluetooth.async_register_callback(
                 hass,
                 on_change,
                 {"address": address},
                 bluetooth.BluetoothScanningMode.PASSIVE,
                 replay=bluetooth.BluetoothCallbackReplay.DISABLED,
-            )
-        )
+            ))
+        except Exception as err:
+            raise AdvertisementObservationError("changed_callback_registration", err) from None
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=OBSERVATION_SECONDS)
         except TimeoutError:
             pass
+        except asyncio.CancelledError:
+            raise
+        except Exception as err:
+            raise AdvertisementObservationError("observation_wait", err) from None
     finally:
         for cancel in reversed(cancel_callbacks):
             try:
@@ -109,16 +137,19 @@ async def async_observe_advertisements(
 
     return {
         "observation_seconds": OBSERVATION_SECONDS,
+        "packet_callback_supported": packet_callback_supported,
         "stopped_by_unload": stop_event.is_set(),
         "callback_cleanup_successful": callback_cleanup_successful,
-        "packet_callback_count": packet_count,
+        "packet_callback_count": packet_count if packet_callback_supported else None,
         "changed_callback_count": changed_count,
-        "packet_source_counts": dict(packet_sources),
+        "packet_source_counts": dict(packet_sources) if packet_callback_supported else None,
         "changed_source_counts": dict(changed_sources),
-        "packet_event_sample": packet_samples,
+        "packet_event_sample": packet_samples if packet_callback_supported else None,
         "changed_event_sample": changed_samples,
         "event_sample_limit": MAX_EVENT_SAMPLES,
         "first_packet_shape": first_shape,
         "last_packet_shape": last_shape,
         "packet_shape_change_count": shape_change_count,
+        "first_changed_shape": first_changed_shape,
+        "last_changed_shape": last_changed_shape,
     }
