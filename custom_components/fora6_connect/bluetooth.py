@@ -58,10 +58,14 @@ class Fora6BluetoothTransport:
         address: str,
         *,
         response_timeout: float = RESPONSE_TIMEOUT,
+        connect_max_attempts: int = 2,
     ) -> None:
+        if connect_max_attempts < 1:
+            raise ValueError("connect_max_attempts must be positive")
         self._hass = hass
         self._address = address  # Runtime only; never rendered or persisted.
         self._response_timeout = response_timeout
+        self._connect_max_attempts = connect_max_attempts
         self._client: Any = None
         self._characteristic: Any = None
         self._subscribed = False
@@ -72,6 +76,7 @@ class Fora6BluetoothTransport:
         self._poisoned = False
         self.device_resolved = False
         self.connection_established = False
+        self.service_found = False
         self.characteristic_found = False
         self.subscription_established = False
 
@@ -100,7 +105,7 @@ class Fora6BluetoothTransport:
                 BleakClientWithServiceCache,
                 ble_device,
                 NAME,
-                max_attempts=2,
+                max_attempts=self._connect_max_attempts,
                 use_services_cache=False,
                 timeout=CONNECTION_TIMEOUT,
                 pair=False,
@@ -131,6 +136,7 @@ class Fora6BluetoothTransport:
             service = next(
                 item for item in services if str(item.uuid).lower() == SERVICE_UUID
             )
+            self.service_found = True
             characteristic = next(
                 item
                 for item in service.characteristics

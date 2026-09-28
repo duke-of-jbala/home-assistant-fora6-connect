@@ -166,6 +166,23 @@ observe_advertisement_rearm:
       selector:
         config_entry:
           integration: fora6_connect
+probe_transaction_readiness:
+  name: Probe transaction readiness (development only)
+  description: >-
+    Development-only, one-attempt Bluetooth check for the configured FORA 6
+    Connect meter. Connects and tests notification subscription, then
+    disconnects. Sends no meter command and does not refresh the sensor.
+    For the normal-ON control, turn the meter on normally and avoid its
+    history arrows. A post-measurement comparison should occur only after a
+    measurement taken for normal use.
+  fields:
+    config_entry_id:
+      name: FORA 6 Connect entry
+      description: Choose the configured meter to check.
+      required: true
+      selector:
+        config_entry:
+          integration: fora6_connect
 probe_history_chronology:
   name: Inspect two primary records (private development action)
   description: >-

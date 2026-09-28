@@ -96,6 +96,22 @@ class BluetoothTransportTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.transport.characteristic_found)
         await self.transport.async_close()
 
+    async def test_development_probe_can_limit_connection_to_one_attempt(self):
+        single = self.probe.Fora6BluetoothTransport(
+            self.hass, self.address, connect_max_attempts=1
+        )
+        await single.async_connect()
+        self.assertEqual(
+            self.connector.establish_connection.call_args.kwargs["max_attempts"], 1
+        )
+        await single.async_close()
+
+    def test_nonpositive_connection_attempt_limit_is_rejected(self):
+        with self.assertRaises(ValueError):
+            self.probe.Fora6BluetoothTransport(
+                self.hass, self.address, connect_max_attempts=0
+            )
+
     async def test_no_connectable_device(self):
         self.bluetooth.async_ble_device_from_address.return_value = None
         await self.failure(self.transport.async_connect(), "no_connectable_device")

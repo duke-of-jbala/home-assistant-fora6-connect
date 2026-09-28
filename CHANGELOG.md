@@ -7,7 +7,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Added
-- Development-only `observe_advertisement_rearm` action for a single callback-gated Home Assistant advertisement-history clear and bounded changed-data observation. Physical re-arm behavior remains untested; production refresh stays manual-only.
+- Development-only configured-entry `probe_transaction_readiness` action that makes one HA-selected connection and custom notification-subscription attempt, then cleans up before any FORA command. It adds no automatic sync or sensor update; physical state comparison remains pending.
+- Development-only `observe_advertisement_rearm` action for a single callback-gated Home Assistant advertisement-history clear and bounded changed-data observation. Its physical test later found false re-dispatch during one continuous ON episode; production refresh stays manual-only.
 - Development-only, manually invoked 60-second Bluetooth callback observer for one configured FORA entry. It compares repeated advertisement receipt with live changed-data callbacks using bounded, privacy-safe structural results. No GATT connection, protocol command, sensor update, or automatic synchronization is performed.
 
 ### Fixed

@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P4 — development-only transaction-readiness probe, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `dc81954b6fa0d1f38f7fb33a66ecfb2a5692809e` — `docs: assess GD82 absence return trigger`; `origin/main` matched. Released `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **Implementation:** [Stage 13A-P4](docs/STAGE13A_P4_TRANSACTION_READINESS_OBSERVATION.md) adds a configured-entry development action, `fora6_connect.probe_transaction_readiness`. It resolves the Home Assistant-selected connectable device, makes one connection attempt, checks the known custom service/characteristic, subscribes once, then unsubscribes and disconnects. A shared per-entry GATT lock excludes the manual refresh while the probe runs; entry unload cancels the probe. The normal manual refresh retains its existing connection setting. No FORA command, measurement read, sensor update, cache clear, automatic callback, or retry is added.
+- **Evidence status:** synthetic implementation only. Normal manual ON is already known to support the full transaction through an Atom Lite proxy, but this new probe has **not** been physically run. The prior post-measurement subscription failure has not been retested. Readiness is not an automatic trigger; production remains manual-only.
+- **Changes after checkpoint:** yes; `custom_components/fora6_connect/{__init__.py,bluetooth.py,coordinator.py,sensor_state.py,services.yaml,transaction_readiness_probe.py}`, `tests/{test_bluetooth_transport.py,test_gatt_probe.py,test_manual_refresh.py,test_transaction_readiness_probe.py}`, `docs/STAGE13A_P4_TRANSACTION_READINESS_OBSERVATION.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. The tree is modified at this pre-commit observation; verify post-commit state separately.
+- **Checks actually run on the modified tree:** 414/414 unit tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; staged and unstaged diff checks passed. The 512 staged added lines had no real address, private IP/path, health value/time, or credential match. The new probe's call audit found no FORA command, measurement read, advertisement cache clear, active scan, automatic callback, or sensor refresh; the artifact audit found only four pre-existing original brand PNGs. Pushed HACS/hassfest remain to be verified.
+
+**Exact next gate:** user-run normal-ON readiness control first. If that succeeds, wait for a naturally occurring post-measurement flashing-state comparison. Do not begin Stage 13B or treat readiness as a trigger.
+
 ## Stage 13A-P3 — Core absence/return review, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `6d223aa6999c53764dacad8f3991357f5263b123` — `docs: close Stage 13A-P2 re-arm validation`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
@@ -92,7 +91,7 @@ class Fora6CurrentRefreshCoordinator:
         self._hass = hass
         self._entry = entry
         self._runtime = runtime
-        self._lock = asyncio.Lock()
+        self._lock = runtime.gatt_lock
 
     async def async_refresh(self) -> dict[str, Any]:
         prior_valid = self._runtime.measurement_state.native_value is not None

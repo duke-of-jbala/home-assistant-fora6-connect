@@ -77,6 +77,8 @@ class MeterRuntime:
     refresh_coordinator: Any = field(default=None, repr=False)
     synchronized_at: datetime | None = field(default=None, repr=False)
     advertisement_observation_stop: asyncio.Event | None = field(default=None, repr=False)
+    gatt_lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False)
+    readiness_probe_task: asyncio.Task | None = field(default=None, repr=False)
 
 
 def meter_device_identifier(stage6_stable_identifier: str) -> tuple[str, str]:

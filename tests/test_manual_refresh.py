@@ -303,6 +303,13 @@ class ManualRefreshTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(str(self.runtime.measurement_state.native_value), "123.4")
         self.assertEqual(str(other_runtime.measurement_state.native_value), "0.2")
 
+    async def test_development_gatt_lock_prevents_manual_overlap(self):
+        self.assertIs(self.coordinator._lock, self.runtime.gatt_lock)
+        async with self.runtime.gatt_lock:
+            result = await self.coordinator.async_refresh()
+        self.assertEqual(result["error_code"], "already_running")
+        self.assertFalse(result["sensor_updated"])
+
     async def test_private_result_and_no_automation(self):
         self.prepare(["uric_general", "hct_qc_invalid"])
         result = await self.coordinator.async_refresh()

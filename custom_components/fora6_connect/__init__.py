@@ -24,6 +24,7 @@ from .serial_probe import async_probe_serial_identity
 from .serial_stability import async_probe_serial_stability
 from .system_id_probe import async_probe_system_id
 from .system_id_stability import async_probe_system_id_stability
+from .transaction_readiness_probe import async_probe_transaction_readiness
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -42,6 +43,7 @@ SERVICE_PROBE_SYSTEM_ID_STABILITY = "probe_system_id_stability"
 SERVICE_REFRESH_CURRENT_URIC_ACID = "refresh_current_uric_acid"
 SERVICE_OBSERVE_ADVERTISEMENTS = "observe_advertisements"
 SERVICE_OBSERVE_ADVERTISEMENT_REARM = "observe_advertisement_rearm"
+SERVICE_PROBE_TRANSACTION_READINESS = "probe_transaction_readiness"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
@@ -468,6 +470,44 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         async_handle_observe_advertisement_rearm,
         supports_response=SupportsResponse.ONLY,
     )
+
+    async def async_handle_probe_transaction_readiness(call: ServiceCall) -> dict:
+        """Probe one configured entry through subscription, without commands."""
+        entry_id = call.data.get("config_entry_id")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ServiceValidationError("Select a configured FORA 6 Connect entry.")
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError("The selected FORA entry is unavailable.")
+        runtime = getattr(entry, "runtime_data", None)
+        if runtime is None or not isinstance(runtime.address, str):
+            raise ServiceValidationError("Load the selected FORA entry before probing.")
+        if runtime.readiness_probe_task is not None or runtime.gatt_lock.locked():
+            raise ServiceValidationError("A FORA GATT operation is already running for this entry.")
+        current_task = asyncio.current_task()
+        runtime.readiness_probe_task = current_task
+        try:
+            async with runtime.gatt_lock:
+                return await async_probe_transaction_readiness(hass, runtime.address)
+        except asyncio.CancelledError:
+            raise
+        except Exception as err:
+            name = type(err).__name__
+            if not name.isidentifier() or len(name) > 64:
+                name = "Exception"
+            raise ServiceValidationError(
+                f"FORA readiness probe failed: stage=action, type={name}"
+            ) from None
+        finally:
+            if runtime.readiness_probe_task is current_task:
+                runtime.readiness_probe_task = None
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_PROBE_TRANSACTION_READINESS,
+        async_handle_probe_transaction_readiness,
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 
@@ -507,6 +547,15 @@ async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
     runtime = getattr(entry, "runtime_data", None)
     if runtime is not None and runtime.advertisement_observation_stop is not None:
         runtime.advertisement_observation_stop.set()
+    readiness_task = getattr(runtime, "readiness_probe_task", None)
+    if readiness_task is not None and not readiness_task.done():
+        readiness_task.cancel()
+        try:
+            await readiness_task
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            pass
     unloaded = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
     if unloaded and getattr(entry, "runtime_data", None) is not None:
         entry.runtime_data.refresh_coordinator = None
