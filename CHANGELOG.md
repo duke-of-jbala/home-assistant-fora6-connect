@@ -15,6 +15,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Detect Home Assistant versions without the public per-advertisement callback (including Core 2026.9.4) and run the development observer in explicitly labeled changed-data-only mode. Preserve sanitized failure stage/type for other observer errors instead of hiding the cause.
 
 ### Documentation
+- Stage 8H-A selected a separately gated manual private response action for bounded count-two/four discrete uric-acid history, retaining both valid count-four primaries and unknown-timezone meter-local minutes. No runtime history, Recorder backfill, deployment, or P4 change was made.
 - Recorded the successful user-supplied Stage 13A-P4 normal-ON physical readiness control: custom notification subscription and cleanup succeeded. The naturally occurring post-measurement comparison remains pending; P4 stays open and Stage 13B has not begun.
 - Stage 13A-P3 reviewed the exact Core 2026.9.4 unavailable/return implementation and found its delayed, aggregate reachability signal unsuitable as the primary GD82 physical-episode auto-trigger. No observer or production behavior was added.
 - Closed Stage 13A-P2 after a real continuous-ON observation showed a second changed callback following one advertisement-history clear. Cache clearing is unsafe as a standalone new-wake signal; production remains manual-only.

@@ -1,5 +1,7 @@
 # Development
 
+**Stage 8H-A:** [The bounded history review](STAGE8H_A_BOUNDED_HISTORY_ARCHITECTURE.md) selects a future manual configured-entry response action returning the complete count-two/four list of discrete General uric-acid primaries with timezone-unknown meter-local minute labels. No code, sensor/Recorder mutation, or Home Assistant deployment is added by this review; the P4 post-measurement comparison remains pending.
+
 **Post-v1 Stage 13A:** [The automatic-trigger review](STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md) audits HA Bluetooth callback, unavailable, replay, per-scanner, and ESPHome connection-slot guidance against the current manual coordinator. It proposes a later privacy-safe advertisement-state observation; no runtime callback, physical meter operation, or automatic refresh is added. `v1.0.0` remains released and unchanged.
 
 **Stage 12 release preparation:** [the v1 review](STAGE12_V1_RELEASE_PREPARATION.md) prepares manifest version `1.0.0`, release notes, and an annotated `v1.0.0` tag procedure, without creating a tag or release. [Stage 10](STAGE10_HACS_PACKAGING_READINESS.md) validated the package; [Stage 11](STAGE11_RELEASE_CANDIDATE_VALIDATION.md) then validated a real HACS install and manual proxy refresh. The README gives HACS and manual installation, update/removal, and private issue-report guidance. No manual refresh behavior or physical meter operation is added by Phase A.

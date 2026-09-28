@@ -1,5 +1,9 @@
 # Architecture decisions
 
+## Stage 8H-A — expose bounded history through one manual response action
+
+**Status:** Architecture accepted for a separately gated implementation. [The Stage 8H-A review](STAGE8H_A_BOUNDED_HISTORY_ARCHITECTURE.md) treats each valid General uric-acid primary in a complete count-two/four snapshot as a discrete historical measurement. Return one or two in a configured-entry private response, sorted by meter-local minute with unknown timezone; retain both equal-minute primaries and disclose the order ambiguity. Validate all fixed slots and cleanup before returning any list. Keep QC-invalid companions internal, and keep the existing current-state winner/sensor policy separate. No event, history entity, Recorder/statistics backfill, persistence, automatic trigger, runtime code, or deployment follows from this decision. Stage 13A-P4 remains physically open.
+
 ## Stage 13A-P3 — do not use delayed reachability as a physical wake boundary
 
 **Status:** Accepted for Core 2026.9.4. Its pinned Bluetooth manager tracks
