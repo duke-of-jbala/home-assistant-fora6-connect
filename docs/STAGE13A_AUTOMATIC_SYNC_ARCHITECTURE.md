@@ -57,6 +57,14 @@ connect/disconnect loop. A future design must first prove a new episode or
 bounded rearm rule. Neither `BluetoothChange` labels nor RSSI changes are
 treated as meter-state semantics without physical evidence.
 
+**Stage 13A-P2 physical update:** a single history clear at the first callback
+was followed by another changed callback while the GD82 remained continuously
+ON. The predicted false-rearm risk is now live-corroborated. Cache clearing
+must not be used alone as a production new-episode signal. The next proposed
+gate examines a genuine observed unavailable → present transition without a
+cache clear; Home Assistant's delayed, multi-controller unavailability semantics
+must be measured before any automatic-trigger design.
+
 ## Trigger candidates
 
 | Candidate | Benefit | Current blocker / risk |

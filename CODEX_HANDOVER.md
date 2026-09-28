@@ -1,5 +1,15 @@
 # FORA 6 Connect Codex Handover
 
+## Stage 13A-P2 — physical re-arm closure, pre-commit
+
+The task began on clean `main` at `fb1d9278834084786484b5b194a6b1cfd6e6efd1` (`feat: add bounded advertisement re-arm observer`) on 2026-09-28 (Europe/London), with matching `origin/main`; released `v1.0.0` still targets `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The user ran the development observer while keeping the GD82 continuously ON for its full 60-second window, without measurement or history arrows. A first changed callback arrived at T+13.2 s, the sole advertisement-history clear occurred then, and another changed callback arrived at T+57.1 s before any OFF transition. Both callbacks came from one sanitized source and had the same structural shape: two service UUIDs, one manufacturer entry, no service data, connectable true. Cleanup succeeded, and unload did not stop the session.
+
+This is **LIVE-CORROBORATED** evidence that the clear can cause changed-data redispatch in one continuous physical ON episode. [The Stage 13A-P2 record](docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md) is closed as **REARM UNSAFE AS EPISODE SIGNAL**. Do not use the clear alone as an automatic wake boundary. The separate later OFF → ON action was unnecessary to answer this false-rearm question. Core 2026.9.4 still lacks the per-packet observer API; packet cadence and notification readiness remain unresolved. Production manual refresh and `v1.0.0` remain unchanged.
+
+This documentation task changes the seven Markdown files listed in `CURRENT_STATUS.md`; the working tree is modified at this pre-commit observation. Baseline/ref/tree checks and current official Bluetooth API review were completed. The full 399/399 tests, compileall, tabnanny, four JSON/two YAML/one TOML parses, staged and unstaged diff checks, and seven-file added-line privacy/identifier/credential/private-path/proprietary-source/artifact audit passed. Pushed HACS/hassfest remain to be verified. Report final commit, remote state, and actual `git status --short` separately.
+
+**Exact next gate:** separately authorize Stage 13A-P3 offline assessment and bounded user-confirmed OFF → ON unavailable/present observation without cache clearing or GATT. Its feasibility is limited by HA's delayed, multi-controller unavailable semantics. Stage 13B is not authorized.
+
 ## Stage 13A-P2 — development one-clear re-arm observer, pre-commit
 
 Started from clean `main` at `64ade3c7667648fefcebd8b3624de570bc895501` (`docs: record bounded GD82 callback observation`) on 2026-09-28 (Europe/London), with `origin/main` matching; `v1.0.0` still peels to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. The new configured-entry action `fora6_connect.observe_advertisement_rearm` listens to Core 2026.9.4-compatible changed-data callbacks, clears HA advertisement history once only after the first live callback, and observes until the bounded 60-second window ends. If no callback arrives, no clear occurs. It is exclusive with the existing observer for that entry and unload stops either observation. No GATT, active scan, FORA command, sensor update, or production automatic sync is involved.

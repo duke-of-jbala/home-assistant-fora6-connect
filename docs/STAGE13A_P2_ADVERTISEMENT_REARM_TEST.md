@@ -1,5 +1,7 @@
 # Stage 13A-P2 — one-time advertisement-history re-arm test
 
+**Status: physically complete for the bounded continuous-ON test. Outcome: REARM UNSAFE AS EPISODE SIGNAL.**
+
 ## Scope and evidence
 
 This post-v1 development action tests Home Assistant changed-data dispatch on Core 2026.9.4. The prior physical Stage 13A-P1 run produced one changed callback during an intended OFF → ON → OFF → ON sequence. That Core version does not offer the observer's per-packet callback API. The changed callback and Advertisement Monitor exposed different structural views, so neither is a complete radio-packet record.
@@ -30,6 +32,18 @@ Only relative times, bounded structural counts/booleans, and temporary source al
 
 ## Project gate
 
-Development starts from clean `main` at `64ade3c7667648fefcebd8b3624de570bc895501` (`docs: record bounded GD82 callback observation`), with matching `origin/main`. The stable `v1.0.0` tag remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. This action is development-only; released and current production refresh remain manual-only. Synthetic tests cover callback gating, one clear, cleanup, sanitized failures, and no GATT/sensor path. **Physical re-arm behavior is pending the user's run.** Do not implement Stage 13B from synthetic evidence.
+Development started from clean `main` at `64ade3c7667648fefcebd8b3624de570bc895501` (`docs: record bounded GD82 callback observation`), with matching `origin/main`. The implementation checkpoint is `fb1d9278834084786484b5b194a6b1cfd6e6efd1` (`feat: add bounded advertisement re-arm observer`). The stable `v1.0.0` tag remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`. This action is development-only; released and current production refresh remain manual-only. Synthetic tests cover callback gating, one clear, cleanup, sanitized failures, and no GATT/sensor path.
 
-**Exact next gate:** user-run Stage 13A-P2 one-clear observation and, if needed, separate later OFF → ON changed-callback observation; classify the result before any new automatic-sync authorization.
+## User-run physical result — LIVE-CORROBORATED
+
+On Home Assistant Core 2026.9.4, the user kept the GD82 continuously ON for the full 60-second observation, took no measurement, and pressed no history arrow. The first changed-data callback arrived at relative T+13.2 s. The action performed its single history clear at T+13.2 s. A second changed-data callback arrived at T+57.1 s **before any physical OFF transition**. The action reported two changed callbacks, one after clear, from the same sanitized source; callback cleanup succeeded and unload did not stop the observation. Both callback shapes had two service UUIDs, one manufacturer-data entry, no service data, and connectable true. No address, payload, RSSI, private health value, or measurement time is retained here.
+
+This directly demonstrates that clearing advertisement history can re-dispatch a changed callback **inside one continuous physical ON episode**. A post-clear changed callback is therefore **not** a safe standalone “new wake” boundary. No later OFF → ON comparison was needed to settle this false-rearm criterion. The test does not establish actual packet cadence, notification-subscription readiness, or the meter's internal advertising state. It does not justify production automatic sync.
+
+## Narrowest next architecture gate
+
+Propose a separately authorized **Stage 13A-P3 — bounded genuine-absence/return observation**, initially design and development observation only. Verify the exact Core 2026.9.x behavior of `async_track_unavailable(..., connectable=True)` and `async_address_present(..., connectable=True)` for the configured entry. A bounded, no-clear, no-GATT observation would correlate a user-confirmed continuous ON interval, a real OFF interval long enough for Home Assistant to report unavailability, and a later normal ON interval. Record only relative timing, callback/presence booleans, and temporary source aliases. Test whether a genuinely observed unavailable → present transition is delivered without manually clearing advertisement history, across all visible proxies. [Home Assistant documents](https://developers.home-assistant.io/docs/core/bluetooth/api/#subscribing-to-unavailable-callbacks) that unavailable notification can lag by up to five minutes and that connectable availability aggregates controllers. An unavailable event can also reflect lost scanner coverage, so it is a candidate conservative boundary, not proof of physical power-off; a short OFF → ON may not trigger it at all.
+
+If Home Assistant cannot show a useful absence/return transition on Core 2026.9.4, reassess whether a newer Core per-packet API or a narrow proxy-level observation is necessary. Do not implement Stage 13B, add cache-clearing to production, or introduce a timing constant from this result. The post-measurement notification-readiness question remains separate.
+
+**Exact next gate:** separately authorize Stage 13A-P3 offline API/observer design and bounded physical unavailable → available observation, with no GATT or production automatic sync. Manual refresh remains the only production trigger.

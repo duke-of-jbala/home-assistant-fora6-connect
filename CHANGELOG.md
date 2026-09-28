@@ -14,6 +14,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - Detect Home Assistant versions without the public per-advertisement callback (including Core 2026.9.4) and run the development observer in explicitly labeled changed-data-only mode. Preserve sanitized failure stage/type for other observer errors instead of hiding the cause.
 
 ### Documentation
+- Closed Stage 13A-P2 after a real continuous-ON observation showed a second changed callback following one advertisement-history clear. Cache clearing is unsafe as a standalone new-wake signal; production remains manual-only.
 - Stage 13A reviewed Home Assistant Bluetooth trigger APIs and the current manual refresh architecture. It specifies a privacy-safe physical advertisement-state gate and bounded future auto-refresh guards. No production automatic sync or runtime behavior changed; `v1.0.0` remains the released baseline.
 
 ## [1.0.0]

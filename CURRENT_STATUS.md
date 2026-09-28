@@ -1,5 +1,15 @@
 # Current Status — FORA 6 Connect
 
+## Stage 13A-P2 — physical re-arm closure, pre-commit
+
+- **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `fb1d9278834084786484b5b194a6b1cfd6e6efd1` — `feat: add bounded advertisement re-arm observer`; `origin/main` matched. Released `v1.0.0` remains at `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
+- **LIVE-CORROBORATED result:** user kept the GD82 continuously ON throughout a 60-second read-only observation without measurement or history-arrow use. First changed callback and the only history clear occurred at relative T+13.2 s. A second changed callback arrived at T+57.1 s in the same ON episode. Both used one sanitized source and effectively stable structural shape; cleanup succeeded. [Stage 13A-P2](docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md) is **complete: REARM UNSAFE AS EPISODE SIGNAL**. No later OFF → ON comparison was necessary for this outcome.
+- **Architecture decision:** do not use advertisement-history clearing alone to identify a new physical wake or enable production automatic sync. The narrow proposed Stage 13A-P3 examines a user-confirmed OFF interval and HA connectable unavailable → present transition without a clear, GATT, or sensor update. HA may delay unavailable by up to five minutes, and scanner loss or multi-proxy coverage complicates interpretation. Production stays manual-only.
+- **Changes after checkpoint:** yes; `docs/STAGE13A_P2_ADVERTISEMENT_REARM_TEST.md`, `docs/STAGE13A_AUTOMATIC_SYNC_ARCHITECTURE.md`, `CURRENT_STATUS.md`, `CODEX_HANDOVER.md`, `FORA6_MASTER_ROADMAP.md`, `ROADMAP.md`, and `CHANGELOG.md`. The working tree is modified at this pre-commit observation; verify post-commit state separately. No runtime or released-ref change.
+- **Checks actually run on the modified tree:** baseline/ref/tree inspection and current official Home Assistant Bluetooth unavailable/cache-clear API review; 399/399 unit tests passed; compileall and tabnanny passed; four JSON, two YAML, and one TOML parsed; staged and unstaged diff checks passed. Seven changed Markdown files passed added-line health, identifier, credential, private-path, proprietary-source, and artifact audits. Pushed HACS/hassfest remain to be verified.
+
+**Exact next gate:** separately authorize Stage 13A-P3 offline API/observer design and bounded physical genuine-absence/return observation. Do not begin Stage 13B automatic sync.
+
 ## Stage 13A-P2 — one-clear development observer, pre-commit
 
 - **Branch/date and checkpoint:** clean `main`, 2026-09-28 (Europe/London), `64ade3c7667648fefcebd8b3624de570bc895501` — `docs: record bounded GD82 callback observation`; `origin/main` matched. Released `v1.0.0` still resolves to `dd26b65ab467381db58ba7a525c6b8eabca8e00a`.
